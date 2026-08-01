@@ -262,8 +262,9 @@ async function main() {
   }
 
   let withSilhouette = 0;
-  let dataOnly = 0;
+  let noSilhouette = 0;
   let skipped = 0;
+  let incomplete = 0;
 
   for (const [i, ea] of catalog.entries()) {
     const name = displayName(ea);
@@ -281,6 +282,30 @@ async function main() {
     }
 
     const stat = (k: string) => ea.stats?.[k]?.value ?? null;
+
+    // The catalog only accepts complete rows (migration 0026). Check here so a
+    // player EA reports partially is skipped with a readable reason, instead of
+    // the insert failing against a constraint further down.
+    const missing = [
+      ['equipo', ea.team?.label],
+      ['nacionalidad', ea.nationality?.label],
+      ['nacimiento', parseBirthdate(ea.birthdate)],
+      ['overall', ea.overallRating],
+      ['ritmo', stat('pac')],
+      ['tiro', stat('sho')],
+      ['pase', stat('pas')],
+      ['regate', stat('dri')],
+      ['defensa', stat('def')],
+      ['físico', stat('phy')],
+    ]
+      .filter(([, value]) => value === null || value === undefined || value === '')
+      .map(([field]) => field);
+
+    if (missing.length) {
+      console.log(`${label} incompleto en EA (falta ${missing.join(', ')})`);
+      incomplete++;
+      continue;
+    }
 
     const row: Record<string, unknown> = {
       ea_id: ea.id,
@@ -339,12 +364,12 @@ async function main() {
     }
 
     if (!row.notable) {
-      // Keep the EA data, but it cannot be auctioned without a usable silhouette.
-      row.notable = false;
-      if (sdb) {
-        row.sportsdb_id = sdb.idPlayer;
-        row.description = sdb.strDescriptionEN ?? null;
-      }
+      // No usable silhouette means no player. Storing the EA data anyway would
+      // leave a row that can never be auctioned, and the catalog no longer
+      // accepts partial entries. `--resume` retries these on a later pass.
+      noSilhouette++;
+      console.log(`${label} sin silueta jugable — no se guarda`);
+      continue;
     }
 
     const { error } = await supabase.from('players').upsert(row, { onConflict: 'ea_id' });
@@ -354,18 +379,15 @@ async function main() {
       continue;
     }
 
-    if (row.notable) {
-      withSilhouette++;
-      console.log(`${label} ok ${ea.overallRating} ${positionType} + silueta`);
-    } else {
-      dataOnly++;
-      console.log(`${label} ok ${ea.overallRating} ${positionType} (sin silueta)`);
-    }
+    withSilhouette++;
+    console.log(`${label} ok ${ea.overallRating} ${positionType} + silueta`);
   }
 
   console.log(
-    `\nauctionable=${withSilhouette} dataOnly=${dataOnly} skipped=${skipped}` +
-      `\nRe-run with --resume to retry the ones still missing a silhouette.`
+    `
+subastables=${withSilhouette} sinSilueta=${noSilhouette} yaEstaban=${skipped} incompletos=${incomplete}` +
+      `
+Volvé a correr con --resume para reintentar los que quedaron sin silueta.`
   );
 }
 
