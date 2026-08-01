@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { errorResponse } from '@/lib/game/http';
 import { createRoomSchema } from '@/lib/game/validators';
 import { generateRoomCode, generateToken } from '@/lib/game/utils';
 
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
       { roomId: room.id, code: room.code, hostToken, clientToken },
       { status: 201 }
     );
-  } catch {
-    return NextResponse.json({ error: 'Petición inválida' }, { status: 400 });
+  } catch (error) {
+    return errorResponse('POST /api/rooms', error);
   }
 }

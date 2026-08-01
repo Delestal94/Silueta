@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { errorResponse } from '@/lib/game/http';
 import { z } from 'zod';
 
 const schema = z.object({ amount: z.number().int().positive().max(100000) });
@@ -44,7 +45,7 @@ export async function POST(
     }
 
     return NextResponse.json({ round: data.round }, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Petición inválida' }, { status: 400 });
+  } catch (error) {
+    return errorResponse('POST /api/rounds/[id]/bid', error);
   }
 }
