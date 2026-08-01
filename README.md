@@ -65,7 +65,12 @@ npm install
 NEXT_PUBLIC_SUPABASE_URL=https://TU_REF.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
 SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
+ADMIN_TOKEN=una-clave-larga-al-azar
 ```
+
+`ADMIN_TOKEN` es la clave para moderar las propuestas de la comunidad. Sin ella, la pestaña
+de revisión queda inaccesible y nada puede entrar al catálogo. Generala con
+`node -e "console.log(require('crypto').randomBytes(18).toString('base64url'))"`.
 
 `packages/ingest/.env` (copiá `.env.example`):
 
@@ -152,6 +157,28 @@ Dos cosas que hay que respetar al tocar esto:
   salas sin arqueros. El pool "Más famosos" toma los primeros `famous_depth()` de cada
   combinación.
 
+### Jugadores propuestos por la comunidad
+
+En `/jugadores` cualquiera puede proponer un jugador que falte o corregir datos de uno
+existente. **Nada llega al catálogo sin aprobación**: el catálogo lo comparten todas las
+partidas a la vez, así que una escritura pública directa dejaría que un solo visitante
+renombre jugadores o meta una imagen ofensiva para todos, en medio de una partida y sin
+registro de quién fue. Borrar no se ofrece: las partidas terminadas referencian sus
+fichajes.
+
+Aprobar un alta **no la vuelve jugable**. El jugador queda con `notable = false` hasta que
+la silueta esté generada:
+
+```bash
+npm run submissions --workspace=packages/ingest
+```
+
+Ese paso vive en el paquete de ingesta y no en la web a propósito: la URL propuesta apunta
+al host de un desconocido, y descargarla dentro de una función serverless haría que el sitio
+busque contenido remoto arbitrario a pedido. Acá se baja una vez, se convierte y se guarda en
+nuestro propio bucket — lo que enlazó el proponente nunca se le sirve a un jugador. El script
+además rechaza imágenes sin transparencia real, que darían una silueta rectangular inútil.
+
 ### Puntaje por época
 
 `next_round` sortea una temporada de la carrera del jugador y calcula el rating de ese
@@ -179,6 +206,7 @@ node apps/web/e2e/filters.mjs http://localhost:3000  # filtros de género y cat�
 node apps/web/e2e/timer.mjs http://localhost:3000    # la puja reinicia el reloj
 node apps/web/e2e/powers.mjs http://localhost:3000   # poderes y su resolución por espectador
 node apps/web/e2e/uncontested.mjs http://localhost:3000  # asignación sin rival
+node apps/web/e2e/submissions.mjs http://localhost:3000 "$ADMIN_TOKEN"  # propuestas y moderación
 node apps/web/e2e/ui.mjs                             # navegador, dos jugadores simultáneos
 ```
 

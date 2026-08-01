@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 type Mode = 'menu' | 'create' | 'join';
@@ -251,6 +252,14 @@ export default function Home() {
         <p className="mt-6 text-center text-xs text-white/35">
           Armá tu equipo: 1 arquero, 2 defensas, 1 mediocampista y 1 delantero.
         </p>
+
+        {mode === 'menu' && (
+          <p className="mt-3 text-center text-sm">
+            <Link href="/jugadores" className="text-white/45 underline hover:text-white">
+              ¿Falta un jugador? Proponelo
+            </Link>
+          </p>
+        )}
       </div>
     </main>
   );

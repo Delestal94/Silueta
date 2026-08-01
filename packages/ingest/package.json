@@ -11,7 +11,9 @@
     "ratings": "tsx --env-file-if-exists=.env src/ratings.ts",
     "fame": "tsx --env-file-if-exists=.env src/fame.ts",
     "gender": "tsx --env-file-if-exists=.env src/backfill-gender.ts",
-    "ranks": "tsx --env-file-if-exists=.env src/refresh-ranks.ts"
+    "ranks": "tsx --env-file-if-exists=.env src/refresh-ranks.ts",
+    "honours": "tsx --env-file-if-exists=.env src/honours.ts",
+    "submissions": "tsx --env-file-if-exists=.env src/process-submissions.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
