@@ -40,7 +40,7 @@ export async function GET(
   const { data: round } = await supabase
     .from('auction_rounds')
     .select(
-      'id, player_id, status, current_bid, current_bid_by, starts_at, ends_at, position_type, round_number, season_year, era_rating, era_label'
+      'id, player_id, status, current_bid, current_bid_by, starts_at, ends_at, position_type, round_number, season_year, era_rating, era_label, mystery'
     )
     .eq('room_id', room.id)
     .order('created_at', { ascending: false })
@@ -109,21 +109,45 @@ export async function GET(
 
     const player = data as Record<string, unknown> | null;
 
-    // "apagon" withholds the image outright; "niebla" only blurs it, which the
-    // client does with a CSS filter — the shape still has to arrive.
-    const hidden = !revealed && myHex?.power === 'apagon';
+    // A mystery round has no silhouette for anyone; "apagon" withholds it from
+    // one viewer. "niebla" only blurs it, which the client does with a CSS
+    // filter — the shape still has to arrive.
+    const hidden = !revealed && (round.mystery || myHex?.power === 'apagon');
     const shownPlayer = hidden && player ? { ...player, silhouette_url: null } : player;
 
-    // The career era is part of the surprise: withhold it until the reveal.
+    // The envelope trades the silhouette for facts: trophies and nationality,
+    // which mislead as often as they help — a big club's third keeper collects
+    // more medals than a star at a mid-table side.
+    let envelope = null;
+    if (round.mystery && !revealed) {
+      const [honours, identity] = await Promise.all([
+        supabase
+          .from('player_honours')
+          .select('honour, season, team')
+          .eq('player_id', round.player_id)
+          .order('season', { ascending: true })
+          .limit(8),
+        supabase.from('players').select('nationality').eq('id', round.player_id).single(),
+      ]);
+
+      envelope = {
+        nationality: identity.data?.nationality ?? null,
+        honours: honours.data ?? [],
+      };
+    }
+
+    // The career era is part of the surprise: withhold it until the reveal,
+    // except in an envelope round, where it is one of the few clues on offer.
     currentRound = revealed
-      ? { ...round, revealed, player, myHex: null }
+      ? { ...round, revealed, player, myHex: null, envelope: null }
       : {
           ...round,
-          season_year: null,
+          season_year: round.mystery ? round.season_year : null,
           era_rating: null,
-          era_label: null,
+          era_label: round.mystery ? round.era_label : null,
           revealed,
           player: shownPlayer,
+          envelope,
           // The victim is told *that* they are hexed, never the decoy's id.
           myHex: myHex ? { power: myHex.power } : null,
         };

@@ -93,6 +93,12 @@ export interface CurrentRound {
   player: CatalogPlayer;
   /** Sabotage aimed at the viewer this round, if any. */
   myHex: { power: string } | null;
+  /** Set when the round hides the silhouette from everyone. */
+  mystery?: boolean;
+  envelope: {
+    nationality: string | null;
+    honours: { honour: string; season: string | null; team: string | null }[];
+  } | null;
 }
 
 export interface PowerEffect {

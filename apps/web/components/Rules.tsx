@@ -44,6 +44,17 @@ export function Rules({ compact = false }: { compact?: boolean }) {
         </p>
       </Section>
 
+      <Section title="El sobre misterioso" icon="✉️">
+        <p>
+          De vez en cuando aparece una ronda <strong>sin silueta para nadie</strong>. A cambio
+          ves su nacionalidad, la temporada que se subasta y los títulos que ganó.
+        </p>
+        <p className="rounded-xl border border-white/10 bg-black/25 px-3 py-2">
+          Cuidado con los títulos: el tercer arquero de un grande junta más medallas que la
+          figura de un equipo chico.
+        </p>
+      </Section>
+
       <Section title="Pujar" icon="💰">
         <ul className="list-disc space-y-1.5 pl-5">
           <li>

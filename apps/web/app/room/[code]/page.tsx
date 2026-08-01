@@ -16,6 +16,7 @@ import {
   type Room,
 } from '@/lib/game/types';
 import { SilhouetteStage } from '@/components/SilhouetteStage';
+import { MysteryEnvelope } from '@/components/MysteryEnvelope';
 import { RevealCard } from '@/components/RevealCard';
 import { RosterRail } from '@/components/RosterRail';
 import { FinalStandings } from '@/components/FinalStandings';
@@ -204,18 +205,34 @@ export default function RoomPage() {
             <div className="space-y-5">
               {round && round.status === 'active' ? (
                 <>
-                  <SilhouetteStage
-                    silhouetteUrl={round.player.silhouette_url}
-                    position={round.position_type}
-                    secondsLeft={secondsLeft}
-                    totalSeconds={room.round_seconds}
-                    currentBid={currentBid}
-                    topBidderName={
-                      room.room_participants.find((p) => p.id === round.current_bid_by)
-                        ?.display_name ?? null
-                    }
-                    hex={round.myHex?.power ?? null}
-                  />
+                  {round.mystery && round.envelope ? (
+                    <MysteryEnvelope
+                      envelope={round.envelope}
+                      position={round.position_type}
+                      seasonYear={round.season_year}
+                      eraLabel={round.era_label}
+                      secondsLeft={secondsLeft}
+                      totalSeconds={room.round_seconds}
+                      currentBid={currentBid}
+                      topBidderName={
+                        room.room_participants.find((p) => p.id === round.current_bid_by)
+                          ?.display_name ?? null
+                      }
+                    />
+                  ) : (
+                    <SilhouetteStage
+                      silhouetteUrl={round.player.silhouette_url}
+                      position={round.position_type}
+                      secondsLeft={secondsLeft}
+                      totalSeconds={room.round_seconds}
+                      currentBid={currentBid}
+                      topBidderName={
+                        room.room_participants.find((p) => p.id === round.current_bid_by)
+                          ?.display_name ?? null
+                      }
+                      hex={round.myHex?.power ?? null}
+                    />
+                  )}
 
                   {round.myHex && <HexNotice power={round.myHex.power} />}
 
