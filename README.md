@@ -178,6 +178,7 @@ node apps/web/e2e/engine.mjs http://localhost:3000   # reglas de subasta, pases 
 node apps/web/e2e/filters.mjs http://localhost:3000  # filtros de género y catálogo
 node apps/web/e2e/timer.mjs http://localhost:3000    # la puja reinicia el reloj
 node apps/web/e2e/powers.mjs http://localhost:3000   # poderes y su resolución por espectador
+node apps/web/e2e/uncontested.mjs http://localhost:3000  # asignación sin rival
 node apps/web/e2e/ui.mjs                             # navegador, dos jugadores simultáneos
 ```
 
