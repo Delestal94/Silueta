@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Rules } from '@/components/Rules';
 
 type Mode = 'menu' | 'create' | 'join';
 
@@ -102,7 +103,8 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md">
+      {/* The rules need room to breathe; the forms read better narrow. */}
+      <div className={`w-full ${mode === 'menu' ? 'max-w-xl' : 'max-w-md'}`}>
         <div className="mb-8 text-center">
           <p className="text-xs uppercase tracking-[0.35em] text-lime-300/70">Subasta futbolera</p>
           <h1 className="mt-2 text-5xl font-black tracking-tight">SILUETAS</h1>
@@ -254,11 +256,18 @@ export default function Home() {
         </p>
 
         {mode === 'menu' && (
-          <p className="mt-3 text-center text-sm">
-            <Link href="/jugadores" className="text-white/45 underline hover:text-white">
-              ¿Falta un jugador? Proponelo
-            </Link>
-          </p>
+          <>
+            <p className="mt-3 text-center text-sm">
+              <Link href="/jugadores" className="text-white/45 underline hover:text-white">
+                ¿Falta un jugador? Proponelo
+              </Link>
+            </p>
+
+            <section className="panel mt-8 p-6">
+              <h2 className="mb-5 text-center text-xl font-black">Cómo se juega</h2>
+              <Rules />
+            </section>
+          </>
         )}
       </div>
     </main>

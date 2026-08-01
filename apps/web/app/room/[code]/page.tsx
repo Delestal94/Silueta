@@ -21,6 +21,7 @@ import { RosterRail } from '@/components/RosterRail';
 import { FinalStandings } from '@/components/FinalStandings';
 import { Toasts, useToasts } from '@/components/Toasts';
 import { PowerPanel } from '@/components/PowerPanel';
+import { RulesModal } from '@/components/RulesModal';
 import { POWER_BY_ID, type PowerId } from '@/lib/game/powers';
 
 const BID_STEPS = [1, 5, 10, 25];
@@ -58,6 +59,7 @@ export default function RoomPage() {
 
   const [busy, setBusy] = useState(false);
   const [flipping, setFlipping] = useState(false);
+  const [showRules, setShowRules] = useState(false);
   const finalizedRef = useRef<string | null>(null);
 
   const room = state?.room;
@@ -190,9 +192,10 @@ export default function RoomPage() {
     <div className="min-h-screen px-4 py-5 sm:px-6 lg:px-8">
       <Toasts toasts={toasts} />
       {flipping && <CoinFlip />}
+      {showRules && <RulesModal onClose={() => setShowRules(false)} />}
 
       <div className="mx-auto max-w-7xl">
-        <Header room={room} me={meParticipant} />
+        <Header room={room} me={meParticipant} onOpenRules={() => setShowRules(true)} />
 
         {room.status === 'finished' ? (
           <FinalStandings room={room} />
@@ -387,7 +390,15 @@ function Centered({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Header({ room, me }: { room: Room; me: Participant | null }) {
+function Header({
+  room,
+  me,
+  onOpenRules,
+}: {
+  room: Room;
+  me: Participant | null;
+  onOpenRules: () => void;
+}) {
   const [copied, setCopied] = useState(false);
 
   return (
@@ -412,6 +423,13 @@ function Header({ room, me }: { room: Room; me: Participant | null }) {
       </div>
 
       <div className="flex items-center gap-3">
+        <button
+          onClick={onOpenRules}
+          className="btn-ghost px-3 py-1.5 text-sm"
+          title="Ver las reglas"
+        >
+          Reglas
+        </button>
         {room.current_position && (
           <span className="chip">
             Ronda {room.round_number} · {POSITION_LABELS[room.current_position as PositionType]}
