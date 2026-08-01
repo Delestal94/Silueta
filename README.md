@@ -22,6 +22,9 @@ Aparece una silueta y todos pujan a ciegas. No sólo no sabés quién es: **tamp
 qué momento de su carrera se trata**. Al cerrar la puja se revela el jugador, la temporada
 sorteada y los puntos que suma — no es lo mismo comprar al Mbappé de 2017 que al de 2024.
 
+Cada puja **reinicia el reloj completo**, así que la subasta se cierra cuando nadie responde,
+no cuando se agota un temporizador fijo.
+
 Gana quien termina con más puntos entre sus cinco fichajes. Si hay empate, define quien
 gastó menos.
 
@@ -144,8 +147,12 @@ Con el server corriendo:
 
 ```bash
 node apps/web/e2e/engine.mjs http://localhost:3000   # reglas de subasta, pases y partida completa
+node apps/web/e2e/filters.mjs http://localhost:3000  # filtros de género y catálogo
+node apps/web/e2e/timer.mjs http://localhost:3000    # la puja reinicia el reloj
 node apps/web/e2e/ui.mjs                             # navegador, dos jugadores simultáneos
 ```
+
+Todos aceptan una URL, así que sirven también contra el despliegue.
 
 El de interfaz necesita `npx playwright install chromium`. Ajustá `BASE` en `ui.mjs` si
 usás otro puerto.
