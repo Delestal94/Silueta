@@ -20,6 +20,8 @@ import { RevealCard } from '@/components/RevealCard';
 import { RosterRail } from '@/components/RosterRail';
 import { FinalStandings } from '@/components/FinalStandings';
 import { Toasts, useToasts } from '@/components/Toasts';
+import { PowerPanel } from '@/components/PowerPanel';
+import { POWER_BY_ID, type PowerId } from '@/lib/game/powers';
 
 const BID_STEPS = [1, 5, 10, 25];
 
@@ -132,6 +134,20 @@ export default function RoomPage() {
     }
   }, [act, round?.id, push]);
 
+  const castPower = useCallback(
+    async (power: PowerId, targetId: string) => {
+      const data = await act(`/api/rooms/${code}/powers`, { power, targetId });
+      if (data) {
+        const label = POWER_BY_ID[power].name;
+        push(
+          data.immediate ? `${label} aplicado` : `${label} listo para la próxima ronda`,
+          'success'
+        );
+      }
+    },
+    [act, code, push]
+  );
+
   // Someone opening a shared room link has no stored identity yet — let them
   // join right here instead of bouncing them to the home page.
   if (identityMissing) {
@@ -195,7 +211,10 @@ export default function RoomPage() {
                       room.room_participants.find((p) => p.id === round.current_bid_by)
                         ?.display_name ?? null
                     }
+                    hex={round.myHex?.power ?? null}
                   />
+
+                  {round.myHex && <HexNotice power={round.myHex.power} />}
 
                   <BidPanel
                     budget={budget}
@@ -234,11 +253,22 @@ export default function RoomPage() {
               )}
             </div>
 
-            <RosterRail
-              room={room}
-              meId={me?.id ?? null}
-              topBidderId={round?.status === 'active' ? round.current_bid_by : null}
-            />
+            <div className="space-y-5">
+              <RosterRail
+                room={room}
+                meId={me?.id ?? null}
+                topBidderId={round?.status === 'active' ? round.current_bid_by : null}
+              />
+
+              <PowerPanel
+                rivals={room.room_participants.filter((p) => p.id !== me?.id)}
+                budget={budget}
+                effects={state.effects ?? []}
+                meId={me?.id ?? null}
+                onCast={castPower}
+                busy={busy}
+              />
+            </div>
           </div>
         )}
       </div>
@@ -316,6 +346,23 @@ function JoinHere({
         </Link>
       </form>
     </main>
+  );
+}
+
+function HexNotice({ power }: { power: string }) {
+  const info = POWER_BY_ID[power as PowerId];
+  if (!info) return null;
+
+  return (
+    <div
+      className="panel animate-rise flex items-center gap-3 border-rose-400/40 bg-rose-500/10 px-4 py-3"
+      role="status"
+    >
+      <span className="text-2xl" aria-hidden>
+        {info.icon}
+      </span>
+      <p className="text-sm text-rose-100">{info.victimNotice}</p>
+    </div>
   );
 }
 

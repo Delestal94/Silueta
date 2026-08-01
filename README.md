@@ -25,6 +25,27 @@ sorteada y los puntos que suma — no es lo mismo comprar al Mbappé de 2017 que
 Cada puja **reinicia el reloj completo**, así que la subasta se cierra cuando nadie responde,
 no cuando se agota un temporizador fijo.
 
+### Poderes
+
+Podés gastar presupuesto en sabotear a un rival en la ronda siguiente. Sale de la misma
+plata con la que comprás jugadores, así que molestar siempre debilita tu propio equipo.
+
+| Poder | Costo | Efecto |
+|---|---|---|
+| 🌫️ Niebla | 10 | Ve la silueta borrosa |
+| ✋ Manotazo | 12 | Le quema el pase (inmediato) |
+| 🔒 Traba | 15 | No puede pujar en la primera mitad |
+| 🌑 Apagón | 18 | No ve ninguna silueta |
+| 🪞 Espejismo | 28 | Ve la silueta de **otro** jugador y no se entera |
+| 💸 Impuesto | 30 | Si gana, paga el doble |
+
+Sólo un poder pendiente por víctima, para que nadie quede fuera del juego a fuerza de plata.
+
+> **Los efectos se resuelven por espectador, en el servidor.** Dos personas mirando la misma
+> ronda reciben siluetas distintas a propósito. Mandar la silueta real y ocultarla en el
+> cliente sería inútil: se ve en la pestaña de red. A la víctima se le avisa *que* está
+> afectada, pero nunca cuál es el señuelo.
+
 Gana quien termina con más puntos entre sus cinco fichajes. Si hay empate, define quien
 gastó menos.
 
@@ -65,7 +86,14 @@ THESPORTSDB_KEY=3
 npm run migrate --workspace=packages/ingest
 ```
 
-Aplica todo `supabase/migrations/` en orden. Las migraciones son idempotentes.
+Aplica todo `supabase/migrations/` en orden. Las migraciones son idempotentes, así que
+correrlo entero es siempre seguro.
+
+> **Corré siempre el lote completo, nunca una migración suelta.** Varias redefinen las mismas
+> funciones (`next_round`, `place_bid`, `finalize_round`) con `create or replace`, así que
+> aplicar una vieja después de una nueva revierte silenciosamente lo que la nueva agregó.
+> Pasó: aplicar 0018 sola después de 0021 dejó al juego sin poderes y sin poder empezar una
+> ronda.
 
 Creá también un bucket público llamado `silhouettes` en Supabase Storage.
 
@@ -149,6 +177,7 @@ Con el server corriendo:
 node apps/web/e2e/engine.mjs http://localhost:3000   # reglas de subasta, pases y partida completa
 node apps/web/e2e/filters.mjs http://localhost:3000  # filtros de género y catálogo
 node apps/web/e2e/timer.mjs http://localhost:3000    # la puja reinicia el reloj
+node apps/web/e2e/powers.mjs http://localhost:3000   # poderes y su resolución por espectador
 node apps/web/e2e/ui.mjs                             # navegador, dos jugadores simultáneos
 ```
 

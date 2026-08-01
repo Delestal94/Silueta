@@ -9,6 +9,7 @@ export function SilhouetteStage({
   totalSeconds,
   currentBid,
   topBidderName,
+  hex,
 }: {
   silhouetteUrl: string | null;
   position: PositionType;
@@ -16,6 +17,7 @@ export function SilhouetteStage({
   totalSeconds: number;
   currentBid: number;
   topBidderName: string | null;
+  hex?: string | null;
 }) {
   const progress = Math.max(0, Math.min(1, secondsLeft / Math.max(1, totalSeconds)));
   const urgent = secondsLeft <= 5;
@@ -77,11 +79,24 @@ export function SilhouetteStage({
             src={silhouetteUrl}
             alt={`Silueta de un ${POSITION_LABELS[position].toLowerCase()} por identificar`}
             className="animate-pop max-h-[420px] w-auto object-contain drop-shadow-[0_0_40px_rgba(182,255,59,0.25)]"
-            style={{ filter: 'brightness(0) saturate(100%) invert(97%) sepia(8%) saturate(600%) hue-rotate(40deg)' }}
+            style={{
+              filter:
+                'brightness(0) saturate(100%) invert(97%) sepia(8%) saturate(600%) hue-rotate(40deg)' +
+                // The blur is cosmetic; the server still sends the real shape.
+                // "apagon" is the one that withholds the image itself.
+                (hex === 'niebla' ? ' blur(14px)' : ''),
+            }}
           />
         ) : (
-          <div className="grid h-64 w-full place-items-center text-white/40">
-            Silueta no disponible
+          <div className="grid h-64 w-full place-items-center text-center text-white/40">
+            {hex === 'apagon' ? (
+              <span>
+                <span className="block text-4xl">🌑</span>
+                <span className="mt-2 block">Apagón — pujás a ciegas</span>
+              </span>
+            ) : (
+              'Silueta no disponible'
+            )}
           </div>
         )}
       </div>

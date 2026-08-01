@@ -93,6 +93,16 @@ export interface CurrentRound {
   era_label: string | null;
   revealed: boolean;
   player: CatalogPlayer;
+  /** Sabotage aimed at the viewer this round, if any. */
+  myHex: { power: string } | null;
+}
+
+export interface PowerEffect {
+  id: string;
+  power: string;
+  caster_id: string;
+  target_id: string;
+  status: 'pending' | 'active' | 'consumed';
 }
 
 export interface GameState {
@@ -105,7 +115,7 @@ export interface GameState {
     remaining_budget: number;
     passes_used: number;
   } | null;
-  remainingPlayers: number;
+  effects: PowerEffect[];
 }
 
 export function countByPosition(
