@@ -1,5 +1,5 @@
 import { chromium } from 'playwright';
-const BASE = 'http://localhost:3000';
+const BASE = process.argv[2] || 'http://localhost:3000';
 const SHOT = 'C:/Users/migue/AppData/Local/Temp/claude/d--Programas-Utilities-Proyectos-Siluetas/ed3f0880-0d1f-472e-b522-7dccb38476fc/scratchpad';
 
 const browser = await chromium.launch();

@@ -16,13 +16,29 @@ export default function Home() {
   const [pool, setPool] = useState<'famous' | 'all'>('famous');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [stuckAt, setStuckAt] = useState<string | null>(null);
 
   const enterRoom = (code: string, tokens: { clientToken: string; hostToken?: string }) => {
-    localStorage.setItem(
-      `room_${code}`,
-      JSON.stringify({ ...tokens, displayName: displayName.trim() })
-    );
-    router.push(`/room/${code}`);
+    try {
+      localStorage.setItem(
+        `room_${code}`,
+        JSON.stringify({ ...tokens, displayName: displayName.trim() })
+      );
+    } catch {
+      // Private browsing and some hardened setups block storage outright.
+      throw new Error(
+        'Tu navegador está bloqueando el almacenamiento local. Probá sin modo incógnito.'
+      );
+    }
+
+    // replace, not push: the back button should not return to a form whose
+    // submission already happened.
+    router.replace(`/room/${code}`);
+
+    // The seat is already taken on the server at this point. If the client-side
+    // navigation stalls, the player would sit on "Entrando…" with no way out,
+    // so offer a plain link instead.
+    setTimeout(() => setStuckAt(code), 5000);
   };
 
   const createRoom = async (e: React.FormEvent) => {
@@ -59,6 +75,16 @@ export default function Home() {
     const code = roomCode.trim().toUpperCase();
 
     try {
+      // Already holding a seat in this room (a retry after a stalled
+      // navigation): go straight in, or the server would reject the name as
+      // taken — by us.
+      const existing = localStorage.getItem(`room_${code}`);
+      if (existing) {
+        router.replace(`/room/${code}`);
+        setTimeout(() => setStuckAt(code), 5000);
+        return;
+      }
+
       const res = await fetch(`/api/rooms/${code}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -84,6 +110,18 @@ export default function Home() {
             cierra la puja.
           </p>
         </div>
+
+        {stuckAt && (
+          <div className="panel animate-rise mb-4 border-lime-300/30 p-4 text-center">
+            <p className="text-sm text-white/70">Ya estás en la sala, pero no te redirigió.</p>
+            {/* Deliberately a full page load: if the client-side router is the
+                thing that stalled, a <Link> would stall with it. */}
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+            <a href={`/room/${stuckAt}`} className="btn-primary mt-3 w-full">
+              Entrar a {stuckAt}
+            </a>
+          </div>
+        )}
 
         <div className="panel p-6">
           {mode === 'menu' && (
