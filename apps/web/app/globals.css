@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --pitch-deep: #04140d;
+  --pitch: #072418;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(1200px 700px at 50% -10%, rgba(182, 255, 59, 0.13), transparent 60%),
+    radial-gradient(900px 600px at 12% 110%, rgba(0, 200, 255, 0.08), transparent 60%),
+    linear-gradient(180deg, var(--pitch) 0%, var(--pitch-deep) 100%);
+  background-attachment: fixed;
+  color: #e9fbe9;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Faint pitch stripes so the background reads as a stadium, not a flat panel. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.018) 0 64px,
+    transparent 64px 128px
+  );
+}
+
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-xl;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-semibold
+           transition active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40;
+  }
+
+  .btn-primary {
+    @apply btn bg-lime-300 text-emerald-950 hover:bg-lime-200
+           shadow-[0_0_28px_-6px_rgba(182,255,59,0.7)];
+  }
+
+  .btn-ghost {
+    @apply btn border border-white/15 bg-white/5 text-white hover:bg-white/10;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-white
+           placeholder-white/35 outline-none transition focus:border-lime-300/70
+           focus:ring-2 focus:ring-lime-300/20;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-white/10
+           bg-white/5 px-2.5 py-1 text-xs font-medium;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  60% {
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-ring {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes flip {
+  from {
+    transform: rotateY(0);
+  }
+  to {
+    transform: rotateY(1980deg);
+  }
+}
+
+.animate-rise {
+  animation: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-pop {
+  animation: pop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-pulse-ring {
+  animation: pulse-ring 1s ease-in-out infinite;
+}
+.animate-flip {
+  animation: flip 1.8s cubic-bezier(0.3, 0.1, 0.2, 1) both;
+  transform-style: preserve-3d;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-pop,
+  .animate-pulse-ring,
+  .animate-flip {
+    animation: none;
+  }
+}

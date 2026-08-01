@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Lionel Messi",
+    "qid": "Q615",
+    "club": "Inter Miami",
+    "position": "Forward",
+    "nationality": "Argentina"
+  },
+  {
+    "name": "Cristiano Ronaldo",
+    "qid": "Q11571",
+    "club": "Al-Nassr",
+    "position": "Forward",
+    "nationality": "Portugal"
+  },
+  {
+    "name": "Neymar",
+    "qid": "Q17617",
+    "club": "Al-Hilal",
+    "position": "Forward",
+    "nationality": "Brazil"
+  },
+  {
+    "name": "Kylian Mbappé",
+    "qid": "Q13632835",
+    "club": "Real Madrid",
+    "position": "Forward",
+    "nationality": "France"
+  },
+  {
+    "name": "Luis Suárez",
+    "qid": "Q8029",
+    "club": "Gremio",
+    "position": "Forward",
+    "nationality": "Uruguay"
+  },
+  {
+    "name": "Ángel Di María",
+    "qid": "Q4672",
+    "club": "Benfica",
+    "position": "Winger",
+    "nationality": "Argentina"
+  },
+  {
+    "name": "Sergio Ramos",
+    "qid": "Q2737",
+    "club": "Sevilla",
+    "position": "Defender",
+    "nationality": "Spain"
+  },
+  {
+    "name": "Thibaut Courtois",
+    "qid": "Q2710",
+    "club": "Real Madrid",
+    "position": "Goalkeeper",
+    "nationality": "Belgium"
+  },
+  {
+    "name": "Andrés Iniesta",
+    "qid": "Q8379",
+    "club": "Real Betis",
+    "position": "Midfielder",
+    "nationality": "Spain"
+  },
+  {
+    "name": "Luka Modrić",
+    "qid": "Q12970",
+    "club": "Real Madrid",
+    "position": "Midfielder",
+    "nationality": "Croatia"
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "name": "siluetas",
+  "version": "0.1.0",
+  "description": "Juego de subasta futbolera inspirado en 412",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/web",
+    "build": "npm run build --workspace=apps/web",
+    "start": "npm run start --workspace=apps/web",
+    "migrate": "npm run migrate --workspace=packages/ingest",
+    "ingest": "npm run ingest --workspace=packages/ingest",
+    "photos": "npm run photos --workspace=packages/ingest"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.5.22",
+    "typescript": "^5.3.3"
+  }
+}

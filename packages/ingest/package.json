@@ -1,0 +1,25 @@
+{
+  "name": "ingest",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ingest": "tsx --env-file-if-exists=.env src/index.ts",
+    "ingest:resume": "tsx --env-file-if-exists=.env src/index.ts --resume",
+    "photos": "tsx --env-file-if-exists=.env src/mirror-photos.ts",
+    "migrate": "tsx --env-file-if-exists=.env src/migrate.ts",
+    "ratings": "tsx --env-file-if-exists=.env src/ratings.ts",
+    "fame": "tsx --env-file-if-exists=.env src/fame.ts",
+    "gender": "tsx --env-file-if-exists=.env src/backfill-gender.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "sharp": "^0.33.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.20.1",
+    "pg": "^8.22.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

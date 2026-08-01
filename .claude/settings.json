@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -)",
+      "Bash(timeout 160 node __TRACKED_VAR__/e2e.mjs)",
+      "Bash(timeout 280 node apps/web/e2e/engine.mjs http://localhost:3006)",
+      "Bash(rm -f src/verify.ts src/distinct.ts src/render.ts src/rendersil.ts src/fame.ts src/legends.ts verify_*.png)",
+      "Bash(npx tsx *)",
+      "Bash(rm -f src/probe2.ts)",
+      "Bash(rm -f src/probe3.ts)",
+      "Bash(curl -s -m 25 \"https://drop-api.ea.com/rating/ea-sports-fc?locale=en&limit=1\" -H \"User-Agent: Mozilla/5.0\" -H \"Accept: application/json\" -o /tmp/ea1.json)",
+      "Bash(python -c ' *)",
+      "Bash(curl -s -m 25 \"https://drop-api.ea.com/rating/ea-sports-fc?locale=en&limit=1\" -H \"User-Agent: Mozilla/5.0\" -H \"Accept: application/json\" -o ea1.json)",
+      "Bash(curl -s -m 25 \"https://drop-api.ea.com/rating/ea-sports-fc?locale=en&limit=5&offset=0\" -H \"User-Agent: Mozilla/5.0\" -H \"Accept: application/json\" -o ea.json)",
+      "Bash(curl -s -m 25 \"https://drop-api.ea.com/rating/ea-sports-fc?locale=en&limit=3&offset=100\" -H \"User-Agent: Mozilla/5.0\" -H \"Accept: application/json\")",
+      "PowerShell(Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" | Where-Object { $_.CommandLine -match 'next' } | Select-Object ProcessId, @{n='cmd';e={$_.CommandLine.Substring\\(0,[Math]::Min\\(90,$_.CommandLine.Length\\)\\)}})",
+      "PowerShell(Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" | Where-Object { $_.CommandLine -match 'next' } | ForEach-Object { try { Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop; \"killed $\\($_.ProcessId\\)\" } catch { \"skip $\\($_.ProcessId\\)\" } })",
+      "Bash(curl -s -m 30 -X POST http://localhost:3000/api/rooms -H \"Content-Type: application/json\" -d '{\"displayName\":\"as\",\"startingBudget\":200,\"roundSeconds\":20}' -w \"\\\\nHTTP %{http_code} in %{time_total}s\\\\n\")",
+      "Bash(curl -s -m 25 \"https://drop-api.ea.com/rating/ea-sports-fc?locale=en&limit=40\" -H \"User-Agent: Mozilla/5.0\" -H \"Accept: application/json\" -o ea.json)",
+      "Bash(rm -f ea.json)",
+      "Bash(timeout 280 node apps/web/e2e/engine.mjs http://localhost:3000)",
+      "Bash(curl -s -m 30 -X POST http://localhost:3000/api/rooms -H \"Content-Type: application/json\" -d '{\"displayName\":\"T\",\"startingBudget\":900,\"roundSeconds\":60,\"genderFilter\":\"men\",\"pool\":\"famous\"}' -w \"\\\\nHTTP %{http_code}\\\\n\")",
+      "PowerShell(Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" | Where-Object { $_.CommandLine -match 'next' } | ForEach-Object { try { Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop } catch {} }; Start-Sleep -Seconds 2; Remove-Item -Recurse -Force \"D:\\\\Programas\\\\Utilities\\\\Proyectos\\\\Siluetas\\\\apps\\\\web\\\\.next\" -ErrorAction SilentlyContinue; if \\(Test-Path \"D:\\\\Programas\\\\Utilities\\\\Proyectos\\\\Siluetas\\\\apps\\\\web\\\\.next\"\\) { \"still there\" } else { \"cache cleared\" })",
+      "Bash(printf '\\\\n.next-dev/\\\\n')",
+      "Bash(npm run *)",
+      "Bash(node /tmp/dbg2.mjs)",
+      "Bash(timeout 280 node apps/web/e2e/filters.mjs)",
+      "Bash(rm -f src/q.ts)",
+      "Bash(curl -s -m 20 -o /tmp/wtest.json -w \"batch status %{http_code}\\\\n\" \"https://en.wikipedia.org/w/api.php?action=query&redirects=1&format=json&titles=Kylian%20Mbapp%C3%A9%7CErling%20Haaland%7CJude%20Bellingham\" -H \"User-Agent: SiluetasGame/1.0 \\(educational project\\)\" -H \"Api-User-Agent: SiluetasGame/1.0 \\(educational project\\)\")",
+      "Bash(curl -s -m 20 -o /tmp/pv.json -w \"%{http_code}\\\\n\" \"https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/Kylian_Mbapp%C3%A9/monthly/2025080100/2026080100\" -H \"User-Agent: SiluetasGame/1.0 \\(educational project\\)\")",
+      "Bash(curl -s -m 30 -o /tmp/wd.json -w \"%{http_code}\\\\n\" -G \"https://query.wikidata.org/sparql\" --data-urlencode 'query=SELECT ?article WHERE { ?p rdfs:label \"Kylian Mbappé\"@en . ?article schema:about ?p ; schema:isPartOf <https://en.wikipedia.org/> } LIMIT 1' -H \"Accept: application/sparql-results+json\" -H \"User-Agent: SiluetasGame/1.0 \\(educational project\\)\")"
+    ]
+  }
+}

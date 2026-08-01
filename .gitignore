@@ -1,0 +1,24 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+*.pem
+.vercel/
+
+# Next.js build output (.next-dev keeps dev separate from production builds)
+.next/
+.next-dev/
+
+# Environment files — these hold the service-role key, which bypasses RLS
+.env
+.env.local
+.env*.local
+packages/ingest/.env
+
+# Superseded scaffolding from the first MVP. Left on disk for reference only;
+# create-bucket.js, setup-db.js and setup-data.js have a service-role key
+# hardcoded, so this directory must never be published.
+legacy/
+
+# Playwright screenshots
+apps/web/e2e/*.png
