@@ -18,6 +18,14 @@ const imageUrl = z
     'La URL tiene que apuntar a una imagen .png, .jpg o .webp'
   );
 
+const stat = z.number().int().min(1).max(99);
+
+/**
+ * Every field the catalog needs, because a player row is complete or it does
+ * not exist (see migration 0026). Nothing here is optional: a half-filled
+ * entry would be rejected by the database anyway, so it is better to ask for
+ * it up front than to accept a proposal that can never be approved.
+ */
 export const newPlayerSchema = z.object({
   name: z.string().trim().min(2).max(80),
   positionType: z.enum(POSITION_TYPES),
@@ -32,6 +40,12 @@ export const newPlayerSchema = z.object({
       return year >= 1900 && year <= new Date().getFullYear() - 15;
     }, 'Fecha de nacimiento poco plausible'),
   rating: z.number().int().min(40).max(99),
+  pace: stat,
+  shooting: stat,
+  passing: stat,
+  dribbling: stat,
+  defending: stat,
+  physical: stat,
   imageUrl,
   // A transparent cut-out is what makes a readable silhouette; a flat photo
   // produces a blob. The submitter is asked to confirm.

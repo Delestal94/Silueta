@@ -13,7 +13,8 @@
     "gender": "tsx --env-file-if-exists=.env src/backfill-gender.ts",
     "ranks": "tsx --env-file-if-exists=.env src/refresh-ranks.ts",
     "honours": "tsx --env-file-if-exists=.env src/honours.ts",
-    "submissions": "tsx --env-file-if-exists=.env src/process-submissions.ts"
+    "submissions": "tsx --env-file-if-exists=.env src/process-submissions.ts",
+    "purge-history": "tsx --env-file-if-exists=.env src/purge-history.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",

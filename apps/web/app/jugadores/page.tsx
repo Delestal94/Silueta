@@ -99,6 +99,12 @@ function NewPlayerForm({ push }: { push: Push }) {
     team: '',
     birthDate: '',
     rating: 80,
+    pace: 75,
+    shooting: 75,
+    passing: 75,
+    dribbling: 75,
+    defending: 50,
+    physical: 70,
     imageUrl: '',
     imageIsTransparent: false,
     submittedBy: '',
@@ -114,7 +120,19 @@ function NewPlayerForm({ push }: { push: Push }) {
       const res = await fetch('/api/submissions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kind: 'new', data: { ...form, rating: Number(form.rating) } }),
+        body: JSON.stringify({
+          kind: 'new',
+          data: {
+            ...form,
+            rating: Number(form.rating),
+            pace: Number(form.pace),
+            shooting: Number(form.shooting),
+            passing: Number(form.passing),
+            dribbling: Number(form.dribbling),
+            defending: Number(form.defending),
+            physical: Number(form.physical),
+          },
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Faltan datos o hay algo inválido');
@@ -215,6 +233,41 @@ function NewPlayerForm({ push }: { push: Push }) {
             required
           />
         </Field>
+      </div>
+
+      <div>
+        <span className="mb-1.5 block text-xs uppercase tracking-wider text-white/50">
+          Estadísticas
+        </span>
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+          {(
+            [
+              ['pace', 'RIT'],
+              ['shooting', 'TIR'],
+              ['passing', 'PAS'],
+              ['dribbling', 'REG'],
+              ['defending', 'DEF'],
+              ['physical', 'FÍS'],
+            ] as const
+          ).map(([key, label]) => (
+            <label key={key} className="block">
+              <span className="mb-1 block text-center text-[11px] text-white/40">{label}</span>
+              <input
+                type="number"
+                min={1}
+                max={99}
+                value={form[key]}
+                onChange={(e) => set({ [key]: Number(e.target.value) } as Partial<typeof form>)}
+                className="field px-2 py-2 text-center"
+                required
+              />
+            </label>
+          ))}
+        </div>
+        <span className="mt-1 block text-xs text-white/35">
+          Las seis de la carta de EA. En arqueros: estirada, manejo, saque, reflejos, velocidad y
+          posicionamiento.
+        </span>
       </div>
 
       <Field

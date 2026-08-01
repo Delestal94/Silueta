@@ -60,6 +60,12 @@ const valid = {
   team: 'Club Prueba',
   birthDate: '1990-05-10',
   rating: 85,
+  pace: 80,
+  shooting: 85,
+  passing: 75,
+  dribbling: 82,
+  defending: 40,
+  physical: 78,
   imageUrl: 'https://example.org/jugador.png',
   imageIsTransparent: true,
   submittedBy: `tester-${stamp}`,
@@ -121,8 +127,16 @@ const [twice] = await post(`/api/submissions/${mine.id}/review`, { decision: 'ap
 check('no se puede revisar dos veces', twice === 409, `got ${twice}`);
 
 const [, search2] = await get(`/api/players/search?q=${encodeURIComponent('Jugador Prueba')}`);
-const inCatalog = (search2.players ?? []).find((p) => p.name === valid.name);
-check('ya existe en el catálogo', !!inCatalog);
+check(
+  'aprobar tampoco lo crea a medias: espera la silueta',
+  !(search2.players ?? []).some((p) => p.name === valid.name)
+);
+
+const [missingStats] = await post('/api/submissions', {
+  kind: 'new',
+  data: { ...valid, name: `Sin Stats ${stamp}`, pace: undefined },
+});
+check('exige las seis estadísticas', missingStats === 400, `got ${missingStats}`);
 
 console.log('\nbúsqueda');
 

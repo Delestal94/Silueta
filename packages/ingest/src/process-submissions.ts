@@ -74,41 +74,58 @@ async function hasUsableAlpha(image: Buffer): Promise<boolean> {
 }
 
 async function main() {
-  const { data: pending, error } = await supabase
-    .from('players')
-    .select('id, name, source_image_url, submitted_by')
-    .not('source_image_url', 'is', null)
-    .is('silhouette_url', null);
+  // Approved proposals live in the queue until the image is ready. The player
+  // row is created here, complete, in one step: the catalog rejects partial
+  // rows outright (migration 0026).
+  const { data: approved, error } = await supabase
+    .from('player_submissions')
+    .select('id, payload')
+    .eq('kind', 'new')
+    .eq('status', 'approved');
 
-  if (error || !pending) {
+  if (error || !approved) {
     console.error('No se pudo leer la cola:', error?.message);
     process.exit(1);
   }
 
-  console.log(`${pending.length} jugadores aprobados esperando silueta\n`);
+  // Skip the ones already turned into players.
+  const names = approved.map((s) => String((s.payload as Record<string, unknown>).name));
+  const { data: existing } = names.length
+    ? await supabase.from('players').select('name').in('name', names)
+    : { data: [] };
+  const already = new Set((existing ?? []).map((p) => p.name as string));
+
+  const pending = approved.filter(
+    (s) => !already.has(String((s.payload as Record<string, unknown>).name))
+  );
+
+  console.log(`${pending.length} propuestas aprobadas esperando silueta
+`);
 
   let done = 0;
   const rejected: string[] = [];
 
-  for (const player of pending) {
-    process.stdout.write(`  ${player.name.slice(0, 28).padEnd(30)}`);
+  for (const submission of pending) {
+    const p = submission.payload as Record<string, string | number>;
+    const name = String(p.name);
+    process.stdout.write(`  ${name.slice(0, 28).padEnd(30)}`);
 
-    const image = await download(player.source_image_url as string);
+    const image = await download(String(p.imageUrl));
     if (!image) {
       console.log('no se pudo descargar');
-      rejected.push(player.name as string);
+      rejected.push(name);
       continue;
     }
 
     if (!(await hasUsableAlpha(image))) {
       console.log('la imagen no tiene fondo transparente');
-      rejected.push(player.name as string);
+      rejected.push(name);
       continue;
     }
 
     try {
       const silhouette = await createSilhouette(image);
-      const path = `catalog/community-${player.id}.png`;
+      const path = `catalog/community-${submission.id}.png`;
 
       const { data: uploaded, error: upErr } = await supabase.storage
         .from('silhouettes')
@@ -116,24 +133,39 @@ async function main() {
 
       if (upErr || !uploaded) {
         console.log(`no se pudo subir: ${upErr?.message}`);
-        rejected.push(player.name as string);
+        rejected.push(name);
         continue;
       }
 
       const url = supabase.storage.from('silhouettes').getPublicUrl(uploaded.path).data.publicUrl;
 
-      const { error: dbErr } = await supabase
-        .from('players')
-        .update({
-          silhouette_url: url,
-          silhouette_source: 'render',
-          notable: true,
-        })
-        .eq('id', player.id);
+      const { error: dbErr } = await supabase.from('players').insert({
+        name,
+        position: String(p.positionType),
+        position_type: String(p.positionType),
+        gender: String(p.gender),
+        nationality: String(p.nationality),
+        team: String(p.team),
+        club: String(p.team),
+        league: 'Comunidad',
+        birth_date: String(p.birthDate),
+        ea_overall: Number(p.rating),
+        prime_rating: Number(p.rating),
+        ea_pace: Number(p.pace),
+        ea_shooting: Number(p.shooting),
+        ea_passing: Number(p.passing),
+        ea_dribbling: Number(p.dribbling),
+        ea_defending: Number(p.defending),
+        ea_physical: Number(p.physical),
+        silhouette_url: url,
+        silhouette_source: 'render',
+        submitted_by: String(p.submittedBy),
+        notable: true,
+      });
 
       if (dbErr) {
         console.log(`error de base: ${dbErr.message}`);
-        rejected.push(player.name as string);
+        rejected.push(name);
         continue;
       }
 
@@ -141,11 +173,12 @@ async function main() {
       console.log('listo — ya se puede subastar');
     } catch (err) {
       console.log(`error: ${err instanceof Error ? err.message : 'desconocido'}`);
-      rejected.push(player.name as string);
+      rejected.push(name);
     }
   }
 
-  console.log(`\nprocesados=${done} rechazados=${rejected.length}`);
+  console.log(`
+procesados=${done} rechazados=${rejected.length}`);
   if (rejected.length) {
     console.log(`Revisar la imagen de: ${rejected.join(', ')}`);
   }

@@ -46,34 +46,13 @@ export async function POST(
     }
 
     if (submission.kind === 'new') {
-      const data = newPlayerSchema.parse(submission.payload);
-
-      const { error } = await supabase.from('players').insert({
-        name: data.name,
-        position_type: data.positionType,
-        position: data.positionType,
-        gender: data.gender,
-        nationality: data.nationality,
-        team: data.team,
-        club: data.team,
-        league: 'Comunidad',
-        birth_date: data.birthDate,
-        prime_rating: data.rating,
-        ea_overall: data.rating,
-        source_image_url: data.imageUrl,
-        submitted_by: data.submittedBy,
-        // Not auctionable until the ingest pass turns the image into a
-        // silhouette — an unprocessed link is not something we serve to players.
-        notable: false,
-      });
-
-      if (error) {
-        return NextResponse.json(
-          { error: `No se pudo crear el jugador: ${error.message}` },
-          { status: 500 }
-        );
-      }
-
+      // Validate now so an unapprovable proposal is caught here rather than
+      // failing later in the image pass. The player row itself is created by
+      // `npm run submissions`, once the silhouette exists — the catalog does
+      // not accept partial rows (migration 0026), and generating the image
+      // means downloading from a stranger's host, which is not something a
+      // request handler should do.
+      newPlayerSchema.parse(submission.payload);
       return NextResponse.json({ ok: true, applied: true, needsImage: true });
     }
 
