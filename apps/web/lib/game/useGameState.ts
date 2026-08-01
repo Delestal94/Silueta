@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { getSupabaseClient } from '@/lib/supabase/client';
 import type { GameState } from './types';
 
 export function useGameState(code: string, clientToken: string | null) {
@@ -45,25 +45,32 @@ export function useGameState(code: string, clientToken: string | null) {
   useEffect(() => {
     if (!roomId) return;
 
-    const supabase = createClient();
-    const channel = supabase.channel(`room:${roomId}`);
+    let cleanup: (() => void) | null = null;
+    let cancelled = false;
 
-    for (const table of ['auction_rounds', 'room_participants', 'team_players', 'rooms']) {
-      channel.on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table },
-        () => refresh()
-      );
-    }
+    getSupabaseClient()
+      .then((supabase) => {
+        if (cancelled) return;
 
-    channel.subscribe();
+        const channel = supabase.channel(`room:${roomId}`);
+
+        for (const table of ['auction_rounds', 'room_participants', 'team_players', 'rooms']) {
+          channel.on('postgres_changes', { event: '*', schema: 'public', table }, () => refresh());
+        }
+
+        channel.subscribe();
+        cleanup = () => supabase.removeChannel(channel);
+      })
+      // Realtime is an optimisation; polling below keeps the game playable.
+      .catch(() => {});
 
     // Realtime can drop silently (sleeping tab, flaky network); poll as a floor.
     const poll = setInterval(refresh, 5000);
 
     return () => {
+      cancelled = true;
       clearInterval(poll);
-      supabase.removeChannel(channel);
+      cleanup?.();
     };
   }, [roomId, refresh]);
 
