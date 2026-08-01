@@ -234,7 +234,9 @@ async function findRender(name: string): Promise<SportsDbPlayer | null> {
 
 async function main() {
   const resume = process.argv.includes('--resume');
-  const wanted = Number(process.env.CATALOG_SIZE || 400);
+  // "all" walks EA's entire roster; a number caps it.
+  const requested = process.env.CATALOG_SIZE ?? '400';
+  const wanted = requested === 'all' ? Number.POSITIVE_INFINITY : Number(requested);
 
   console.log(`Pulling the top ${wanted} EA FC players\n`);
 
@@ -247,7 +249,7 @@ async function main() {
     await sleep(700);
   }
 
-  const catalog = roster.slice(0, wanted);
+  const catalog = Number.isFinite(wanted) ? roster.slice(0, wanted) : roster;
   console.log(`\nProcessing ${catalog.length} players\n`);
 
   const alreadyNotable = new Set<number>();
@@ -335,7 +337,6 @@ async function main() {
       ea_weak_foot: ea.weakFootAbility,
       ea_card_url: ea.shieldUrl,
       photo_url: ea.avatarUrl,
-      prime_rating: null,
     };
 
     // The silhouette needs an action pose, which only TheSportsDB provides.

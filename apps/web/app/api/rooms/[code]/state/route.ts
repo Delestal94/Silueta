@@ -4,8 +4,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 export const dynamic = 'force-dynamic';
 
 const REVEALED_COLUMNS =
-  'id, name, team, league, position, position_type, nationality, birth_date, birth_location, ' +
-  'shirt_number, height, weight, foot, market_value, description, photo_url, silhouette_url, ' +
+  'id, name, team, league, position, position_type, nationality, birth_date, ' +
+  'shirt_number, height, weight, foot, description, photo_url, silhouette_url, ' +
   'ea_overall, ea_pace, ea_shooting, ea_passing, ea_dribbling, ea_defending, ea_physical, ea_card_url';
 
 const HIDDEN_COLUMNS = 'id, position_type, silhouette_url';

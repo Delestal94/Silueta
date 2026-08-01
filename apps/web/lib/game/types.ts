@@ -30,12 +30,10 @@ export interface CatalogPlayer {
   position_type: PositionType;
   nationality?: string | null;
   birth_date?: string | null;
-  birth_location?: string | null;
   shirt_number?: string | null;
   height?: string | null;
   weight?: string | null;
   foot?: string | null;
-  market_value?: string | null;
   description?: string | null;
   photo_url?: string | null;
   silhouette_url: string | null;

@@ -150,7 +150,6 @@ async function main() {
         league: 'Comunidad',
         birth_date: String(p.birthDate),
         ea_overall: Number(p.rating),
-        prime_rating: Number(p.rating),
         ea_pace: Number(p.pace),
         ea_shooting: Number(p.shooting),
         ea_passing: Number(p.passing),
