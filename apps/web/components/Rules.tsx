@@ -111,11 +111,25 @@ export function Rules({ compact = false }: { compact?: boolean }) {
         </ul>
       </Section>
 
+      <Section title="Entre ronda y ronda" icon="✅">
+        <p>
+          La próxima silueta sale cuando <strong>todos marcan que están listos</strong>, no
+          cuando lo decide una sola persona. Si alguien se fue de la compu, el anfitrión puede
+          arrancar igual.
+        </p>
+        <p>
+          Podés salir de la sala cuando quieras, y el anfitrión puede echar a quien dejó de
+          jugar — si no, la partida no puede terminar, porque el juego sigue ofreciendo
+          jugadores para los puestos que a esa persona le faltan.
+        </p>
+      </Section>
+
       <Section title="El anfitrión" icon="👑">
         <p>
-          Quien crea la sala controla cuándo sale cada silueta y elige la configuración:
-          presupuesto, segundos por ronda, si juegan futbolistas masculinos, femeninas o ambos,
-          y si el catálogo se limita a los más famosos o entra completo.
+          Quien crea la sala elige la configuración: presupuesto, segundos por ronda, si juegan
+          futbolistas masculinos, femeninas o ambos, y si el catálogo se limita a los más
+          famosos o entra completo. Si se va, el rol pasa a otro para que la sala no quede
+          trabada.
         </p>
       </Section>
     </div>

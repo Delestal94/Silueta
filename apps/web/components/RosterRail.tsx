@@ -16,12 +16,15 @@ export function RosterRail({
   meId,
   topBidderId,
   showHeading = true,
+  onKick,
 }: {
   room: Room;
   meId: string | null;
   topBidderId: string | null;
   /** Off inside the mobile tabs, where the tab itself is the heading. */
   showHeading?: boolean;
+  /** Only supplied to the host. */
+  onKick?: (id: string, name: string) => void;
 }) {
   const position = room.current_position;
   // Ordered by points so the rail doubles as a live leaderboard.
@@ -57,9 +60,21 @@ export function RosterRail({
                   <span className="truncate">{p.display_name}</span>
                   {isMe && <span className="text-xs text-white/40">(vos)</span>}
                 </p>
-                <div className="shrink-0 text-right leading-tight">
-                  <span className="block font-black text-lime-300">{totalPoints(p)} pts</span>
-                  <span className="block text-[11px] text-white/40">💰 {p.remaining_budget}</span>
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <div className="text-right leading-tight">
+                    <span className="block font-black text-lime-300">{totalPoints(p)} pts</span>
+                    <span className="block text-[11px] text-white/40">💰 {p.remaining_budget}</span>
+                  </div>
+                  {onKick && !isMe && !p.is_host && (
+                    <button
+                      onClick={() => onKick(p.id, p.display_name)}
+                      className="grid h-8 w-8 place-items-center rounded-lg text-white/25 transition hover:bg-rose-500/15 hover:text-rose-300"
+                      title={`Echar a ${p.display_name}`}
+                      aria-label={`Echar a ${p.display_name}`}
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -84,7 +99,10 @@ export function RosterRail({
               </div>
 
               <div className="mt-1.5 flex items-center justify-between text-[11px] text-white/40">
-                <span>{position && hasPass(p, position) ? 'pase disponible' : 'pase usado'}</span>
+                <span>
+                  {p.is_ready && <span className="text-lime-300">listo · </span>}
+                  {position && hasPass(p, position) ? 'pase disponible' : 'pase usado'}
+                </span>
                 {complete && <span className="text-lime-300">completo ✓</span>}
                 {leading && !complete && <span className="text-lime-300">pujando</span>}
               </div>

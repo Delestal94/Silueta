@@ -63,6 +63,8 @@ export interface Participant {
   is_host: boolean;
   remaining_budget: number;
   passes_used: number;
+  /** Voted to start the next round. */
+  is_ready: boolean;
   /** One pass per position, so spending it early no longer costs the game. */
   position_passes: { position_type: PositionType }[];
   team_players: TeamSigning[];

@@ -23,7 +23,7 @@ export async function GET(
     .select(
       `id, code, status, starting_budget, round_number, current_position, round_seconds, requirements,
        room_participants (
-         id, display_name, is_host, remaining_budget, passes_used,
+         id, display_name, is_host, remaining_budget, passes_used, is_ready,
          position_passes (position_type),
          team_players (
            purchase_price, rating, season_year, era_label,

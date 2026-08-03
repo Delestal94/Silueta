@@ -149,6 +149,31 @@ export default function RoomPage() {
     }
   }, [act, round?.id, push]);
 
+  const markReady = useCallback(async () => {
+    const data = await act(`/api/rooms/${code}/members`, { action: 'ready' });
+    if (data && !data.started && data.total) {
+      push(`Listo. Faltan ${data.total - data.ready}.`, 'info');
+    }
+  }, [act, code, push]);
+
+  const leaveRoom = useCallback(async () => {
+    if (!confirm('¿Salir de la sala? Perdés los jugadores que compraste.')) return;
+    const data = await act(`/api/rooms/${code}/members`, { action: 'leave' });
+    if (data) {
+      localStorage.removeItem(`room_${code}`);
+      window.location.href = '/';
+    }
+  }, [act, code]);
+
+  const kick = useCallback(
+    async (targetId: string, name: string) => {
+      if (!confirm(`¿Echar a ${name} de la sala?`)) return;
+      const data = await act(`/api/rooms/${code}/members`, { action: 'kick', targetId });
+      if (data) push(`${name} salió de la sala`, 'info');
+    },
+    [act, code, push]
+  );
+
   const castPower = useCallback(
     async (power: PowerId, targetId: string | null) => {
       const data = await act(`/api/rooms/${code}/powers`, { power, targetId });
@@ -245,8 +270,10 @@ export default function RoomPage() {
     <Idle
       isHost={!!identity?.hostToken}
       onStart={startRound}
+      onReady={markReady}
       busy={busy}
-      playersInRoom={room.room_participants.length}
+      participants={room.room_participants}
+      meId={me?.id ?? null}
     />
   );
 
@@ -274,6 +301,7 @@ export default function RoomPage() {
         room={room}
         meId={me?.id ?? null}
         topBidderId={liveRound ? round.current_bid_by : null}
+        onKick={identity?.hostToken ? kick : undefined}
       />
       <PowerPanel
         rivals={rivals}
@@ -294,7 +322,12 @@ export default function RoomPage() {
       {showRules && <RulesModal onClose={() => setShowRules(false)} />}
 
       <div className="mx-auto max-w-7xl">
-        <Header room={room} me={meParticipant} onOpenRules={() => setShowRules(true)} />
+        <Header
+          room={room}
+          me={meParticipant}
+          onOpenRules={() => setShowRules(true)}
+          onLeave={leaveRoom}
+        />
 
         {room.status === 'finished' ? (
           <FinalStandings room={room} />
@@ -329,6 +362,7 @@ export default function RoomPage() {
                 busy={busy}
                 meParticipant={meParticipant}
                 requirements={requirements}
+                onKick={identity?.hostToken ? kick : undefined}
               />
             </div>
           </>
@@ -354,6 +388,7 @@ function MobileTabs({
   busy,
   meParticipant,
   requirements,
+  onKick,
 }: {
   room: Room;
   meId: string | null;
@@ -365,6 +400,7 @@ function MobileTabs({
   busy: boolean;
   meParticipant: Participant | null;
   requirements: Record<PositionType, number>;
+  onKick?: (id: string, name: string) => void;
 }) {
   const [tab, setTab] = useState<'tabla' | 'poderes' | 'equipo'>('tabla');
 
@@ -397,7 +433,13 @@ function MobileTabs({
       </div>
 
       {tab === 'tabla' && (
-        <RosterRail room={room} meId={meId} topBidderId={topBidderId} showHeading={false} />
+        <RosterRail
+          room={room}
+          meId={meId}
+          topBidderId={topBidderId}
+          showHeading={false}
+          onKick={onKick}
+        />
       )}
       {tab === 'poderes' && (
         <PowerPanel
@@ -545,10 +587,12 @@ function Header({
   room,
   me,
   onOpenRules,
+  onLeave,
 }: {
   room: Room;
   me: Participant | null;
   onOpenRules: () => void;
+  onLeave: () => void;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -613,37 +657,93 @@ function Header({
             ?
           </span>
         </button>
+
+        <button
+          onClick={onLeave}
+          className="btn-ghost grid min-h-[44px] min-w-[44px] place-items-center px-3 text-sm hover:border-rose-400/40 hover:text-rose-200"
+          title="Salir de la sala"
+          aria-label="Salir de la sala"
+        >
+          <span className="hidden sm:inline">Salir</span>
+          <span className="text-lg sm:hidden" aria-hidden>
+            ⏻
+          </span>
+        </button>
       </div>
     </header>
   );
 }
 
+/**
+ * Between rounds everyone votes to continue. The host keeps a way to force it,
+ * for the common case of somebody who wandered off — but the default is
+ * agreement, not one person the others have to wait on.
+ */
 function Idle({
   isHost,
   onStart,
+  onReady,
   busy,
-  playersInRoom,
+  participants,
+  meId,
 }: {
   isHost: boolean;
   onStart: () => void;
+  onReady: () => void;
   busy: boolean;
-  playersInRoom: number;
+  participants: Participant[];
+  meId: string | null;
 }) {
+  const ready = participants.filter((p) => p.is_ready);
+  const iAmReady = participants.some((p) => p.id === meId && p.is_ready);
+  const waiting = participants.filter((p) => !p.is_ready);
+
   return (
-    <div className="panel animate-rise flex flex-col items-center gap-4 px-6 py-16 text-center">
-      <div className="text-5xl">⚽</div>
-      <h2 className="text-2xl font-bold">
-        {isHost ? 'Listo para subastar' : 'Esperando al anfitrión'}
+    <div className="panel animate-rise flex flex-col items-center gap-4 px-5 py-10 text-center sm:py-14">
+      <div className="text-4xl sm:text-5xl">⚽</div>
+      <h2 className="text-xl font-bold sm:text-2xl">
+        {iAmReady ? 'Esperando al resto' : 'Listo para la próxima silueta'}
       </h2>
-      <p className="max-w-md text-white/60">
-        {isHost
-          ? 'Cuando arranques, aparece la silueta de un jugador y todos pujan a ciegas. El nombre se revela recién cuando se cierra la puja.'
-          : 'El anfitrión va a lanzar la próxima silueta en cualquier momento.'}
+
+      <p className="max-w-md text-sm text-white/60 sm:text-base">
+        {iAmReady
+          ? 'La ronda arranca sola apenas todos digan que están listos.'
+          : 'Cuando todos estén listos aparece la silueta y se puja a ciegas. El nombre se revela recién al cerrar.'}
       </p>
-      <p className="chip">{playersInRoom} jugador{playersInRoom === 1 ? '' : 'es'} en la sala</p>
-      {isHost && (
-        <button onClick={onStart} disabled={busy} className="btn-primary mt-2 px-8 py-3 text-lg">
-          {busy ? 'Preparando…' : 'Lanzar silueta'}
+
+      <div className="flex flex-wrap items-center justify-center gap-1.5">
+        {participants.map((p) => (
+          <span
+            key={p.id}
+            className={`chip ${
+              p.is_ready ? 'border-lime-300/40 bg-lime-300/15 text-lime-200' : 'text-white/45'
+            }`}
+          >
+            {p.is_ready ? '✓' : '⋯'} {p.display_name}
+          </span>
+        ))}
+      </div>
+
+      <p className="text-sm text-white/45">
+        {ready.length} de {participants.length} listos
+      </p>
+
+      {!iAmReady ? (
+        <button onClick={onReady} disabled={busy} className="btn-primary mt-1 px-8 py-3 text-lg">
+          {busy ? 'Un segundo…' : 'Estoy listo'}
+        </button>
+      ) : (
+        <p className="chip mt-1 border-lime-300/40 text-lime-200">Marcaste que estás listo</p>
+      )}
+
+      {isHost && waiting.length > 0 && (
+        <button
+          onClick={onStart}
+          disabled={busy}
+          className="btn-ghost text-sm"
+          title="Arrancar sin esperar al resto"
+        >
+          Arrancar igual ({waiting.length} sin marcar)
         </button>
       )}
     </div>
