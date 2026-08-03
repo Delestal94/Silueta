@@ -39,8 +39,9 @@ await guest.waitForURL(/\/room\//, { timeout: 15000 });
 await host.waitForSelector('text=Cobra', { timeout: 15000 });
 console.log('PASS guest appeared on host screen via realtime');
 
-// --- Start round
-await host.getByRole('button', { name: 'Lanzar silueta' }).click();
+// --- Start round: it now takes everyone agreeing, not one person's button.
+await guest.getByRole('button', { name: 'Estoy listo' }).click();
+await host.getByRole('button', { name: 'Estoy listo' }).click();
 await host.waitForSelector('img[alt*="Silueta"]', { timeout: 15000 });
 await guest.waitForSelector('img[alt*="Silueta"]', { timeout: 15000 });
 console.log('PASS both clients show the silhouette');
