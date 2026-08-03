@@ -10,10 +10,17 @@ export function useGameState(code: string, clientToken: string | null) {
   const [loading, setLoading] = useState(true);
   const inFlight = useRef(false);
 
+  // How far this device's clock sits from the server's. Every countdown is
+  // drawn against the corrected time, so two players with skewed clocks still
+  // see the same seconds left.
+  const [clockOffset, setClockOffset] = useState(0);
+
   const refresh = useCallback(async () => {
     // Realtime can burst several events at once; collapse them into one fetch.
     if (inFlight.current) return;
     inFlight.current = true;
+
+    const sentAt = Date.now();
 
     try {
       const res = await fetch(`/api/rooms/${code}/state`, {
@@ -26,7 +33,17 @@ export function useGameState(code: string, clientToken: string | null) {
         return;
       }
 
-      setState(await res.json());
+      const data = (await res.json()) as GameState;
+      const receivedAt = Date.now();
+
+      if (data.serverTime) {
+        // Assume the response spent half the round trip coming back, which is
+        // the usual NTP-style correction and plenty for a countdown.
+        const latency = (receivedAt - sentAt) / 2;
+        setClockOffset(new Date(data.serverTime).getTime() + latency - receivedAt);
+      }
+
+      setState(data);
       setError(null);
     } catch {
       setError('Sin conexión con el servidor');
@@ -74,5 +91,8 @@ export function useGameState(code: string, clientToken: string | null) {
     };
   }, [roomId, refresh]);
 
-  return { state, error, loading, refresh };
+  /** Server time as this device best understands it. */
+  const serverNow = useCallback(() => Date.now() + clockOffset, [clockOffset]);
+
+  return { state, error, loading, refresh, serverNow };
 }

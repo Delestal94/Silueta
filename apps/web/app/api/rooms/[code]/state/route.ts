@@ -37,6 +37,11 @@ export async function GET(
     return NextResponse.json({ error: 'Room not found' }, { status: 404 });
   }
 
+  // Clients no longer force a round closed, so a room whose players all left
+  // would hang on an expired round. Any read sweeps it up; the function is a
+  // no-op while there is still time on the clock.
+  await supabase.rpc('settle_expired', { p_room: room.id });
+
   const { data: round } = await supabase
     .from('auction_rounds')
     .select(
@@ -184,5 +189,13 @@ export async function GET(
         };
   }
 
-  return NextResponse.json({ room, currentRound, me, effects: effects ?? [] });
+  return NextResponse.json({
+    room,
+    currentRound,
+    me,
+    effects: effects ?? [],
+    // Anchors each client's countdown to a clock they all share. Without it,
+    // a device 40 seconds fast shows a different timer to everyone else.
+    serverTime: new Date().toISOString(),
+  });
 }

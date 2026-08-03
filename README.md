@@ -25,6 +25,14 @@ sorteada y los puntos que suma — no es lo mismo comprar al Mbappé de 2017 que
 Cada puja **reinicia el reloj completo**, así que la subasta se cierra cuando nadie responde,
 no cuando se agota un temporizador fijo.
 
+> **El reloj del servidor es el único que decide.** Cada cliente pide cerrar la ronda cuando
+> su propio reloj llega a cero, pero el servidor rechaza mientras quede tiempo del suyo; si
+> no, el jugador con el reloj más adelantado le cortaba la puja a todos, y cualquiera podía
+> hacerlo a propósito desde la consola. Los contadores en pantalla se anclan a `serverTime`,
+> que el estado publica en cada lectura, así que un dispositivo desfasado igual muestra los
+> mismos segundos que el resto. El anfitrión sí puede cerrar antes a propósito (`force`), que
+> es otra cosa: está autenticado y ya decide cuándo empieza cada ronda.
+
 ### Poderes
 
 Podés gastar presupuesto en sabotear a un rival en la ronda siguiente. Sale de la misma
@@ -209,6 +217,7 @@ Con el server corriendo:
 node apps/web/e2e/engine.mjs http://localhost:3000   # reglas de subasta, pases y partida completa
 node apps/web/e2e/filters.mjs http://localhost:3000  # filtros de género y catálogo
 node apps/web/e2e/timer.mjs http://localhost:3000    # la puja reinicia el reloj
+node apps/web/e2e/clock.mjs http://localhost:3000    # autoridad del reloj del servidor
 node apps/web/e2e/powers.mjs http://localhost:3000   # poderes y su resolución por espectador
 node apps/web/e2e/uncontested.mjs http://localhost:3000  # asignación sin rival
 node apps/web/e2e/submissions.mjs http://localhost:3000 "$ADMIN_TOKEN"  # propuestas y moderación

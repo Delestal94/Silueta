@@ -50,7 +50,7 @@ const [, rival] = await post(`/api/rooms/${room.code}/join`, {
 // Round 1: the rival takes the goalkeeper, so only "Solo" still needs one.
 const [, r1] = await post('/api/rounds', { roomId: room.roomId }, host);
 await post(`/api/rounds/${r1.round.id}/bid`, { amount: 5 }, { 'x-client-token': rival.clientToken });
-await post(`/api/rounds/${r1.round.id}/finalize`);
+await post(`/api/rounds/${r1.round.id}/finalize`, { force: true }, host);
 
 const mid = await state(room.code, room.clientToken);
 const rivalCounts = mid.room.room_participants.find((p) => p.display_name === 'Rival');
@@ -60,7 +60,7 @@ check('el rival llenó su arquero', rivalCounts.team_players.length === 1);
 const [, r2] = await post('/api/rounds', { roomId: room.roomId }, host);
 check('sigue ofreciendo arquero', r2.round?.position_type === 'goalkeeper', r2.round?.position_type);
 
-const [, settled] = await post(`/api/rounds/${r2.round.id}/finalize`);
+const [, settled] = await post(`/api/rounds/${r2.round.id}/finalize`, { force: true }, host);
 check('se asigna sin puja', settled.uncontested === true, JSON.stringify(settled).slice(0, 120));
 check('queda como vendido', settled.round?.status === 'sold', settled.round?.status);
 
@@ -79,7 +79,9 @@ const [, room2] = await post('/api/rooms', {
 });
 await post(`/api/rooms/${room2.code}/join`, { code: room2.code, displayName: 'B' });
 const [, r3] = await post('/api/rounds', { roomId: room2.roomId }, { 'x-host-token': room2.hostToken });
-const [, unsold] = await post(`/api/rounds/${r3.round.id}/finalize`);
+const [, unsold] = await post(`/api/rounds/${r3.round.id}/finalize`, { force: true }, {
+  'x-host-token': room2.hostToken,
+});
 check('con dos interesados sigue quedando desierta', unsold.round?.status === 'unsold', unsold.round?.status);
 
 console.log(`\n${ok} passed, ${fails.length} failed`);

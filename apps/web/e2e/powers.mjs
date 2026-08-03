@@ -84,7 +84,7 @@ async function espejismo() {
 
   // Whoever wins must get the real player, not the decoy.
   await post(`/api/rounds/${attacker.currentRound.id}/bid`, { amount: 5 }, { 'x-client-token': victim.clientToken });
-  await post(`/api/rounds/${attacker.currentRound.id}/finalize`);
+  await post(`/api/rounds/${attacker.currentRound.id}/finalize`, { force: true }, host);
   const after = await state(r.code, victim.clientToken);
   const bought = after.room.room_participants.find((p) => p.display_name === 'Victima')
     .team_players[0];
@@ -172,7 +172,7 @@ async function impuesto() {
   const [, round] = await post('/api/rounds', { roomId: r.roomId }, host);
 
   await post(`/api/rounds/${round.round.id}/bid`, { amount: 10 }, { 'x-client-token': victim.clientToken });
-  await post(`/api/rounds/${round.round.id}/finalize`);
+  await post(`/api/rounds/${round.round.id}/finalize`, { force: true }, host);
 
   const after = await state(r.code, victim.clientToken);
   check(

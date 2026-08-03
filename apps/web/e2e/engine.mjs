@@ -79,8 +79,8 @@ async function auctionRules() {
   const [raise] = await post(`/api/rounds/${round}/bid`, { amount: 25 }, { 'x-client-token': p2.clientToken });
   check('higher bid accepted', raise === 201, `got ${raise}`);
 
-  const [, fin1] = await post(`/api/rounds/${round}/finalize`);
-  const [, fin2] = await post(`/api/rounds/${round}/finalize`);
+  const [, fin1] = await post(`/api/rounds/${round}/finalize`, { force: true }, host);
+  const [, fin2] = await post(`/api/rounds/${round}/finalize`, { force: true }, host);
   check('finalize settles the round', fin1.round?.status === 'sold');
   check('finalize is idempotent', fin2.already_final === true);
 
@@ -121,7 +121,7 @@ async function passAndFlip() {
   check('the last pass triggers the flip', s3 === 200 && d3.coin_flip === true);
   check('the flip picks a winner', !!d3.coin_flip_winner);
 
-  await post(`/api/rounds/${round}/finalize`);
+  await post(`/api/rounds/${round}/finalize`, { force: true }, host);
   const state = await get(`/api/rooms/${room.code}/state`);
   const owners = state.room.room_participants.filter((p) => p.team_players.length === 1);
   check('exactly one participant gets the player', owners.length === 1, `got ${owners.length}`);
@@ -163,7 +163,7 @@ async function fullGame() {
       const [s] = await post(`/api/rounds/${r.round.id}/bid`, { amount: 2 }, { 'x-client-token': token });
       if (s === 201) break;
     }
-    await post(`/api/rounds/${r.round.id}/finalize`);
+    await post(`/api/rounds/${r.round.id}/finalize`, { force: true }, host);
   }
 
   const state = await get(`/api/rooms/${room.code}/state`);

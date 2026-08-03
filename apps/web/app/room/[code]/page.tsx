@@ -49,14 +49,18 @@ export default function RoomPage() {
     }
   }, [code]);
 
-  const { state, error, loading, refresh } = useGameState(code, identity?.clientToken ?? null);
+  const { state, error, loading, refresh, serverNow } = useGameState(
+    code,
+    identity?.clientToken ?? null
+  );
   const { toasts, push } = useToasts();
 
-  const [now, setNow] = useState(() => Date.now());
+  // Ticks on the server's clock, not this device's.
+  const [now, setNow] = useState(() => serverNow());
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 200);
+    const t = setInterval(() => setNow(serverNow()), 200);
     return () => clearInterval(t);
-  }, []);
+  }, [serverNow]);
 
   const [busy, setBusy] = useState(false);
   const [flipping, setFlipping] = useState(false);
@@ -75,15 +79,21 @@ export default function RoomPage() {
   const msLeft = round?.status === 'active' ? new Date(round.ends_at).getTime() - now : 0;
   const secondsLeft = Math.max(0, Math.ceil(msLeft / 1000));
 
-  // Every client races to settle the auction; the server keeps only the first.
+  // Asking to settle is only a nudge: the server refuses while the round still
+  // has time on its own clock, so a device running fast cannot cut the bidding
+  // short for everyone. A small grace period avoids a pointless rejected call.
   useEffect(() => {
-    if (!round || round.status !== 'active' || msLeft > 0) return;
+    if (!round || round.status !== 'active' || msLeft > -250) return;
     if (finalizedRef.current === round.id) return;
     finalizedRef.current = round.id;
 
     fetch(`/api/rounds/${round.id}/finalize`, { method: 'POST' })
       .then(() => refresh())
-      .catch(() => {});
+      .catch(() => {})
+      // If the server says it is still open, let a later tick try again.
+      .finally(() => {
+        if (round.status === 'active') finalizedRef.current = null;
+      });
   }, [round, msLeft, refresh]);
 
   const act = useCallback(

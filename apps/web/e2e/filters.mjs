@@ -21,7 +21,7 @@ async function sample(settings, rounds = 8) {
       const [s] = await post(`/api/rounds/${r.round.id}/bid`, { amount: 2 }, { 'x-client-token': t });
       if (s === 201) break;
     }
-    await post(`/api/rounds/${r.round.id}/finalize`);
+    await post(`/api/rounds/${r.round.id}/finalize`, { force: true }, host);
     const st = await get(`/api/rooms/${room.code}/state`);
     if (st.currentRound?.player?.name) seen.push(st.currentRound.player.name);
   }

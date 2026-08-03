@@ -122,6 +122,8 @@ export interface GameState {
     passes_used: number;
   } | null;
   effects: PowerEffect[];
+  /** Server clock at the moment the state was read. */
+  serverTime: string;
 }
 
 export function countByPosition(
