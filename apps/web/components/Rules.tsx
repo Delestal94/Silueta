@@ -36,8 +36,13 @@ export function Rules({ compact = false }: { compact?: boolean }) {
           llevarte al jugador equivocado.
         </p>
         <p className="rounded-xl border border-white/10 bg-black/25 px-3 py-2">
-          No es lo mismo el Mbappé de 2017, con 18 años y 79 puntos, que el de 2024 con 91. Es
-          el mismo jugador y la misma silueta.
+          No es lo mismo el Mbappé de 2017, con 18 años y 79 puntos, que el de 2024 con 91. Ni
+          el Maradona del 86, que vale 95, que el del 96, que vale 86. Misma silueta, distinto
+          jugador.
+        </p>
+        <p>
+          También entran <strong>leyendas retiradas</strong>: Maradona, Pelé, Cruyff, Zidane,
+          Ronaldinho y unos cuantos más.
         </p>
         <p>
           Los puntos que suma son los de <strong>esa</strong> época, no los de hoy.
