@@ -221,8 +221,21 @@ node apps/web/e2e/clock.mjs http://localhost:3000    # autoridad del reloj del s
 node apps/web/e2e/powers.mjs http://localhost:3000   # poderes y su resolución por espectador
 node apps/web/e2e/uncontested.mjs http://localhost:3000  # asignación sin rival
 node apps/web/e2e/submissions.mjs http://localhost:3000 "$ADMIN_TOKEN"  # propuestas y moderación
+node apps/web/e2e/membership.mjs http://localhost:3000  # salir, echar y arrancar por acuerdo
+node apps/web/e2e/load.mjs http://localhost:3000     # costo por sala (no es un test, mide)
 node apps/web/e2e/ui.mjs                             # navegador, dos jugadores simultáneos
 ```
+
+### Rendimiento
+
+`/api/rooms/[code]/state` es lo único que se consulta cada pocos segundos desde cada
+cliente, así que es el único endpoint cuyo costo importa. Todo el estado —incluida la
+decisión de qué silueta puede ver *ese* espectador— lo arma una sola función de Postgres,
+`room_state`. La versión anterior hacía nueve consultas secuenciales y tardaba 581 ms para
+devolver 1,7 KB: el costo nunca fue el ancho de banda sino los viajes de ida y vuelta.
+Con una sola consulta bajó a **86 ms**.
+
+Medilo con `node apps/web/e2e/load.mjs`.
 
 Todos aceptan una URL, así que sirven también contra el despliegue.
 

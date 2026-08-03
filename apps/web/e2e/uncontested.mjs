@@ -79,10 +79,13 @@ const [, room2] = await post('/api/rooms', {
 });
 await post(`/api/rooms/${room2.code}/join`, { code: room2.code, displayName: 'B' });
 const [, r3] = await post('/api/rounds', { roomId: room2.roomId }, { 'x-host-token': room2.hostToken });
-const [, unsold] = await post(`/api/rounds/${r3.round.id}/finalize`, { force: true }, {
+// Since 0033 a round nobody bid on is raffled among everyone who still needs
+// the position: not bidding is no longer a free way to skip a player.
+const [, raffled] = await post(`/api/rounds/${r3.round.id}/finalize`, { force: true }, {
   'x-host-token': room2.hostToken,
 });
-check('con dos interesados sigue quedando desierta', unsold.round?.status === 'unsold', unsold.round?.status);
+check('con dos interesados se sortea igual', raffled.round?.status === 'sold', raffled.round?.status);
+check('y se marca como sorteo', raffled.raffled === true, JSON.stringify(raffled).slice(0, 90));
 
 console.log(`\n${ok} passed, ${fails.length} failed`);
 if (fails.length) {
