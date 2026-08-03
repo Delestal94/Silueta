@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 const REVEALED_COLUMNS =
   'id, name, team, league, position, position_type, nationality, birth_date, ' +
   'shirt_number, height, weight, foot, description, photo_url, silhouette_url, ' +
-  'ea_overall, ea_pace, ea_shooting, ea_passing, ea_dribbling, ea_defending, ea_physical, ea_card_url';
+  'ea_overall, ea_pace, ea_shooting, ea_passing, ea_dribbling, ea_defending, ea_physical, ea_card_url, colour_url';
 
 const HIDDEN_COLUMNS = 'id, position_type, silhouette_url';
 

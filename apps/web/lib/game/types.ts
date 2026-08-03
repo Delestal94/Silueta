@@ -45,6 +45,8 @@ export interface CatalogPlayer {
   ea_defending?: number | null;
   ea_physical?: number | null;
   ea_card_url?: string | null;
+  /** The very pose the silhouette was cut from, in colour. */
+  colour_url?: string | null;
 }
 
 export interface TeamSigning {

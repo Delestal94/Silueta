@@ -101,6 +101,20 @@ body::before {
   }
 }
 
+/* The silhouette gaining colour: it starts as the same flat shape the players
+   were staring at, then the ink drains out of it. */
+@keyframes reveal {
+  from {
+    filter: brightness(0) saturate(100%) invert(97%) sepia(8%) saturate(600%)
+      hue-rotate(40deg);
+    transform: scale(1.02);
+  }
+  to {
+    filter: none;
+    transform: scale(1);
+  }
+}
+
 @keyframes flip {
   from {
     transform: rotateY(0);
@@ -123,12 +137,16 @@ body::before {
   animation: flip 1.8s cubic-bezier(0.3, 0.1, 0.2, 1) both;
   transform-style: preserve-3d;
 }
+.animate-reveal {
+  animation: reveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .animate-rise,
   .animate-pop,
   .animate-pulse-ring,
-  .animate-flip {
+  .animate-flip,
+  .animate-reveal {
     animation: none;
   }
 }

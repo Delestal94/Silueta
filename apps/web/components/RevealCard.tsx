@@ -71,9 +71,28 @@ export function RevealCard({
 
   return (
     <section className="panel animate-pop overflow-hidden">
+      {/* The pose that was a silhouette a second ago, now in colour. Same
+          framing, same figure — the answer to what everyone was staring at,
+          rather than a different photo of the same person. */}
+      {p.colour_url && (
+        <div className="relative flex min-h-[300px] items-end justify-center overflow-hidden sm:min-h-[380px]">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[460px] w-[460px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
+            style={{ background: 'radial-gradient(circle, rgba(182,255,59,0.22), transparent 65%)' }}
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={p.colour_url}
+            alt={p.name}
+            className="animate-reveal relative max-h-[360px] w-auto object-contain"
+          />
+        </div>
+      )}
+
       <div className="grid gap-6 p-6 sm:grid-cols-[190px_minmax(0,1fr)]">
         <div className="mx-auto w-full max-w-[190px] space-y-3">
-          {/* EA's official card is the identity reveal. */}
+          {/* EA's official card carries the rating and the six stats. */}
           {p.ea_card_url || p.photo_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img

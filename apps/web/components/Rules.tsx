@@ -24,8 +24,8 @@ export function Rules({ compact = false }: { compact?: boolean }) {
           automáticamente.
         </p>
         <p>
-          De cada jugador ves <strong>sólo su silueta</strong>. El nombre aparece recién cuando
-          se cierra la puja.
+          De cada jugador ves <strong>sólo su silueta</strong>. Al cerrarse la puja, esa misma
+          figura se llena de color y aparece su nombre.
         </p>
       </Section>
 
