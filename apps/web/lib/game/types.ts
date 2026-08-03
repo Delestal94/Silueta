@@ -99,6 +99,8 @@ export interface CurrentRound {
     nationality: string | null;
     honours: { honour: string; season: string | null; team: string | null }[];
   } | null;
+  /** Clue this viewer paid for with "soplo". */
+  tip: { nationality: string | null; team: string | null } | null;
 }
 
 export interface PowerEffect {

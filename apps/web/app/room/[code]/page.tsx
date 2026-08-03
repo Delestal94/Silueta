@@ -138,7 +138,7 @@ export default function RoomPage() {
   }, [act, round?.id, push]);
 
   const castPower = useCallback(
-    async (power: PowerId, targetId: string) => {
+    async (power: PowerId, targetId: string | null) => {
       const data = await act(`/api/rooms/${code}/powers`, { power, targetId });
       if (data) {
         const label = POWER_BY_ID[power].name;
@@ -235,6 +235,7 @@ export default function RoomPage() {
                   )}
 
                   {round.myHex && <HexNotice power={round.myHex.power} />}
+                  {round.tip && <TipNotice tip={round.tip} />}
 
                   <BidPanel
                     budget={budget}
@@ -366,6 +367,20 @@ function JoinHere({
         </Link>
       </form>
     </main>
+  );
+}
+
+function TipNotice({ tip }: { tip: { nationality: string | null; team: string | null } }) {
+  return (
+    <div className="panel animate-rise flex items-center gap-3 border-sky-400/40 bg-sky-500/10 px-4 py-3">
+      <span className="text-2xl" aria-hidden>
+        🔍
+      </span>
+      <p className="text-sm text-sky-100">
+        Tu soplo: es de <strong>{tip.nationality ?? 'nacionalidad desconocida'}</strong> y juega
+        en <strong>{tip.team ?? 'un club desconocido'}</strong>.
+      </p>
+    </div>
   );
 }
 

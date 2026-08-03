@@ -16,7 +16,7 @@ export function PowerPanel({
   budget: number;
   effects: PowerEffect[];
   meId: string | null;
-  onCast: (power: PowerId, targetId: string) => void;
+  onCast: (power: PowerId, targetId: string | null) => void;
   busy: boolean;
 }) {
   const [picked, setPicked] = useState<PowerId | null>(null);
@@ -60,7 +60,16 @@ export function PowerPanel({
               }`}
             >
               <button
-                onClick={() => setPicked(open ? null : power.id)}
+                onClick={() => {
+                  // Self-targeted powers have nobody to choose, so they fire
+                  // straight away instead of opening a picker.
+                  if (power.selfTargeted) {
+                    onCast(power.id, null);
+                    setPicked(null);
+                    return;
+                  }
+                  setPicked(open ? null : power.id);
+                }}
                 disabled={!affordable || busy}
                 className="flex w-full items-center gap-3 px-3 py-2.5 text-left disabled:opacity-35"
                 aria-expanded={open}
@@ -83,7 +92,7 @@ export function PowerPanel({
                 </span>
               </button>
 
-              {open && (
+              {open && !power.selfTargeted && (
                 <div className="animate-rise border-t border-white/10 px-3 py-2.5">
                   <p className="mb-2 text-xs uppercase tracking-wider text-white/45">
                     ¿A quién?

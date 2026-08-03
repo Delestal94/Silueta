@@ -4,8 +4,9 @@ import { errorResponse } from '@/lib/game/http';
 import { z } from 'zod';
 
 const schema = z.object({
-  power: z.enum(['niebla', 'apagon', 'espejismo', 'impuesto', 'traba', 'manotazo']),
-  targetId: z.string().uuid(),
+  power: z.enum(['soplo', 'apagon', 'espejismo', 'impuesto', 'traba', 'manotazo']),
+  // "soplo" is bought for yourself, so it carries no target.
+  targetId: z.string().uuid().nullish(),
 });
 
 const ERRORS: Record<string, [string, number]> = {
@@ -16,6 +17,8 @@ const ERRORS: Record<string, [string, number]> = {
   insufficient_budget: ['No te alcanza para ese poder', 400],
   target_already_hexed: ['Ya tiene un poder encima esperando', 409],
   target_has_no_pass: ['Ya usó su pase, no hay nada que quemar', 400],
+  no_active_round: ['No hay ninguna ronda en curso', 409],
+  already_bought_tip: ['Ya compraste el soplo de esta ronda', 409],
 };
 
 export async function POST(
@@ -47,7 +50,7 @@ export async function POST(
       p_room: room.id,
       p_client_token: clientToken,
       p_power: power,
-      p_target: targetId,
+      p_target: targetId ?? null,
     });
 
     if (error) {

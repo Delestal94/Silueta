@@ -37,6 +37,9 @@ export function RevealCard({
   onNext: () => void;
   busy: boolean;
 }) {
+  // Espejismo stays quiet during the bidding, so the reveal is the first the
+  // victim hears of it.
+  const wasFooled = round.myHex?.power === 'espejismo';
   const p = round.player;
   const age = ageAt(p.birth_date, round.season_year);
   const rating = round.era_rating;
@@ -117,6 +120,13 @@ export function RevealCard({
           </div>
 
           <h2 className="mt-1 text-3xl font-black leading-tight">{p.name}</h2>
+
+          {wasFooled && (
+            <p className="animate-pop mt-2 rounded-xl border border-violet-300/40 bg-violet-500/15 px-3 py-2 text-sm text-violet-100">
+              🪞 Te tiraron <strong>Espejismo</strong>: toda la ronda estuviste viendo la
+              silueta de otro jugador.
+            </p>
+          )}
 
           {winnerName && round.status === 'sold' && (
             <p className="mt-2 text-white/70">

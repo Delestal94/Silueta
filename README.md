@@ -32,12 +32,17 @@ plata con la que comprás jugadores, así que molestar siempre debilita tu propi
 
 | Poder | Costo | Efecto |
 |---|---|---|
-| 🌫️ Niebla | 10 | Ve la silueta borrosa |
+| 🔍 Soplo | 10 | **Para vos**: te revela nacionalidad y club |
 | ✋ Manotazo | 12 | Le quema el pase (inmediato) |
 | 🔒 Traba | 15 | No puede pujar en la primera mitad |
 | 🌑 Apagón | 18 | No ve ninguna silueta |
-| 🪞 Espejismo | 28 | Ve la silueta de **otro** jugador y no se entera |
+| 🪞 Espejismo | 28 | Ve la silueta de **otro** jugador, sin aviso |
 | 💸 Impuesto | 30 | Si gana, paga el doble |
+
+> **Espejismo no le avisa a la víctima hasta que cierra la ronda.** Avisarle lo convertiría
+> en un Apagón más caro: sabiendo que la silueta miente, la ignorás y pujás a ciegas igual.
+> Denegar información te vuelve prudente; mentirte te vuelve confiado, y ahí está la
+> diferencia entre los dos poderes.
 
 Sólo un poder pendiente por víctima, para que nadie quede fuera del juego a fuerza de plata.
 

@@ -80,9 +80,13 @@ export function Rules({ compact = false }: { compact?: boolean }) {
 
       <Section title="Poderes" icon="🪄">
         <p className="mb-3">
-          Podés gastar presupuesto en sabotear a un rival en la ronda siguiente. Sale de la
-          misma plata con la que comprás, así que molestar siempre te debilita. Sólo un poder
-          por víctima a la vez.
+          Podés gastar presupuesto en sabotear a un rival en la ronda siguiente, o en darte
+          una ventaja a vos. Sale de la misma plata con la que comprás, así que siempre es un
+          canje. Sólo un poder por víctima a la vez.
+        </p>
+        <p className="mb-3 rounded-xl border border-white/10 bg-black/25 px-3 py-2">
+          <strong>Espejismo no avisa.</strong> Si te lo tiran, te enterás recién cuando se
+          revela el jugador — para entonces ya pujaste creyendo en una silueta que no era.
         </p>
         <ul className="space-y-1.5">
           {POWERS.map((p) => (

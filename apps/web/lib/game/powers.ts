@@ -1,4 +1,4 @@
-export type PowerId = 'niebla' | 'apagon' | 'espejismo' | 'impuesto' | 'traba' | 'manotazo';
+export type PowerId = 'soplo' | 'apagon' | 'espejismo' | 'impuesto' | 'traba' | 'manotazo';
 
 export interface Power {
   id: PowerId;
@@ -9,6 +9,8 @@ export interface Power {
   description: string;
   /** Shown to the victim, who is told they are hexed but not the details. */
   victimNotice: string;
+  /** Aimed at yourself rather than a rival. */
+  selfTargeted?: boolean;
 }
 
 /**
@@ -20,12 +22,13 @@ export interface Power {
  */
 export const POWERS: Power[] = [
   {
-    id: 'niebla',
-    name: 'Niebla',
-    icon: '🌫️',
+    id: 'soplo',
+    name: 'Soplo',
+    icon: '🔍',
     cost: 10,
-    description: 'Ve la silueta borrosa en la próxima ronda.',
-    victimNotice: 'Te tiraron Niebla: vas a ver la silueta borrosa.',
+    description: 'Te revela la nacionalidad y el club del jugador de esta ronda. Sólo a vos.',
+    victimNotice: '',
+    selfTargeted: true,
   },
   {
     id: 'manotazo',

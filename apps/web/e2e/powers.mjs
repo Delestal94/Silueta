@@ -73,9 +73,12 @@ async function espejismo() {
     'la víctima no recibe el id del jugador real',
     victimView.currentRound.player.id !== attacker.currentRound.player.id
   );
-  check('se le avisa que está afectada', victimView.currentRound.myHex?.power === 'espejismo');
+  // The whole point: knowing the shape is a lie would collapse espejismo into
+  // a dearer apagón, because you would just ignore what you see.
+  check('NO se le avisa durante la puja', victimView.currentRound.myHex === null,
+    JSON.stringify(victimView.currentRound.myHex));
   check(
-    'pero no qué silueta le están mostrando',
+    'nunca recibe qué silueta le muestran',
     victimView.currentRound.myHex?.decoy_player_id === undefined
   );
 
@@ -90,6 +93,47 @@ async function espejismo() {
     bought.players.id === attacker.currentRound.player.id,
     `compró ${bought.players.name}`
   );
+  check('recién al cerrar se entera del engaño', after.currentRound?.myHex?.power === 'espejismo',
+    JSON.stringify(after.currentRound?.myHex));
+}
+
+async function soplo() {
+  console.log('\nsoplo — pista para uno mismo');
+  const { r, host } = await room();
+
+  const [early] = await post(
+    `/api/rooms/${r.code}/powers`,
+    { power: 'soplo' },
+    { 'x-client-token': r.clientToken }
+  );
+  check('sin ronda en curso no se puede comprar', early === 409, `got ${early}`);
+
+  await post('/api/rounds', { roomId: r.roomId }, host);
+
+  const before = (await state(r.code, r.clientToken)).me.remaining_budget;
+  const [bought] = await post(
+    `/api/rooms/${r.code}/powers`,
+    { power: 'soplo' },
+    { 'x-client-token': r.clientToken }
+  );
+  check('se compra sin elegir rival', bought === 201, `got ${bought}`);
+
+  const mine = await state(r.code, r.clientToken);
+  check('revela nacionalidad y club', !!mine.currentRound.tip?.nationality && !!mine.currentRound.tip?.team,
+    JSON.stringify(mine.currentRound.tip));
+  check('sigue sin revelar el nombre', mine.currentRound.player.name === undefined);
+  check('descuenta 10 del presupuesto', before - mine.me.remaining_budget === 10,
+    `${before} -> ${mine.me.remaining_budget}`);
+
+  const other = await state(r.code, (await post(`/api/rooms/${r.code}/join`, { code: r.code, displayName: 'Otro' }))[1].clientToken);
+  check('el resto no ve la pista', !other.currentRound.tip);
+
+  const [again] = await post(
+    `/api/rooms/${r.code}/powers`,
+    { power: 'soplo' },
+    { 'x-client-token': r.clientToken }
+  );
+  check('no se compra dos veces en la misma ronda', again === 409, `got ${again}`);
 }
 
 async function apagon() {
@@ -169,7 +213,7 @@ async function rules() {
 
   const [self] = await post(
     `/api/rooms/${r.code}/powers`,
-    { power: 'niebla', targetId: me.id },
+    { power: 'apagon', targetId: me.id },
     { 'x-client-token': r.clientToken }
   );
   check('no podés tirártelo a vos mismo', self === 400, `got ${self}`);
@@ -177,15 +221,15 @@ async function rules() {
   const budgetBefore = (await state(r.code, r.clientToken)).me.remaining_budget;
   await post(
     `/api/rooms/${r.code}/powers`,
-    { power: 'niebla', targetId: victimId },
+    { power: 'apagon', targetId: victimId },
     { 'x-client-token': r.clientToken }
   );
   const budgetAfter = (await state(r.code, r.clientToken)).me.remaining_budget;
-  check('descuenta el costo del presupuesto', budgetBefore - budgetAfter === 10, `${budgetBefore} -> ${budgetAfter}`);
+  check('descuenta el costo del presupuesto', budgetBefore - budgetAfter === 18, `${budgetBefore} -> ${budgetAfter}`);
 
   const [stacked] = await post(
     `/api/rooms/${r.code}/powers`,
-    { power: 'apagon', targetId: victimId },
+    { power: 'traba', targetId: victimId },
     { 'x-client-token': r.clientToken }
   );
   check('no se pueden apilar sobre la misma víctima', stacked === 409, `got ${stacked}`);
@@ -201,6 +245,7 @@ async function rules() {
 console.log(`testing ${BASE}`);
 await espejismo();
 await apagon();
+await soplo();
 await impuesto();
 await traba();
 await rules();
