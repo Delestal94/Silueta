@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const createRoomSchema = z.object({
   displayName: z.string().trim().min(1).max(24),
   startingBudget: z.number().int().min(50).max(1000).default(200),
-  roundSeconds: z.number().int().min(8).max(120).default(20),
+  roundSeconds: z.number().int().min(5).max(120).default(10),
   genderFilter: z.enum(['men', 'women', 'any']).default('any'),
   pool: z.enum(['famous', 'all']).default('famous'),
 });

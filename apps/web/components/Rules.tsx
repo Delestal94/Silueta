@@ -64,17 +64,21 @@ export function Rules({ compact = false }: { compact?: boolean }) {
           <li>Tu puja tiene que superar la actual, y no podés pasarte de tu presupuesto.</li>
           <li>Si ya completaste ese puesto, no podés seguir pujando en esa ronda.</li>
           <li>
-            Si sos <strong>el único</strong> que todavía necesita ese puesto y nadie puja, el
-            jugador es tuyo al precio mínimo.
+            Si <strong>nadie puja</strong>, el jugador se sortea entre todos los que todavía
+            necesitan ese puesto, al precio mínimo. No pujar no te salva: para eso está el
+            pase, y tenés uno solo por puesto.
           </li>
         </ul>
       </Section>
 
       <Section title="El pase" icon="🙅">
         <p>
-          Tenés <strong>un solo pase en toda la partida</strong>. Pasar te saca de esa ronda. Si
-          todos los que necesitaban ese puesto pasan, se sortea entre ellos y a alguien le toca
-          igual.
+          Tenés <strong>un pase por puesto</strong>: uno para arqueros, otro para defensas, y
+          así. Gastarlo temprano ya no te deja indefenso el resto de la partida.
+        </p>
+        <p>
+          Si todos los que necesitaban ese puesto pasan, se sortea entre ellos y a alguien le
+          toca igual.
         </p>
       </Section>
 

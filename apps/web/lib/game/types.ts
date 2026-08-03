@@ -61,7 +61,13 @@ export interface Participant {
   is_host: boolean;
   remaining_budget: number;
   passes_used: number;
+  /** One pass per position, so spending it early no longer costs the game. */
+  position_passes: { position_type: PositionType }[];
   team_players: TeamSigning[];
+}
+
+export function hasPass(participant: Participant, position: PositionType): boolean {
+  return !(participant.position_passes || []).some((p) => p.position_type === position);
 }
 
 export interface Room {

@@ -127,14 +127,22 @@ async function passAndFlip() {
   check('exactly one participant gets the player', owners.length === 1, `got ${owners.length}`);
   check('assigned at the flip price', owners[0]?.remaining_budget === 99);
 
-  // The flip winner now has the position filled, and that check fires before the
-  // pass-quota one, so ask the loser to prove passes are once per game.
+  // The flip winner now has the position filled, and that check fires before
+  // the pass-quota one, so ask the loser. A pass is spent per position, so the
+  // loser still owes a goalkeeper and has already used that position's pass.
   const loser = state.room.room_participants.find((p) => p.team_players.length === 0);
   const loserToken = loser.display_name === 'A' ? room.clientToken : b.clientToken;
 
   const [, r2] = await post('/api/rounds', { roomId: room.roomId }, host);
-  const [s4, d4] = await post(`/api/rounds/${r2.round.id}/pass`, null, { 'x-client-token': loserToken });
-  check('a pass is limited to one per game', s4 === 400 && /único/.test(d4.error || ''), `${s4} ${d4.error}`);
+  const [s4] = await post(`/api/rounds/${r2.round.id}/pass`, null, { 'x-client-token': loserToken });
+  check('the pass for that position is already spent', s4 >= 400, `got ${s4}`);
+
+  // …but a different position starts with a fresh one.
+  const fresh = await get(`/api/rooms/${room.code}/state`);
+  const loserRow = fresh.room.room_participants.find((p) => p.display_name === loser.display_name);
+  const spent = (loserRow.position_passes || []).map((p) => p.position_type);
+  check('only that position is marked as passed', spent.length === 1 && spent[0] === 'goalkeeper',
+    JSON.stringify(spent));
 }
 
 async function fullGame() {

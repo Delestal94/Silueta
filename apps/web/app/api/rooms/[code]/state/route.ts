@@ -24,6 +24,7 @@ export async function GET(
       `id, code, status, starting_budget, round_number, current_position, round_seconds, requirements,
        room_participants (
          id, display_name, is_host, remaining_budget, passes_used,
+         position_passes (position_type),
          team_players (
            purchase_price, rating, season_year, era_label,
            players (id, name, team, position, position_type, nationality, photo_url, silhouette_url)

@@ -4,6 +4,7 @@ import {
   POSITION_ORDER,
   POSITION_SHORT,
   countByPosition,
+  hasPass,
   isTeamComplete,
   rankParticipants,
   totalPoints,
@@ -19,6 +20,7 @@ export function RosterRail({
   meId: string | null;
   topBidderId: string | null;
 }) {
+  const position = room.current_position;
   // Ordered by points so the rail doubles as a live leaderboard.
   const ordered = rankParticipants(room.room_participants);
 
@@ -77,7 +79,7 @@ export function RosterRail({
               </div>
 
               <div className="mt-1.5 flex items-center justify-between text-[11px] text-white/40">
-                <span>{p.passes_used >= 1 ? 'pase usado' : 'pase disponible'}</span>
+                <span>{position && hasPass(p, position) ? 'pase disponible' : 'pase usado'}</span>
                 {complete && <span className="text-lime-300">completo ✓</span>}
                 {leading && !complete && <span className="text-lime-300">pujando</span>}
               </div>

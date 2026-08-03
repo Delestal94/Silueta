@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Rules } from '@/components/Rules';
+import { Leaderboard } from '@/components/Leaderboard';
 
 type Mode = 'menu' | 'create' | 'join';
 
@@ -13,7 +14,7 @@ export default function Home() {
   const [displayName, setDisplayName] = useState('');
   const [roomCode, setRoomCode] = useState('');
   const [budget, setBudget] = useState(200);
-  const [roundSeconds, setRoundSeconds] = useState(20);
+  const [roundSeconds, setRoundSeconds] = useState(10);
   const [genderFilter, setGenderFilter] = useState<'men' | 'women' | 'any'>('any');
   const [pool, setPool] = useState<'famous' | 'all'>('famous');
   const [loading, setLoading] = useState(false);
@@ -167,7 +168,7 @@ export default function Home() {
                   <input
                     type="number"
                     value={roundSeconds}
-                    min={8}
+                    min={5}
                     max={120}
                     onChange={(e) => setRoundSeconds(Number(e.target.value))}
                     className="field"
@@ -263,7 +264,9 @@ export default function Home() {
               </Link>
             </p>
 
-            <section className="panel mt-8 p-6">
+            <Leaderboard />
+
+            <section className="panel mt-5 p-6">
               <h2 className="mb-5 text-center text-xl font-black">Cómo se juega</h2>
               <Rules />
             </section>

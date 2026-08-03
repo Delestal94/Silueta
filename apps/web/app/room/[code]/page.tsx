@@ -9,6 +9,7 @@ import {
   POSITION_ORDER,
   POSITION_SHORT,
   countByPosition,
+  hasPass,
   isTeamComplete,
   totalPoints,
   type Participant,
@@ -25,7 +26,7 @@ import { PowerPanel } from '@/components/PowerPanel';
 import { RulesModal } from '@/components/RulesModal';
 import { POWER_BY_ID, type PowerId } from '@/lib/game/powers';
 
-const BID_STEPS = [1, 5, 10, 25];
+const BID_STEPS = [3, 5, 10, 25];
 
 export default function RoomPage() {
   const { code } = useParams<{ code: string }>();
@@ -253,7 +254,9 @@ export default function RoomPage() {
                     canBid={canBid}
                     positionFull={positionFull}
                     iAmTopBidder={iAmTopBidder}
-                    passesLeft={1 - (meParticipant?.passes_used ?? 0)}
+                    passesLeft={
+                      meParticipant && currentPos && hasPass(meParticipant, currentPos) ? 1 : 0
+                    }
                     onBid={placeBid}
                     onPass={pass}
                     busy={busy}
