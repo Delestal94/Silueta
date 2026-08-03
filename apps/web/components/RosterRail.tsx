@@ -15,10 +15,13 @@ export function RosterRail({
   room,
   meId,
   topBidderId,
+  showHeading = true,
 }: {
   room: Room;
   meId: string | null;
   topBidderId: string | null;
+  /** Off inside the mobile tabs, where the tab itself is the heading. */
+  showHeading?: boolean;
 }) {
   const position = room.current_position;
   // Ordered by points so the rail doubles as a live leaderboard.
@@ -26,7 +29,9 @@ export function RosterRail({
 
   return (
     <aside className="panel h-fit p-4 lg:sticky lg:top-5">
-      <h3 className="mb-3 px-1 font-bold">Tabla ({room.room_participants.length})</h3>
+      {showHeading && (
+        <h3 className="mb-3 px-1 font-bold">Tabla ({room.room_participants.length})</h3>
+      )}
 
       <ul className="space-y-2">
         {ordered.map((p) => {

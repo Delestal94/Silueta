@@ -49,12 +49,18 @@ async function download(url: string, attempts = 3): Promise<Buffer | null> {
 async function main() {
   const batch = Number(process.env.BATCH || 500);
 
+  // Ordered by fame rank, which is computed per gender and position: the
+  // players a game is most likely to draw get their colour first, and no
+  // group is left behind while another is finished. Without it the rows come
+  // back in insertion order, which had covered 22% of the men and 1% of the
+  // women — the reveal looked broken for entire categories.
   const { data: players, error } = await supabase
     .from('players')
     .select('id, ea_id, name, render_url')
     .eq('notable', true)
     .not('render_url', 'is', null)
     .is('colour_url', null)
+    .order('fame_rank')
     .limit(batch);
 
   if (error || !players) {

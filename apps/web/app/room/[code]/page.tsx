@@ -25,6 +25,7 @@ import { Toasts, useToasts } from '@/components/Toasts';
 import { PowerPanel } from '@/components/PowerPanel';
 import { RulesModal } from '@/components/RulesModal';
 import { POWER_BY_ID, type PowerId } from '@/lib/game/powers';
+import type { GameState } from '@/lib/game/types';
 
 const BID_STEPS = [3, 5, 10, 25];
 
@@ -200,8 +201,94 @@ export default function RoomPage() {
     !iAmTopBidder &&
     !busy;
 
+  const rivals = room.room_participants.filter((p) => p.id !== me?.id);
+  const liveRound = round && round.status === 'active';
+
+  const stage = liveRound ? (
+    round.mystery && round.envelope ? (
+      <MysteryEnvelope
+        envelope={round.envelope}
+        position={round.position_type}
+        seasonYear={round.season_year}
+        eraLabel={round.era_label}
+        secondsLeft={secondsLeft}
+        totalSeconds={room.round_seconds}
+        currentBid={currentBid}
+        topBidderName={
+          room.room_participants.find((p) => p.id === round.current_bid_by)?.display_name ?? null
+        }
+      />
+    ) : (
+      <SilhouetteStage
+        silhouetteUrl={round.player.silhouette_url}
+        position={round.position_type}
+        secondsLeft={secondsLeft}
+        totalSeconds={room.round_seconds}
+        currentBid={currentBid}
+        topBidderName={
+          room.room_participants.find((p) => p.id === round.current_bid_by)?.display_name ?? null
+        }
+        hex={round.myHex?.power ?? null}
+      />
+    )
+  ) : round && round.revealed ? (
+    <RevealCard
+      round={round}
+      winnerName={
+        room.room_participants.find((p) => p.id === round.current_bid_by)?.display_name ?? null
+      }
+      isHost={!!identity?.hostToken}
+      onNext={startRound}
+      busy={busy}
+    />
+  ) : (
+    <Idle
+      isHost={!!identity?.hostToken}
+      onStart={startRound}
+      busy={busy}
+      playersInRoom={room.room_participants.length}
+    />
+  );
+
+  const controls = liveRound ? (
+    <>
+      {round.myHex && <HexNotice power={round.myHex.power} />}
+      {round.tip && <TipNotice tip={round.tip} />}
+      <BidPanel
+        budget={budget}
+        currentBid={currentBid}
+        canBid={canBid}
+        positionFull={positionFull}
+        iAmTopBidder={iAmTopBidder}
+        passesLeft={meParticipant && currentPos && hasPass(meParticipant, currentPos) ? 1 : 0}
+        onBid={placeBid}
+        onPass={pass}
+        busy={busy}
+      />
+    </>
+  ) : null;
+
+  const rail = (
+    <>
+      <RosterRail
+        room={room}
+        meId={me?.id ?? null}
+        topBidderId={liveRound ? round.current_bid_by : null}
+      />
+      <PowerPanel
+        rivals={rivals}
+        budget={budget}
+        effects={state.effects ?? []}
+        meId={me?.id ?? null}
+        onCast={castPower}
+        busy={busy}
+      />
+      {meParticipant && <MyTeam participant={meParticipant} requirements={requirements} />}
+    </>
+  );
+
   return (
-    <div className="min-h-screen px-4 py-5 sm:px-6 lg:px-8">
+    <div className="min-h-screen px-3 py-3 sm:px-6 sm:py-5 lg:px-8">
       <Toasts toasts={toasts} />
       {flipping && <CoinFlip />}
       {showRules && <RulesModal onClose={() => setShowRules(false)} />}
@@ -212,100 +299,119 @@ export default function RoomPage() {
         {room.status === 'finished' ? (
           <FinalStandings room={room} />
         ) : (
-          <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
-            <div className="space-y-5">
-              {round && round.status === 'active' ? (
-                <>
-                  {round.mystery && round.envelope ? (
-                    <MysteryEnvelope
-                      envelope={round.envelope}
-                      position={round.position_type}
-                      seasonYear={round.season_year}
-                      eraLabel={round.era_label}
-                      secondsLeft={secondsLeft}
-                      totalSeconds={room.round_seconds}
-                      currentBid={currentBid}
-                      topBidderName={
-                        room.room_participants.find((p) => p.id === round.current_bid_by)
-                          ?.display_name ?? null
-                      }
-                    />
-                  ) : (
-                    <SilhouetteStage
-                      silhouetteUrl={round.player.silhouette_url}
-                      position={round.position_type}
-                      secondsLeft={secondsLeft}
-                      totalSeconds={room.round_seconds}
-                      currentBid={currentBid}
-                      topBidderName={
-                        room.room_participants.find((p) => p.id === round.current_bid_by)
-                          ?.display_name ?? null
-                      }
-                      hex={round.myHex?.power ?? null}
-                    />
-                  )}
-
-                  {round.myHex && <HexNotice power={round.myHex.power} />}
-                  {round.tip && <TipNotice tip={round.tip} />}
-
-                  <BidPanel
-                    budget={budget}
-                    currentBid={currentBid}
-                    canBid={canBid}
-                    positionFull={positionFull}
-                    iAmTopBidder={iAmTopBidder}
-                    passesLeft={
-                      meParticipant && currentPos && hasPass(meParticipant, currentPos) ? 1 : 0
-                    }
-                    onBid={placeBid}
-                    onPass={pass}
-                    busy={busy}
-                  />
-                </>
-              ) : round && round.revealed ? (
-                <RevealCard
-                  round={round}
-                  winnerName={
-                    room.room_participants.find((p) => p.id === round.current_bid_by)
-                      ?.display_name ?? null
-                  }
-                  isHost={!!identity?.hostToken}
-                  onNext={startRound}
-                  busy={busy}
-                />
-              ) : (
-                <Idle
-                  isHost={!!identity?.hostToken}
-                  onStart={startRound}
-                  busy={busy}
-                  playersInRoom={room.room_participants.length}
-                />
-              )}
-
-              {meParticipant && (
-                <MyTeam participant={meParticipant} requirements={requirements} />
-              )}
+          <>
+            {/* Desktop: the stage takes the height left over so the bid
+                controls stay on screen. Scrolling away from the silhouette to
+                place a bid is fatal in a ten-second round. */}
+            <div className="mt-4 hidden gap-5 lg:grid lg:grid-cols-[minmax(0,1fr)_360px]">
+              <div className="flex flex-col gap-4 lg:h-[calc(100vh-9rem)]">
+                {stage}
+                {controls}
+              </div>
+              <div className="space-y-4 lg:h-[calc(100vh-9rem)] lg:overflow-y-auto lg:pr-1">
+                {rail}
+              </div>
             </div>
 
-            <div className="space-y-5">
-              <RosterRail
+            {/* Mobile: the stage and the controls own the screen; everything
+                else moves behind tabs instead of a two-thousand-pixel scroll. */}
+            <div className="mt-3 lg:hidden">
+              <div className="flex flex-col gap-3">{stage}</div>
+              {controls && <div className="mt-3 space-y-3">{controls}</div>}
+              <MobileTabs
                 room={room}
                 meId={me?.id ?? null}
-                topBidderId={round?.status === 'active' ? round.current_bid_by : null}
-              />
-
-              <PowerPanel
-                rivals={room.room_participants.filter((p) => p.id !== me?.id)}
+                topBidderId={liveRound ? round.current_bid_by : null}
+                rivals={rivals}
                 budget={budget}
                 effects={state.effects ?? []}
-                meId={me?.id ?? null}
                 onCast={castPower}
                 busy={busy}
+                meParticipant={meParticipant}
+                requirements={requirements}
               />
             </div>
-          </div>
+          </>
         )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * On a phone the roster, the powers and your squad add up to more scrolling
+ * than the auction itself. Tabs keep them one tap away without burying the
+ * silhouette.
+ */
+function MobileTabs({
+  room,
+  meId,
+  topBidderId,
+  rivals,
+  budget,
+  effects,
+  onCast,
+  busy,
+  meParticipant,
+  requirements,
+}: {
+  room: Room;
+  meId: string | null;
+  topBidderId: string | null;
+  rivals: Participant[];
+  budget: number;
+  effects: GameState['effects'];
+  onCast: (power: PowerId, targetId: string | null) => void;
+  busy: boolean;
+  meParticipant: Participant | null;
+  requirements: Record<PositionType, number>;
+}) {
+  const [tab, setTab] = useState<'tabla' | 'poderes' | 'equipo'>('tabla');
+
+  const tabs: [typeof tab, string][] = [
+    ['tabla', `Tabla (${room.room_participants.length})`],
+    ['poderes', 'Poderes'],
+    ['equipo', 'Tu equipo'],
+  ];
+
+  return (
+    <div className="mt-4">
+      <div
+        role="tablist"
+        className="panel mb-3 flex gap-1 p-1"
+        aria-label="Información de la sala"
+      >
+        {tabs.map(([id, label]) => (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={tab === id}
+            onClick={() => setTab(id)}
+            className={`min-h-[44px] flex-1 rounded-lg px-2 text-sm font-semibold transition ${
+              tab === id ? 'bg-lime-300 text-emerald-950' : 'text-white/60'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'tabla' && (
+        <RosterRail room={room} meId={meId} topBidderId={topBidderId} showHeading={false} />
+      )}
+      {tab === 'poderes' && (
+        <PowerPanel
+          rivals={rivals}
+          budget={budget}
+          effects={effects}
+          meId={meId}
+          onCast={onCast}
+          busy={busy}
+        />
+      )}
+      {tab === 'equipo' && meParticipant && (
+        <MyTeam participant={meParticipant} requirements={requirements} />
+      )}
     </div>
   );
 }
@@ -447,45 +553,66 @@ function Header({
   const [copied, setCopied] = useState(false);
 
   return (
-    <header className="panel flex flex-wrap items-center justify-between gap-4 px-5 py-4">
-      <div className="flex items-center gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-white/45">Siluetas</p>
-          <h1 className="text-2xl font-black leading-tight">Subasta Futbolera</h1>
+    <header className="panel flex items-center justify-between gap-3 px-3 py-2.5 sm:px-5 sm:py-4">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="min-w-0">
+          <p className="hidden text-xs uppercase tracking-[0.2em] text-white/45 sm:block">
+            Siluetas
+          </p>
+          {/* The full title is a luxury a phone header cannot afford; it wrapped
+              onto three rows and pushed the auction down the page. */}
+          <h1 className="truncate text-lg font-black leading-tight sm:text-2xl">
+            <span className="sm:hidden">Siluetas</span>
+            <span className="hidden sm:inline">Subasta Futbolera</span>
+          </h1>
         </div>
+
         <button
           onClick={() => {
             navigator.clipboard?.writeText(room.code);
             setCopied(true);
             setTimeout(() => setCopied(false), 1600);
           }}
-          className="chip hover:bg-white/10"
-          title="Copiar código"
+          className="chip min-h-[44px] shrink-0 hover:bg-white/10"
+          title="Copiar código de sala"
         >
-          <span className="font-mono text-base tracking-[0.25em] text-lime-300">{room.code}</span>
-          <span className="text-white/50">{copied ? '¡copiado!' : 'copiar'}</span>
+          <span className="font-mono text-sm tracking-[0.2em] text-lime-300 sm:text-base sm:tracking-[0.25em]">
+            {room.code}
+          </span>
+          <span className="hidden text-white/50 sm:inline">{copied ? '¡copiado!' : 'copiar'}</span>
+          <span className="text-white/50 sm:hidden" aria-hidden>
+            {copied ? '✓' : '⧉'}
+          </span>
         </button>
       </div>
 
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onOpenRules}
-          className="btn-ghost px-3 py-1.5 text-sm"
-          title="Ver las reglas"
-        >
-          Reglas
-        </button>
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         {room.current_position && (
-          <span className="chip">
+          <span className="chip hidden sm:inline-flex">
             Ronda {room.round_number} · {POSITION_LABELS[room.current_position as PositionType]}
           </span>
         )}
+
         {me && (
-          <div className="text-right">
-            <p className="text-sm text-white/60">{me.display_name}</p>
-            <p className="text-xl font-bold text-lime-300">{me.remaining_budget} 💰</p>
+          <div className="text-right leading-tight">
+            <p className="hidden text-sm text-white/60 sm:block">{me.display_name}</p>
+            <p className="text-lg font-bold text-lime-300 sm:text-xl">
+              {me.remaining_budget} <span aria-hidden>💰</span>
+            </p>
           </div>
         )}
+
+        <button
+          onClick={onOpenRules}
+          className="btn-ghost grid min-h-[44px] min-w-[44px] place-items-center px-3 text-sm"
+          title="Ver las reglas"
+          aria-label="Ver las reglas"
+        >
+          <span className="hidden sm:inline">Reglas</span>
+          <span className="text-lg sm:hidden" aria-hidden>
+            ?
+          </span>
+        </button>
       </div>
     </header>
   );

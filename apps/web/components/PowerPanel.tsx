@@ -32,28 +32,26 @@ export function PowerPanel({
     );
   }
 
-  const hexedIds = new Set(
-    effects.filter((e) => e.status === 'pending').map((e) => e.target_id)
-  );
+  const hexedIds = new Set(effects.filter((e) => e.status === 'pending').map((e) => e.target_id));
   const castByMe = effects.filter((e) => e.caster_id === meId && e.status !== 'consumed');
 
   return (
-    <div className="panel p-5">
-      <div className="mb-1 flex items-center justify-between">
+    <div className="panel p-4 sm:p-5">
+      <div className="mb-1 flex items-baseline justify-between gap-2">
         <h3 className="font-bold">Poderes</h3>
-        <span className="text-xs text-white/45">salen de tu presupuesto</span>
+        <span className="text-[11px] text-white/40">salen de tu presupuesto</span>
       </div>
-      <p className="mb-4 text-xs text-white/45">
+      <p className="mb-3 text-xs leading-snug text-white/45">
         Se activan en la próxima ronda. Uno por rival a la vez.
       </p>
 
-      <div className="space-y-2">
+      <ul className="space-y-2">
         {POWERS.map((power) => {
           const affordable = power.cost <= budget;
           const open = picked === power.id;
 
           return (
-            <div
+            <li
               key={power.id}
               className={`rounded-xl border transition ${
                 open ? 'border-lime-300/40 bg-lime-300/5' : 'border-white/10 bg-white/[0.03]'
@@ -71,37 +69,36 @@ export function PowerPanel({
                   setPicked(open ? null : power.id);
                 }}
                 disabled={!affordable || busy}
-                className="flex w-full items-center gap-3 px-3 py-2.5 text-left disabled:opacity-35"
+                className="w-full px-3 py-2.5 text-left disabled:opacity-40"
                 aria-expanded={open}
               >
-                <span className="text-xl" aria-hidden>
-                  {power.icon}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold">{power.name}</span>
-                  <span className="block truncate text-xs text-white/45">
-                    {power.description}
+                <span className="flex items-center gap-2">
+                  <span className="text-lg leading-none" aria-hidden>
+                    {power.icon}
+                  </span>
+                  <span className="flex-1 text-sm font-semibold">{power.name}</span>
+                  <span
+                    className={`rounded-md px-1.5 py-0.5 text-xs font-black tabular-nums ${
+                      affordable ? 'bg-lime-300/15 text-lime-300' : 'bg-white/5 text-white/30'
+                    }`}
+                  >
+                    {power.cost}
                   </span>
                 </span>
-                <span
-                  className={`shrink-0 text-sm font-black ${
-                    affordable ? 'text-lime-300' : 'text-white/30'
-                  }`}
-                >
-                  {power.cost}
+                {/* Wraps rather than truncating: a power whose effect you
+                    cannot read is a power nobody will risk buying. */}
+                <span className="mt-1 block text-xs leading-snug text-white/50">
+                  {power.description}
                 </span>
               </button>
 
               {open && !power.selfTargeted && (
                 <div className="animate-rise border-t border-white/10 px-3 py-2.5">
-                  <p className="mb-2 text-xs uppercase tracking-wider text-white/45">
-                    ¿A quién?
-                  </p>
+                  <p className="mb-2 text-[11px] uppercase tracking-wider text-white/45">¿A quién?</p>
                   <div className="flex flex-wrap gap-2">
                     {rivals.map((rival) => {
                       const alreadyHexed = hexedIds.has(rival.id);
-                      const noPass = power.id === 'manotazo' && rival.passes_used >= 1;
-                      const blocked = alreadyHexed || noPass;
+                      const blocked = alreadyHexed;
 
                       return (
                         <button
@@ -111,14 +108,8 @@ export function PowerPanel({
                             setPicked(null);
                           }}
                           disabled={busy || blocked}
-                          title={
-                            alreadyHexed
-                              ? 'Ya tiene un poder esperando'
-                              : noPass
-                                ? 'Ya usó su pase'
-                                : `Tirarle ${power.name}`
-                          }
-                          className="btn-ghost px-3 py-1.5 text-sm disabled:opacity-30"
+                          title={alreadyHexed ? 'Ya tiene un poder esperando' : `Tirarle ${power.name}`}
+                          className="btn-ghost min-h-[44px] px-3 py-2 text-sm disabled:opacity-30"
                         >
                           {rival.display_name}
                           {blocked && ' 🚫'}
@@ -128,10 +119,10 @@ export function PowerPanel({
                   </div>
                 </div>
               )}
-            </div>
+            </li>
           );
         })}
-      </div>
+      </ul>
 
       {castByMe.length > 0 && (
         <p className="mt-3 text-xs text-lime-300/70">

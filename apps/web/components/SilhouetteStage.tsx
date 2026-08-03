@@ -26,7 +26,7 @@ export function SilhouetteStage({
   const circumference = 2 * Math.PI * radius;
 
   return (
-    <section className="panel animate-rise relative overflow-hidden">
+    <section className="panel animate-rise relative flex min-h-0 flex-1 flex-col overflow-hidden">
       {/* Spotlight behind the figure */}
       <div
         aria-hidden
@@ -39,7 +39,7 @@ export function SilhouetteStage({
           {POSITION_LABELS[position]}
         </span>
 
-        <div className="relative grid h-16 w-16 place-items-center">
+        <div className="relative grid h-[72px] w-[72px] place-items-center sm:h-20 sm:w-20">
           <svg className="absolute inset-0 -rotate-90" viewBox="0 0 64 64">
             <circle
               cx="32"
@@ -63,7 +63,7 @@ export function SilhouetteStage({
             />
           </svg>
           <span
-            className={`text-xl font-black tabular-nums ${
+            className={`text-2xl font-black tabular-nums sm:text-3xl ${
               urgent ? 'animate-pulse-ring text-rose-400' : 'text-lime-300'
             }`}
           >
@@ -72,13 +72,13 @@ export function SilhouetteStage({
         </div>
       </div>
 
-      <div className="relative flex min-h-[380px] items-end justify-center px-6 sm:min-h-[460px]">
+      <div className="relative flex min-h-[38vh] flex-1 items-end justify-center px-6 py-2">
         {silhouetteUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={silhouetteUrl}
             alt={`Silueta de un ${POSITION_LABELS[position].toLowerCase()} por identificar`}
-            className="animate-pop max-h-[420px] w-auto object-contain drop-shadow-[0_0_40px_rgba(182,255,59,0.25)]"
+            className="animate-pop h-full max-h-[52vh] w-auto object-contain drop-shadow-[0_0_40px_rgba(182,255,59,0.25)]"
             style={{
               filter:
                 'brightness(0) saturate(100%) invert(97%) sepia(8%) saturate(600%) hue-rotate(40deg)' +
