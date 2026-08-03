@@ -79,21 +79,21 @@ export default function RoomPage() {
   const msLeft = round?.status === 'active' ? new Date(round.ends_at).getTime() - now : 0;
   const secondsLeft = Math.max(0, Math.ceil(msLeft / 1000));
 
-  // Asking to settle is only a nudge: the server refuses while the round still
-  // has time on its own clock, so a device running fast cannot cut the bidding
-  // short for everyone. A small grace period avoids a pointless rejected call.
+  // When our timer runs out we just re-read the room: the state endpoint
+  // settles any round whose time is up, on the server's clock. Asking the
+  // finalize endpoint directly would be the same request with an extra way to
+  // fail — a bid placed at the last instant restarts the clock, so a client
+  // holding the previous deadline would be told, correctly, that it asked too
+  // early. Reading is never wrong, and the poll keeps trying by itself.
   useEffect(() => {
-    if (!round || round.status !== 'active' || msLeft > -250) return;
+    if (!round || round.status !== 'active' || msLeft > -500) return;
     if (finalizedRef.current === round.id) return;
     finalizedRef.current = round.id;
 
-    fetch(`/api/rounds/${round.id}/finalize`, { method: 'POST' })
-      .then(() => refresh())
-      .catch(() => {})
-      // If the server says it is still open, let a later tick try again.
-      .finally(() => {
-        if (round.status === 'active') finalizedRef.current = null;
-      });
+    refresh().finally(() => {
+      // A late bid may have pushed the deadline out; allow another attempt.
+      finalizedRef.current = null;
+    });
   }, [round, msLeft, refresh]);
 
   const act = useCallback(
