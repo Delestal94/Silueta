@@ -20,6 +20,7 @@ export function SealedBidPanel({
   expected,
   positionFull,
   canBid,
+  taxed,
   passesLeft,
   onSeal,
   onPass,
@@ -32,6 +33,8 @@ export function SealedBidPanel({
   expected: number;
   positionFull: boolean;
   canBid: boolean;
+  /** "impuesto" on this player: winning costs double what the envelope says. */
+  taxed: boolean;
   passesLeft: number;
   onSeal: (amount: number) => void;
   onPass: () => void;
@@ -50,7 +53,10 @@ export function SealedBidPanel({
   }, [mine]);
 
   const value = Number(amount);
-  const valid = Number.isInteger(value) && value >= 1 && value <= budget;
+  // Con "impuesto" ganar cuesta el doble, así que el techo real es la mitad
+  // del presupuesto: por encima de eso el servidor rechaza el sobre.
+  const techo = taxed ? Math.floor(budget / 2) : budget;
+  const valid = Number.isInteger(value) && value >= 1 && value <= techo;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,9 +118,24 @@ export function SealedBidPanel({
 
           {amount && !valid && (
             <p className="mt-1 text-xs text-rose-300">
-              {value > budget ? 'No te alcanza el presupuesto.' : 'Poné un número de 1 para arriba.'}
+              {value > techo ? 'No te alcanza el presupuesto.' : 'Poné un número de 1 para arriba.'}
             </p>
           )}
+
+          {/* Escribe el máximo en el campo en vez de mandarlo: a sobre cerrado
+              el número no se puede retirar una vez guardado, así que conviene
+              verlo antes de confirmarlo. */}
+          <button
+            type="button"
+            onClick={() => setAmount(String(techo))}
+            disabled={!canBid || techo < 1}
+            className="mt-2 w-full rounded-xl border-2 border-orange-400/60 bg-orange-500/10 py-2.5 font-black uppercase tracking-wide text-orange-300 transition hover:bg-orange-500/20 disabled:opacity-30"
+          >
+            All in · {techo}
+            {taxed && (
+              <span className="ml-1.5 text-xs font-normal normal-case">(te sale {techo * 2})</span>
+            )}
+          </button>
         </>
       )}
 

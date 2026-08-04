@@ -328,6 +328,7 @@ export default function RoomPage() {
           expected={round.envelopesExpected ?? 0}
           positionFull={positionFull}
           canBid={canBid}
+          taxed={round.myHex?.power === 'impuesto'}
           passesLeft={meParticipant && currentPos && hasPass(meParticipant, currentPos) ? 1 : 0}
           onSeal={sealBid}
           onPass={pass}
@@ -340,6 +341,7 @@ export default function RoomPage() {
         canBid={canBid}
         positionFull={positionFull}
         iAmTopBidder={iAmTopBidder}
+        taxed={round.myHex?.power === 'impuesto'}
         passesLeft={meParticipant && currentPos && hasPass(meParticipant, currentPos) ? 1 : 0}
         onBid={placeBid}
         onPass={pass}
@@ -811,6 +813,7 @@ function BidPanel({
   canBid,
   positionFull,
   iAmTopBidder,
+  taxed,
   passesLeft,
   onBid,
   onPass,
@@ -821,6 +824,8 @@ function BidPanel({
   canBid: boolean;
   positionFull: boolean;
   iAmTopBidder: boolean;
+  /** "impuesto" encima: ganar cuesta el doble de lo que se puja. */
+  taxed: boolean;
   passesLeft: number;
   onBid: (amount: number) => void;
   onPass: () => void;
@@ -829,6 +834,8 @@ function BidPanel({
   let notice: string | null = null;
   if (positionFull) notice = 'Ya completaste esta posición — no podés pujar en esta ronda.';
   else if (iAmTopBidder) notice = 'Vas ganando la puja.';
+
+  const allIn = taxed ? Math.floor(budget / 2) : budget;
 
   return (
     <div className="panel animate-rise p-5">
@@ -865,6 +872,19 @@ function BidPanel({
           );
         })}
       </div>
+
+      {/* Todo lo que se puede poner de verdad. Con "impuesto" encima ganar
+          cuesta el doble, así que jugarse el presupuesto entero sería una puja
+          que el servidor rechaza siempre: el techo real es la mitad. */}
+      <button
+        onClick={() => onBid(allIn)}
+        disabled={!canBid || allIn <= currentBid}
+        title={allIn > currentBid ? `Pujar ${allIn}` : 'No te alcanza para superar la puja'}
+        className="mt-3 w-full rounded-xl border-2 border-orange-400/60 bg-orange-500/10 py-3 font-black uppercase tracking-wide text-orange-300 transition hover:bg-orange-500/20 disabled:opacity-30"
+      >
+        All in · {allIn}
+        {taxed && <span className="ml-1.5 text-xs font-normal normal-case">(te sale {allIn * 2})</span>}
+      </button>
 
       <button
         onClick={onPass}
