@@ -47,59 +47,11 @@ export function Footer() {
         </Column>
       </div>
 
-      <Malvinas />
-
       <div className="mx-auto flex w-full max-w-[1700px] flex-wrap items-center justify-between gap-2 border-t border-white/10 py-5 text-xs text-white/30">
         <p>© {year} Silumatch</p>
         <p>Hecho en Argentina 🇦🇷</p>
       </div>
     </footer>
-  );
-}
-
-/**
- * The bronze frame is a gradient ring rather than a flat border: a single
- * colour reads as a yellow line, while light running from dark to pale and
- * back is what makes a metal edge look like metal.
- *
- * The white background of the artwork is kept on purpose. Keying it out would
- * leave black hand-lettering on a navy footer, which is unreadable — framing it
- * as a print is the honest way to sit a white image on a dark page.
- */
-function Malvinas() {
-  return (
-    <div className="mb-8 flex justify-center">
-      <figure
-        className="rounded-xl p-[6px] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.7)]"
-        style={{
-          // Cuatro paradas y no dos: un marco real recibe la luz de arriba,
-          // la devuelve en el canto y se apaga abajo. Con dos colores queda
-          // una línea amarilla; con esto, metal.
-          background:
-            'linear-gradient(150deg, #5a4312 0%, #d8b45c 22%, #f0dda0 34%, #a8801f 52%, #7a5c18 74%, #cbab55 100%)',
-        }}
-      >
-        {/* Un filo oscuro entre el marco y la lámina. Sin él las dos
-            superficies se tocan y el bronce parece pintado encima. */}
-        <div className="overflow-hidden rounded-[7px] bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.45)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/malvinas.png"
-            alt="Las Malvinas son argentinas"
-            width={360}
-            height={216}
-            loading="lazy"
-            // The file may not be there yet; a broken-image icon in the footer
-            // is worse than no image at all.
-            onError={(e) => {
-              const frame = e.currentTarget.closest('figure');
-              if (frame) frame.style.display = 'none';
-            }}
-            className="block h-auto w-[260px] sm:w-[320px]"
-          />
-        </div>
-      </figure>
-    </div>
   );
 }
 
