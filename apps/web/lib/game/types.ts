@@ -82,6 +82,8 @@ export interface Room {
   round_number: number;
   current_position: PositionType | null;
   round_seconds: number;
+  /** 'open' es la subasta de siempre; 'sealed', a sobre cerrado. */
+  auction_mode: 'open' | 'sealed';
   requirements: Record<PositionType, number>;
   room_participants: Participant[];
 }
@@ -111,6 +113,15 @@ export interface CurrentRound {
   } | null;
   /** Clue this viewer paid for with "soplo". */
   tip: { nationality: string | null; team: string | null } | null;
+
+  /** Sealed-bid round. The fields below only mean anything when this is true. */
+  sealed?: boolean;
+  /** What this viewer put in, and only this viewer. */
+  myEnvelope?: number | null;
+  envelopesIn?: number;
+  envelopesExpected?: number;
+  /** Everybody's envelope — present only once the round has closed. */
+  envelopes?: { participant_id: string; display_name: string; amount: number }[] | null;
 }
 
 export interface PowerEffect {

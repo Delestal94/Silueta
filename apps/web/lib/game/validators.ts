@@ -6,6 +6,7 @@ export const createRoomSchema = z.object({
   roundSeconds: z.number().int().min(5).max(120).default(10),
   genderFilter: z.enum(['men', 'women', 'any']).default('any'),
   pool: z.enum(['famous', 'all']).default('famous'),
+  auctionMode: z.enum(['open', 'sealed']).default('open'),
 });
 
 export const joinRoomSchema = z.object({

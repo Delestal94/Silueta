@@ -21,6 +21,7 @@ export default function Home() {
   const [roundSeconds, setRoundSeconds] = useState(10);
   const [genderFilter, setGenderFilter] = useState<'men' | 'women' | 'any'>('any');
   const [pool, setPool] = useState<'famous' | 'all'>('famous');
+  const [auctionMode, setAuctionMode] = useState<'open' | 'sealed'>('open');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [stuckAt, setStuckAt] = useState<string | null>(null);
@@ -64,6 +65,7 @@ export default function Home() {
           roundSeconds,
           genderFilter,
           pool,
+          auctionMode,
         }),
       });
       const data = await res.json();
@@ -344,6 +346,21 @@ export default function Home() {
                   pool === 'famous'
                     ? 'Sólo el top del ranking de EA — más fáciles de reconocer.'
                     : 'Todo el catálogo, incluidos jugadores menos conocidos.'
+                }
+              />
+
+              <Choice
+                label="Modo de subasta"
+                value={auctionMode}
+                onChange={setAuctionMode}
+                options={[
+                  { value: 'open', label: 'Puja abierta' },
+                  { value: 'sealed', label: 'Sobre cerrado' },
+                ]}
+                hint={
+                  auctionMode === 'open'
+                    ? 'Se ve lo que puja el resto y se puede responder. Cada puja reinicia el reloj.'
+                    : 'Cada uno anota en secreto el máximo que pagaría. Al cerrar se abren todos los sobres y gana el más alto.'
                 }
               />
 

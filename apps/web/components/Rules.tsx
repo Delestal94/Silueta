@@ -78,10 +78,22 @@ export function Rules({
       </Section>
 
       <Section title="Pujar" icon="💰">
+        <p className="mb-2">
+          El que arma la sala elige entre <strong>puja abierta</strong> y{' '}
+          <strong>sobre cerrado</strong>. Las dos comparten todo lo demás: los puestos, la
+          época, los poderes y el pase.
+        </p>
         <ul className="list-disc space-y-1.5 pl-5">
           <li>
-            Cada puja <strong>reinicia el reloj completo</strong>. La subasta se cierra cuando
-            nadie responde, no cuando se acaba un tiempo fijo.
+            <strong>Puja abierta:</strong> se ve lo que puja el resto y cada puja{' '}
+            <strong>reinicia el reloj completo</strong>. La subasta se cierra cuando nadie
+            responde, no cuando se acaba un tiempo fijo.
+          </li>
+          <li>
+            <strong>Sobre cerrado:</strong> cada uno anota en secreto el máximo que pagaría.
+            Nadie ve el número ajeno —sólo cuántos ya pusieron el suyo— y el reloj no se
+            reinicia. Al cerrar se abren todos: gana el más alto y paga exactamente eso. Si dos
+            empatan, gana el que lo puso primero. Podés cambiar tu sobre hasta que cierre.
           </li>
           <li>Tu puja tiene que superar la actual, y no podés pasarte de tu presupuesto.</li>
           <li>Si ya completaste ese puesto, no podés seguir pujando en esa ronda.</li>

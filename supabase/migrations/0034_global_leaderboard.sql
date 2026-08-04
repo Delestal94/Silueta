@@ -11,7 +11,12 @@
 -- Safe to re-run.
 -- ============================================================
 
-create or replace view public.leaderboard as
+-- Se borra antes de crearla. 0039 la reemplaza por una con columnas nuevas, y
+-- `create or replace view` no puede quitar columnas: en una base que ya se pasó
+-- de acá, volver a esta versión fallaba en cada corrida del lote entero.
+drop view if exists public.leaderboard cascade;
+
+create view public.leaderboard as
 with games as (
   select
     rp.display_name,

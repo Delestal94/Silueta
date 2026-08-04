@@ -25,6 +25,7 @@ import { Toasts, useToasts } from '@/components/Toasts';
 import { PowerPanel } from '@/components/PowerPanel';
 import { RulesModal } from '@/components/RulesModal';
 import { useConfirm } from '@/components/ConfirmDialog';
+import { SealedBidPanel, OpenedEnvelopes } from '@/components/SealedBidPanel';
 import { POWER_BY_ID, type PowerId } from '@/lib/game/powers';
 import type { GameState } from '@/lib/game/types';
 
@@ -139,6 +140,14 @@ export default function RoomPage() {
   const placeBid = useCallback(
     (amount: number) => act(`/api/rounds/${round?.id}/bid`, { amount }),
     [act, round?.id]
+  );
+
+  const sealBid = useCallback(
+    async (amount: number) => {
+      const data = await act(`/api/rounds/${round?.id}/seal`, { amount });
+      if (data?.sealed) push(`Sobre guardado: ${data.amount}`, 'success');
+    },
+    [act, round?.id, push]
   );
 
   const pass = useCallback(async () => {
@@ -274,15 +283,26 @@ export default function RoomPage() {
       />
     )
   ) : round && round.revealed ? (
-    <RevealCard
-      round={round}
-      winnerName={
-        room.room_participants.find((p) => p.id === round.current_bid_by)?.display_name ?? null
-      }
-      isHost={!!identity?.hostToken}
-      onNext={startRound}
-      busy={busy}
-    />
+    <>
+      <RevealCard
+        round={round}
+        winnerName={
+          room.room_participants.find((p) => p.id === round.current_bid_by)?.display_name ?? null
+        }
+        isHost={!!identity?.hostToken}
+        onNext={startRound}
+        busy={busy}
+      />
+      {/* Half the point of the mode: seeing what everybody else was willing to
+          pay is the only feedback you get about how far off you were. */}
+      {round.sealed && round.envelopes && (
+        <OpenedEnvelopes
+          envelopes={round.envelopes}
+          winnerId={round.current_bid_by}
+          meId={me?.id ?? null}
+        />
+      )}
+    </>
   ) : (
     <Idle
       isHost={!!identity?.hostToken}
@@ -294,10 +314,26 @@ export default function RoomPage() {
     />
   );
 
+  const sealedMode = room?.auction_mode === 'sealed';
+
   const controls = liveRound ? (
     <>
       {round.myHex && <HexNotice power={round.myHex.power} />}
       {round.tip && <TipNotice tip={round.tip} />}
+      {sealedMode ? (
+        <SealedBidPanel
+          budget={budget}
+          mine={round.myEnvelope ?? null}
+          sealedCount={round.envelopesIn ?? 0}
+          expected={round.envelopesExpected ?? 0}
+          positionFull={positionFull}
+          canBid={canBid}
+          passesLeft={meParticipant && currentPos && hasPass(meParticipant, currentPos) ? 1 : 0}
+          onSeal={sealBid}
+          onPass={pass}
+          busy={busy}
+        />
+      ) : (
       <BidPanel
         budget={budget}
         currentBid={currentBid}
@@ -309,6 +345,7 @@ export default function RoomPage() {
         onPass={pass}
         busy={busy}
       />
+      )}
     </>
   ) : null;
 

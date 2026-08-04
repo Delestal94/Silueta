@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
           round_seconds: input.roundSeconds,
           gender_filter: input.genderFilter,
           pool: input.pool,
+          auction_mode: input.auctionMode,
           status: 'lobby',
         })
         .select()
