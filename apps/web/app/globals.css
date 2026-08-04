@@ -175,6 +175,21 @@ body {
   cursor: image-set(url('/cursor/glove.png') 1x, url('/cursor/glove-2x.png') 2x) 13 0, auto;
 }
 
+/* El preflight de Tailwind trae `button, [role="button"] { cursor: pointer }`,
+   y una declaración directa le gana a lo que el body hereda — así que sobre
+   cualquier botón o enlace volvía la manito del sistema. Se repite acá con
+   `pointer` de reserva, que es lo que corresponde si la imagen no carga. */
+button,
+[role='button'],
+a,
+summary,
+label {
+  cursor: url('/cursor/glove.png') 13 0, pointer;
+  cursor: image-set(url('/cursor/glove.png') 1x, url('/cursor/glove-2x.png') 2x) 13 0, pointer;
+}
+
+/* Después de las anteriores a propósito: con la misma especificidad, gana la
+   última, y apretar tiene que verse siempre. */
 :active {
   cursor: url('/cursor/glove-grab.png') 13 0, auto;
   cursor: image-set(url('/cursor/glove-grab.png') 1x, url('/cursor/glove-grab-2x.png') 2x) 13 0,
@@ -194,7 +209,16 @@ textarea,
    the platform gives us. */
 @media (prefers-reduced-motion: reduce) {
   body,
+  section,
   :active {
     cursor: auto;
+  }
+
+  button,
+  [role='button'],
+  a,
+  summary,
+  label {
+    cursor: pointer;
   }
 }
