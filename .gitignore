@@ -27,3 +27,8 @@ apps/web/e2e/*.png
 # only ever exist while a layout is being tuned.
 *.tsbuildinfo
 apps/web/e2e/_*.mjs
+
+# El JSON de credenciales que descarga Google Cloud trae el client_secret en
+# texto plano. No hace falta en el repo: el secreto vive en el panel de
+# Supabase, no acá.
+client_secret*.json
