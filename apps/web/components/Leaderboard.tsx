@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react';
 
 interface Entry {
+  identity: string;
   display_name: string;
+  /** Signed in with Google, so the row belongs to one person. */
+  verified: boolean;
   games: number;
   wins: number;
   best_score: number;
@@ -54,8 +57,8 @@ export function Leaderboard() {
         <span className="text-xs text-white/40">mejores 20</span>
       </div>
       <p className="mb-4 text-xs leading-snug text-white/45">
-        De todas las partidas terminadas. Se identifica por nombre, así que si dos personas usan
-        el mismo comparten fila.
+        De todas las partidas terminadas. Quien entra con Google tiene su propia fila; los demás
+        se identifican por nombre, así que dos personas con el mismo lo comparten.
       </p>
 
       {/* Four columns, not six: in a 360px sidebar the extra ones were clipped
@@ -75,13 +78,24 @@ export function Leaderboard() {
         <tbody>
           {entries.map((e, i) => (
             <tr
-              key={e.display_name}
+              key={e.identity}
               className={`border-t border-white/[0.07] ${i < 3 ? 'text-white' : 'text-white/70'}`}
             >
               <td className="py-2 pr-2 align-top tabular-nums">{MEDALS[i] ?? i + 1}</td>
               <td className="max-w-[9rem] py-2 pr-3 align-top">
-                <span className="block truncate font-semibold" title={e.display_name}>
-                  {e.display_name}
+                <span className="flex items-center gap-1">
+                  <span className="truncate font-semibold" title={e.display_name}>
+                    {e.display_name}
+                  </span>
+                  {e.verified && (
+                    <span
+                      title="Cuenta de Google: esta fila es de una sola persona"
+                      className="shrink-0 text-orange-400"
+                      aria-label="verificado"
+                    >
+                      ✓
+                    </span>
+                  )}
                 </span>
                 <span className="block text-[11px] text-white/35">
                   {e.games} partida{e.games === 1 ? '' : 's'}

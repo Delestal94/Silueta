@@ -32,7 +32,8 @@ await guest.goto(BASE);
 await guest.getByRole('button', { name: 'Unirme con un código' }).click();
 await guest.getByPlaceholder('ABC123').fill(code);
 await guest.getByPlaceholder('Ej: La Cobra').fill('Cobra');
-await guest.getByRole('button', { name: 'Entrar' }).click();
+// exact: the header's "Entrar con Google" also starts with "Entrar".
+await guest.getByRole('button', { name: 'Entrar', exact: true }).click();
 await guest.waitForURL(/\/room\//, { timeout: 15000 });
 
 // --- Host sees guest appear (realtime)

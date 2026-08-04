@@ -11,7 +11,9 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from('leaderboard')
-      .select('display_name, games, wins, best_score, average_score, best_signing, total_points')
+      .select(
+        'identity, display_name, verified, games, wins, best_score, average_score, best_signing, total_points'
+      )
       .limit(20);
 
     if (error) {

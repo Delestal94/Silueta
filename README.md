@@ -85,6 +85,29 @@ ADMIN_TOKEN=una-clave-larga-al-azar
 de revisión queda inaccesible y nada puede entrar al catálogo. Generala con
 `node -e "console.log(require('crypto').randomBytes(18).toString('base64url'))"`.
 
+### Entrar con Google (opcional)
+
+El juego se puede jugar sin cuenta y así va a seguir: se comparte un código por WhatsApp y
+poner un login delante de eso perdería media mesa. La cuenta compra una sola cosa, una fila
+propia en el ranking, en vez de compartirla con cualquiera que use el mismo nombre.
+
+No hay variables de entorno nuevas: el proveedor se configura del lado de Supabase. Hasta que
+esos tres pasos estén hechos, el botón "Entrar con Google" va a fallar y devolver al jugador
+con `?auth=error` — que es el único efecto, porque todo lo demás sigue andando sin cuenta.
+
+1. **Google Cloud** → *APIs y servicios* → *Credenciales* → crear un **ID de cliente de OAuth**
+   de tipo aplicación web. En *URI de redireccionamiento autorizados* va la de Supabase, que
+   es siempre `https://TU_REF.supabase.co/auth/v1/callback`.
+2. **Supabase** → *Authentication* → *Providers* → **Google**: activarlo y pegar el *Client ID*
+   y el *Client Secret* del paso anterior.
+3. **Supabase** → *Authentication* → *URL Configuration*: en *Site URL* poner la dirección
+   pública, y en *Redirect URLs* agregar `http://localhost:3000/**` y la de producción con
+   `/**`, para que el callback funcione en los dos lados.
+
+Quien entra con Google queda identificado por el id de su cuenta y no por el nombre. El
+`user_id` lo escribe el servidor leyendo la sesión verificada; si viniera en el cuerpo del
+pedido, cualquiera podría anotarse las partidas de otro.
+
 `packages/ingest/.env` (copiá `.env.example`):
 
 ```

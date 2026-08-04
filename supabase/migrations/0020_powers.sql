@@ -25,10 +25,19 @@ create table if not exists public.power_effects (
   created_at      timestamp with time zone default now()
 );
 
-alter table public.power_effects drop constraint if exists power_effects_power_check;
-alter table public.power_effects
-  add constraint power_effects_power_check
-  check (power in ('niebla', 'apagon', 'espejismo', 'impuesto', 'traba', 'manotazo'));
+-- 0029 reemplaza esta restricción por una que admite 'soplo'. En una base que
+-- ya la aplicó, volver a poner la original falla contra filas que hoy son
+-- perfectamente válidas — y como el README pide correr el lote entero, esa
+-- falla aparecía en cada corrida. Si ya se pasó de acá, no se toca.
+do $$
+begin
+  if not exists (select 1 from public.power_effects where power = 'soplo') then
+    alter table public.power_effects drop constraint if exists power_effects_power_check;
+    alter table public.power_effects
+      add constraint power_effects_power_check
+      check (power in ('niebla', 'apagon', 'espejismo', 'impuesto', 'traba', 'manotazo'));
+  end if;
+end $$;
 
 alter table public.power_effects drop constraint if exists power_effects_status_check;
 alter table public.power_effects

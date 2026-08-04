@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { Leaderboard } from '@/components/Leaderboard';
 import { Scoreboard } from '@/components/Scoreboard';
 import { HeroSilhouette } from '@/components/HeroSilhouette';
-import { Logo } from '@/components/Logo';
 import { RulesModal } from '@/components/RulesModal';
 import { Footer } from '@/components/Footer';
+import { Header } from '@/components/Header';
 
 type Mode = 'menu' | 'create' | 'join';
 
@@ -114,6 +114,7 @@ export default function Home() {
   return (
     <main className="min-h-screen px-4 py-8 sm:px-6 sm:py-12">
       {showRules && <RulesModal onClose={() => setShowRules(false)} />}
+      <Header />
       <div
         className={
           focused
@@ -153,12 +154,10 @@ export default function Home() {
                 nothing to look at. */}
             <section className="relative isolate grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,46%)]">
               <div className="relative text-center lg:text-left">
-                {/* The badge carries its own wordmark, so it has to be big
-                    enough to read it. Below ~110px the three lines of type
-                    inside collapse into a smudge. */}
-                <Logo size={112} className="mx-auto lg:mx-0 lg:!h-[150px] lg:!w-[150px]" />
-
-                <h1 className="mt-4 text-[2.6rem] font-black leading-[0.95] tracking-tight sm:text-6xl lg:mt-6 lg:text-7xl">
+                {/* No badge here any more: the header carries it a few pixels
+                    above, and two of the same logo on one screen just reads as
+                    a mistake. */}
+                <h1 className="text-[2.6rem] font-black leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">
                   Adiviná al
                   <br />
                   futbolista

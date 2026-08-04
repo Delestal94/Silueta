@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { errorResponse } from '@/lib/game/http';
+import { currentAccount } from '@/lib/game/session';
 import { createRoomSchema } from '@/lib/game/validators';
 import { generateRoomCode, generateToken } from '@/lib/game/utils';
 
@@ -8,6 +9,7 @@ export async function POST(request: NextRequest) {
   try {
     const input = createRoomSchema.parse(await request.json());
     const supabase = createAdminClient();
+    const account = await currentAccount();
     const hostToken = generateToken();
     const clientToken = generateToken();
 
@@ -44,6 +46,9 @@ export async function POST(request: NextRequest) {
       client_token: clientToken,
       remaining_budget: input.startingBudget,
       is_host: true,
+      // From the verified session, never from the request body — otherwise
+      // anyone could file a game under somebody else's ranking row.
+      user_id: account?.id ?? null,
     });
 
     if (participantError) {

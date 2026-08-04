@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { errorResponse } from '@/lib/game/http';
+import { currentAccount } from '@/lib/game/session';
 import { joinRoomSchema } from '@/lib/game/validators';
 import { generateToken } from '@/lib/game/utils';
 
@@ -14,6 +15,7 @@ export async function POST(
     const { code } = await params;
     const input = joinRoomSchema.parse(await request.json());
     const supabase = createAdminClient();
+    const account = await currentAccount();
 
     const { data: room } = await supabase
       .from('rooms')
@@ -50,6 +52,8 @@ export async function POST(
       client_token: clientToken,
       remaining_budget: room.starting_budget,
       is_host: false,
+      // From the verified session, never from the request body.
+      user_id: account?.id ?? null,
     });
 
     if (error) {
