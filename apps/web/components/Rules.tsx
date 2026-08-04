@@ -41,7 +41,7 @@ export function Rules({
           automáticamente.
         </p>
         <p>
-          De cada jugador ves <strong>sólo su silueta</strong>. Al cerrarse la puja, esa misma
+          De cada jugador ves <strong>sólo su silueta</strong>. Al cerrarse la ronda, esa misma
           figura se llena de color y aparece su nombre.
         </p>
       </Section>
@@ -49,7 +49,7 @@ export function Rules({
       <Section title="La época: el riesgo de verdad" icon="⏳">
         <p>
           Cada ronda sortea además <strong>un momento de la carrera</strong> de ese jugador, y
-          tampoco lo sabés mientras pujás. Podés reconocer la silueta perfectamente y aun así
+          tampoco lo sabés mientras ofertás. Podés reconocer la silueta perfectamente y aun así
           llevarte al jugador equivocado.
         </p>
         <p className="rounded-xl border border-white/10 bg-black/25 px-3 py-2">
@@ -66,7 +66,7 @@ export function Rules({
         </p>
       </Section>
 
-      <Section title="El sobre misterioso" icon="✉️">
+      <Section title="La ronda a ciegas" icon="🫥">
         <p>
           De vez en cuando aparece una ronda <strong>sin silueta para nadie</strong>. A cambio
           ves su nacionalidad, la temporada que se subasta y los títulos que ganó.
@@ -77,7 +77,7 @@ export function Rules({
         </p>
       </Section>
 
-      <Section title="Pujar" icon="💰">
+      <Section title="Ofertar" icon="💰">
         <p className="mb-2">
           El que arma la sala elige entre <strong>puja abierta</strong> y{' '}
           <strong>sobre cerrado</strong>. Las dos comparten todo lo demás: los puestos, la
@@ -95,12 +95,12 @@ export function Rules({
             reinicia. Al cerrar se abren todos: gana el más alto y paga exactamente eso. Si dos
             empatan, gana el que lo puso primero. Podés cambiar tu sobre hasta que cierre.
           </li>
-          <li>Tu puja tiene que superar la actual, y no podés pasarte de tu presupuesto.</li>
-          <li>Si ya completaste ese puesto, no podés seguir pujando en esa ronda.</li>
+          <li>En los dos, nunca podés pasarte de tu presupuesto.</li>
+          <li>Si ya completaste ese puesto, quedás afuera de esa ronda.</li>
           <li>
-            Si <strong>nadie puja</strong>, el jugador se sortea entre todos los que todavía
-            necesitan ese puesto, al precio mínimo. No pujar no te salva: para eso está el
-            pase, y tenés uno solo por puesto.
+            Si <strong>nadie oferta</strong>, el jugador se sortea entre todos los que todavía
+            necesitan ese puesto, al precio mínimo. Quedarte quieto no te salva: para eso está
+            el pase, y tenés uno solo por puesto.
           </li>
         </ul>
       </Section>
@@ -160,9 +160,9 @@ export function Rules({
 
       <Section title="El anfitrión" icon="👑">
         <p>
-          Quien crea la sala elige la configuración: presupuesto, segundos por ronda, si juegan
-          futbolistas masculinos, femeninas o ambos, y si el catálogo se limita a los más
-          famosos o entra completo. Si se va, el rol pasa a otro para que la sala no quede
+          Quien crea la sala elige la configuración: el modo de subasta, el presupuesto, los
+          segundos por ronda, si juegan futbolistas masculinos, femeninas o ambos, y si el
+          catálogo se limita a los más famosos o entra completo. Si se va, el rol pasa a otro para que la sala no quede
           trabada.
         </p>
       </Section>

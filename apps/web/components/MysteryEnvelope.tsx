@@ -47,7 +47,7 @@ export function MysteryEnvelope({
 
       <div className="relative flex items-start justify-between px-5 pt-5">
         <span className="chip border-indigo-300/30 text-indigo-200">
-          ✉️ Sobre misterioso · {POSITION_LABELS[position]}
+          🫥 Ronda a ciegas · {POSITION_LABELS[position]}
         </span>
 
         <div className="relative grid h-16 w-16 place-items-center">

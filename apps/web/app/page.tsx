@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Leaderboard } from '@/components/Leaderboard';
 import { Scoreboard } from '@/components/Scoreboard';
@@ -168,9 +167,9 @@ export default function Home() {
                 </h1>
 
                 <p className="mx-auto mt-4 max-w-md text-white/60 sm:text-lg lg:mx-0 lg:mt-6">
-                  Aparece una silueta y todos pujan sin saber quién es{' '}
+                  Aparece una silueta y todos ofertan sin saber quién es{' '}
                   <em className="not-italic text-white">ni de qué momento de su carrera</em>. El
-                  nombre se revela recién cuando cierra la puja.
+                  nombre se revela recién cuando cierra la ronda.
                 </p>
 
                 <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-center lg:mt-8 lg:justify-start">
@@ -191,11 +190,17 @@ export default function Home() {
                 <p className="mt-5 text-sm text-white/40">
                   Gratis · sin cuenta · de 2 a 12 jugadores
                 </p>
+                {/* Proponer jugadores queda deshabilitado por seguridad: es la
+                    única puerta por la que entra contenido de gente de afuera,
+                    y hasta que la moderación esté cerrada no conviene
+                    anunciarla. La página sigue existiendo para el moderador.
+                    Para volver a habilitarlo hay que reponer el import de Link.
                 <p className="mt-2 text-sm">
                   <Link href="/jugadores" className="text-white/45 underline hover:text-white">
                     ¿Falta un jugador? Proponelo
                   </Link>
                 </p>
+                */}
               </div>
 
               <HeroSilhouette />
@@ -205,7 +210,7 @@ export default function Home() {
             <section className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {(
                 [
-                  ['silueta', 'Sólo la silueta', 'Ni nombre ni club hasta que cierra la puja.'],
+                  ['silueta', 'Sólo la silueta', 'Ni nombre ni club hasta que cierra la ronda.'],
                   ['epoca', 'Y qué época', 'El Maradona del 86 vale 95. El del 96, 86.'],
                   ['poderes', 'Poderes', 'Apagones, espejismos e impuestos para el rival.'],
                   ['trofeo', 'Gana el mejor equipo', 'Cinco fichajes, más puntos, menos gastado.'],
@@ -253,21 +258,21 @@ export default function Home() {
                       </p>
                     </div>
                     <div>
-                      <h3 className="font-bold text-white">La puja reinicia el reloj</h3>
+                      <h3 className="font-bold text-white">Dos formas de ofertar</h3>
                       <p className="mt-1.5 text-white/60">
-                        La subasta se cierra cuando nadie responde, no cuando se acaba un tiempo
-                        fijo. Ganar sobre la hora no alcanza.
+                        A puja abierta ves lo que ofrece el resto y cada puja reinicia el reloj. A
+                        sobre cerrado anotás en secreto tu máximo y todos se abren al final.
                       </p>
                     </div>
                     <div>
                       <h3 className="font-bold text-white">Un pase por puesto</h3>
                       <p className="mt-1.5 text-white/60">
-                        Y si nadie puja, el jugador se sortea igual entre los que todavía lo
-                        necesitan. No pujar no te salva.
+                        Y si nadie oferta, el jugador se sortea igual entre los que todavía lo
+                        necesitan. Quedarte quieto no te salva.
                       </p>
                     </div>
                     <div>
-                      <h3 className="font-bold text-white">El sobre misterioso</h3>
+                      <h3 className="font-bold text-white">La ronda a ciegas</h3>
                       <p className="mt-1.5 text-white/60">
                         De vez en cuando llega una ronda sin silueta para nadie: sólo la
                         nacionalidad, la temporada y los títulos que ganó.
