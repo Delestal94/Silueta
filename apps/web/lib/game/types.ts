@@ -86,6 +86,8 @@ export interface Room {
   auction_mode: 'open' | 'sealed';
   /** Si entran las leyendas retiradas al sorteo de jugadores. */
   include_legends: boolean;
+  gender_filter: 'men' | 'women' | 'any';
+  pool: 'famous' | 'all';
   requirements: Record<PositionType, number>;
   room_participants: Participant[];
 }

@@ -39,8 +39,10 @@ export function RematchPanel({
   const [settings, setSettings] = useState<RematchSettings>({
     startingBudget: room.starting_budget,
     roundSeconds: room.round_seconds,
-    genderFilter: 'any',
-    pool: 'famous',
+    // De la sala, no fijados: si el anfitrión eligió sólo masculino, repetir
+    // partida no tiene por qué devolverle las mujeres sin avisar.
+    genderFilter: room.gender_filter,
+    pool: room.pool,
     auctionMode: room.auction_mode,
     includeLegends: room.include_legends,
   });
