@@ -21,6 +21,7 @@ import { MysteryEnvelope } from '@/components/MysteryEnvelope';
 import { RevealCard } from '@/components/RevealCard';
 import { RosterRail } from '@/components/RosterRail';
 import { FinalStandings } from '@/components/FinalStandings';
+import { RematchPanel, type RematchSettings } from '@/components/RematchPanel';
 import { Toasts, useToasts } from '@/components/Toasts';
 import { PowerPanel } from '@/components/PowerPanel';
 import { RulesModal } from '@/components/RulesModal';
@@ -166,6 +167,14 @@ export default function RoomPage() {
       push(`Listo. Faltan ${data.total - data.ready}.`, 'info');
     }
   }, [act, code, push]);
+
+  const rematch = useCallback(
+    async (settings: RematchSettings) => {
+      const data = await act(`/api/rooms/${code}/rematch`, settings);
+      if (data?.rematch) push('Sala lista para otra partida', 'success');
+    },
+    [act, code, push]
+  );
 
   const leaveRoom = useCallback(async () => {
     const ok = await confirm({
@@ -387,7 +396,17 @@ export default function RoomPage() {
         />
 
         {room.status === 'finished' ? (
-          <FinalStandings room={room} />
+          <>
+            <FinalStandings room={room} />
+            <div className="mx-auto mt-5 max-w-lg">
+              <RematchPanel
+                room={room}
+                isHost={!!identity?.hostToken}
+                onRematch={rematch}
+                busy={busy}
+              />
+            </div>
+          </>
         ) : (
           <>
             {/* Desktop: the stage takes the height left over so the bid

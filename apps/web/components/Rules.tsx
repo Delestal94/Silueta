@@ -158,6 +158,18 @@ export function Rules({
         </p>
       </Section>
 
+      <Section title="Volver a jugar" icon="🔁">
+        <p>
+          Al terminar, el anfitrión puede arrancar otra partida{' '}
+          <strong>en la misma sala</strong>. El código no cambia y nadie tiene que volver a
+          entrar: se borran los equipos, vuelve el presupuesto y listo.
+        </p>
+        <p>
+          Ese es además el único momento en que se puede cambiar la configuración —el modo, el
+          presupuesto, los segundos, el catálogo— porque es cuando ya sabés qué te quedó corto.
+        </p>
+      </Section>
+
       <Section title="El anfitrión" icon="👑">
         <p>
           Quien crea la sala elige la configuración: el modo de subasta, el presupuesto, los
