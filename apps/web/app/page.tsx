@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Rules } from '@/components/Rules';
 import { Leaderboard } from '@/components/Leaderboard';
-import { SilhouetteStrip } from '@/components/SilhouetteStrip';
+import { HeroSilhouette } from '@/components/HeroSilhouette';
 import { Logo } from '@/components/Logo';
+import { RulesModal } from '@/components/RulesModal';
 
 type Mode = 'menu' | 'create' | 'join';
 
@@ -22,6 +22,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [stuckAt, setStuckAt] = useState<string | null>(null);
+  const [showRules, setShowRules] = useState(false);
 
   const enterRoom = (code: string, tokens: { clientToken: string; hostToken?: string }) => {
     try {
@@ -110,6 +111,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen px-4 py-8 sm:px-6 sm:py-12">
+      {showRules && <RulesModal onClose={() => setShowRules(false)} />}
       <div className={`mx-auto w-full ${focused ? 'max-w-md' : 'max-w-6xl'}`}>
 
         {stuckAt && (
@@ -124,59 +126,46 @@ export default function Home() {
           </div>
         )}
 
-        {/* Hero and ranking sit side by side on a wide screen: stacking them
-            left a 576px column adrift in two thousand pixels of nothing. */}
-        <div
-          className={
-            focused ? '' : 'grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)]'
-          }
-        >
-          <div>
-            {/* Hidden once a form is open: leaving it up meant two "Crear
-                sala" buttons on screen at the same time. */}
-            {!focused && (
-            <section className="panel relative isolate overflow-hidden px-6 py-10 text-center lg:py-14">
-              <SilhouetteStrip />
-              <div
-                aria-hidden
-                className="pointer-events-none absolute left-1/2 top-0 h-[460px] w-[460px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
-                style={{
-                  background: 'radial-gradient(circle, rgba(245,130,31,0.24), transparent 65%)',
-                }}
-              />
-              <div className="relative">
-                {/* The badge already carries the wordmark, so repeating it as
-                    a heading said the name twice. The h1 stays for structure
-                    and screen readers. */}
-                <h1 className="sr-only">Silumatch — El juego de adivinar futbolistas</h1>
-                <Logo size={168} className="mx-auto" />
-                <p className="mt-4 text-xs uppercase tracking-[0.3em] text-white/40">
-                  El juego de adivinar · Fútbol &amp; Siluetas
-                </p>
+        {!focused && (
+          <>
+            {/* Split hero: the copy earns the left, the silhouette owns the
+                right. Centring text in a panel gave the widest viewport
+                nothing to look at. */}
+            <section className="relative isolate grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,46%)]">
+              <div className="relative text-center lg:text-left">
+                <Logo size={72} className="mx-auto lg:mx-0 lg:!h-[92px] lg:!w-[92px]" />
 
-                <p className="mx-auto mt-5 max-w-lg text-white/60 sm:text-lg">
-                  Aparece la silueta de un futbolista. Pujás a ciegas, sin saber quién es{' '}
-                  <em className="not-italic text-white/85">ni de qué momento de su carrera</em>. El
+                <h1 className="mt-4 text-[2.6rem] font-black leading-[0.95] tracking-tight sm:text-6xl lg:mt-6 lg:text-7xl">
+                  Adiviná al
+                  <br />
+                  futbolista
+                  <br />
+                  <span className="text-orange-500">a ciegas.</span>
+                </h1>
+
+                <p className="mx-auto mt-4 max-w-md text-white/60 sm:text-lg lg:mx-0 lg:mt-6">
+                  Aparece una silueta y todos pujan sin saber quién es{' '}
+                  <em className="not-italic text-white">ni de qué momento de su carrera</em>. El
                   nombre se revela recién cuando cierra la puja.
                 </p>
 
-                <div className="mx-auto mt-7 flex max-w-md flex-col gap-3 sm:flex-row">
+                <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-center lg:mt-8 lg:justify-start">
                   <button
                     onClick={() => setMode('create')}
-                    className="btn-primary flex-1 py-3 text-lg"
+                    className="btn-primary px-8 py-3 text-lg"
                   >
                     Crear sala
                   </button>
                   <button
                     onClick={() => setMode('join')}
-                    className="btn-ghost flex-1 py-3 text-lg"
+                    className="btn-ghost px-8 py-3 text-lg"
                   >
                     Unirme con un código
                   </button>
                 </div>
 
-                <p className="mt-5 text-xs text-white/40">
-                  1 arquero · 2 defensas · 1 mediocampista · 1 delantero
+                <p className="mt-5 text-sm text-white/40">
+                  Gratis · sin cuenta · de 2 a 12 jugadores
                 </p>
                 <p className="mt-2 text-sm">
                   <Link href="/jugadores" className="text-white/45 underline hover:text-white">
@@ -184,36 +173,66 @@ export default function Home() {
                   </Link>
                 </p>
               </div>
+
+              <HeroSilhouette />
             </section>
-            )}
 
-            {!focused && (
-              <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                {(
-                  [
-                    ['🕵️', 'Adiviná a ciegas', 'Sólo ves la silueta. El nombre aparece al cerrar la puja.'],
-                    ['⏳', 'Y de qué época', 'Cada ronda sortea un momento de su carrera. No es lo mismo el 86 que el 96.'],
-                    ['🪄', 'Saboteá al rival', 'Gastá presupuesto en poderes: apagones, espejismos, impuestos.'],
-                  ] as [string, string, string][]
-                ).map(([icon, title, text]) => (
-                  <div key={title} className="panel p-5 text-left">
-                    <span className="text-2xl" aria-hidden>
-                      {icon}
-                    </span>
-                    <h3 className="mt-2 font-bold">{title}</h3>
-                    <p className="mt-1 text-sm leading-snug text-white/55">{text}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+            {/* Four beats instead of nine hundred pixels of documentation. */}
+            <section className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {(
+                [
+                  ['🕵️', 'Sólo la silueta', 'Ni nombre ni club hasta que cierra la puja.'],
+                  ['⏳', 'Y qué época', 'El Maradona del 86 vale 95. El del 96, 86.'],
+                  ['🪄', 'Poderes', 'Apagones, espejismos e impuestos para el rival.'],
+                  ['🏆', 'Gana el mejor equipo', 'Cinco fichajes, más puntos, menos gastado.'],
+                ] as [string, string, string][]
+              ).map(([icon, title, text]) => (
+                <div
+                  key={title}
+                  className="panel border-t-2 border-t-orange-500/50 p-5 transition hover:bg-white/[0.06]"
+                >
+                  <span className="text-2xl" aria-hidden>
+                    {icon}
+                  </span>
+                  <h3 className="mt-2.5 font-bold">{title}</h3>
+                  <p className="mt-1 text-sm leading-snug text-white/55">{text}</p>
+                </div>
+              ))}
+            </section>
 
-          {!focused && (
-            <div className="lg:sticky lg:top-8">
+            <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
               <Leaderboard />
+
+              <section className="panel relative overflow-hidden p-6 sm:p-8">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full blur-3xl"
+                  style={{
+                    background: 'radial-gradient(circle, rgba(245,130,31,0.22), transparent 65%)',
+                  }}
+                />
+                <div className="relative">
+                  <h2 className="text-2xl font-black">
+                    ¿Cómo se <span className="text-orange-500">juega</span>?
+                  </h2>
+                  <p className="mt-3 max-w-prose text-white/60">
+                    Las rondas van por puesto. Cada puja reinicia el reloj, así que la subasta se
+                    cierra cuando nadie responde. Tenés un pase por puesto, y si nadie puja el
+                    jugador se sortea igual entre los que lo necesitan.
+                  </p>
+                  <p className="mt-3 max-w-prose text-white/60">
+                    De vez en cuando llega un <strong className="text-white">sobre misterioso</strong>:
+                    sin silueta para nadie, sólo la nacionalidad, la temporada y los títulos que ganó.
+                  </p>
+
+                  <button onClick={() => setShowRules(true)} className="btn-ghost mt-6">
+                    Ver las reglas completas
+                  </button>
+                </div>
+              </section>
             </div>
-          )}
-        </div>
+          </>
+        )}
 
         <div className={focused ? 'panel p-6' : 'hidden'}>
 
@@ -331,14 +350,6 @@ export default function Home() {
         </div>
 
 
-        {!focused && (
-          <section className="panel mt-6 p-6 sm:p-8">
-            <h2 className="mb-6 text-center text-2xl font-black">Cómo se juega</h2>
-            {/* Two columns on a wide screen: one long ribbon of text was the
-                least readable shape for the widest viewport. */}
-            <Rules columns />
-          </section>
-        )}
       </div>
     </main>
   );
