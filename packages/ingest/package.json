@@ -16,7 +16,8 @@
     "submissions": "tsx --env-file-if-exists=.env src/process-submissions.ts",
     "purge-history": "tsx --env-file-if-exists=.env src/purge-history.ts",
     "colours": "tsx --env-file-if-exists=.env src/mirror-renders.ts",
-    "legends": "tsx --env-file-if-exists=.env src/ingest-legends.ts"
+    "legends": "tsx --env-file-if-exists=.env src/ingest-legends.ts",
+    "icons": "tsx src/make-icons.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
