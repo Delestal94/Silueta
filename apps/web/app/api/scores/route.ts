@@ -160,14 +160,15 @@ function label(date: string, base: string): { title: string; subtitle: string } 
   return { title: weekday[0].toUpperCase() + weekday.slice(1), subtitle };
 }
 
-async function fetchDay(date: string, query = `l=${LEAGUE}`): Promise<Event[]> {
+async function fetchDay(date: string, query = `l=${LEAGUE}`, revalidate = 60): Promise<Event[]> {
   try {
     const res = await fetch(`${API}/eventsday.php?d=${date}&${query}`, {
       headers: { 'User-Agent': 'SilumatchGame/1.0' },
       signal: AbortSignal.timeout(9000),
       // The upstream free tier rate-limits hard, so a short shared cache is
-      // what keeps a busy landing page from exhausting it.
-      next: { revalidate: 60 },
+      // what keeps a busy landing page from exhausting it. It is shared, so
+      // the cost is fixed per interval no matter how many people are looking.
+      next: { revalidate },
     });
     if (!res.ok) return [];
     const body = await res.text();
@@ -192,8 +193,11 @@ export async function GET() {
     const [live, ...league] = await Promise.all([
       // The league-filtered day endpoint answers with a stale status — it was
       // still reporting "not started" for matches already in the first half.
-      // The sport-wide one is fresh, so it supplies the status.
-      fetchDay(base, 's=Soccer'),
+      // The sport-wide one is fresh, so it supplies the status and, while a
+      // match is running, the score too. It is the only thing here that
+      // changes minute to minute, so it is the only one worth asking twice as
+      // often; fixtures and finished results do not move.
+      fetchDay(base, 's=Soccer', 30),
       ...utcDays.map((d) => fetchDay(d)),
     ]);
 
@@ -243,7 +247,16 @@ export async function GET() {
 
     return NextResponse.json(
       { league: league_name, season, days },
-      { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' } }
+      {
+        // max-age=0 keeps this out of the browser's own cache: with max-age=60
+        // and a 60s poll the client kept answering itself with the copy it
+        // already had instead of going to the network. The shared CDN cache is
+        // what protects the upstream quota, and 30s there is the freshness a
+        // panel labelled "en vivo" has to earn.
+        headers: {
+          'Cache-Control': 'public, max-age=0, s-maxage=30, stale-while-revalidate=120',
+        },
+      }
     );
   } catch (error) {
     return errorResponse('GET /api/scores', error);

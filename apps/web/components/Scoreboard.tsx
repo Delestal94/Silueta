@@ -61,15 +61,27 @@ export function Scoreboard() {
 
   useEffect(() => {
     const load = () =>
-      fetch('/api/scores')
+      // no-store, or the browser serves its own cached copy back and the poll
+      // silently does nothing. The CDN behind this is what keeps the upstream
+      // from being hit once per viewer.
+      fetch('/api/scores', { cache: 'no-store' })
         .then((r) => (r.ok ? r.json() : { days: [] }))
         .then((d) => setFeed(d))
         .catch(() => setFeed({ league: null, season: null, days: [] }));
 
     load();
     // A live score that never updates is worse than none.
-    const t = setInterval(load, 60_000);
-    return () => clearInterval(t);
+    const t = setInterval(load, 30_000);
+
+    // Coming back to the tab after a while should not show a stale score for
+    // another half minute.
+    const wake = () => document.visibilityState === 'visible' && load();
+    document.addEventListener('visibilitychange', wake);
+
+    return () => {
+      clearInterval(t);
+      document.removeEventListener('visibilitychange', wake);
+    };
   }, []);
 
   // Nothing to show is not an error state; the rail just stays out of the way.
