@@ -200,9 +200,9 @@ export default function Home() {
               ))}
             </section>
 
-            <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
-              <Leaderboard />
-
+            {/* Rules take the width; the ranking is a sidebar, so it sits on
+                the right where a sidebar belongs. */}
+            <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
               <section className="panel relative overflow-hidden p-6 sm:p-8">
                 <div
                   aria-hidden
@@ -212,25 +212,50 @@ export default function Home() {
                   }}
                 />
                 <div className="relative">
-                  <h2 className="text-2xl font-black">
+                  <h2 className="text-2xl font-black sm:text-3xl">
                     ¿Cómo se <span className="text-orange-500">juega</span>?
                   </h2>
-                  <p className="mt-3 max-w-prose text-white/60">
-                    Las rondas van por puesto. Cada puja reinicia el reloj, así que la subasta se
-                    cierra cuando nadie responde. Tenés un pase por puesto, y si nadie puja el
-                    jugador se sortea igual entre los que lo necesitan.
-                  </p>
-                  <p className="mt-3 max-w-prose text-white/60">
-                    De vez en cuando llega un <strong className="text-white">sobre misterioso</strong>:
-                    sin silueta para nadie, sólo la nacionalidad, la temporada y los títulos que ganó.
-                  </p>
 
-                  <button onClick={() => setShowRules(true)} className="btn-ghost mt-6">
+                  <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                    <div>
+                      <h3 className="font-bold text-white">Las rondas van por puesto</h3>
+                      <p className="mt-1.5 text-white/60">
+                        Primero todos los arqueros, después los defensas, y así. Cuando nadie
+                        necesita más de un puesto, se pasa al siguiente solo.
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-white">La puja reinicia el reloj</h3>
+                      <p className="mt-1.5 text-white/60">
+                        La subasta se cierra cuando nadie responde, no cuando se acaba un tiempo
+                        fijo. Ganar sobre la hora no alcanza.
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-white">Un pase por puesto</h3>
+                      <p className="mt-1.5 text-white/60">
+                        Y si nadie puja, el jugador se sortea igual entre los que todavía lo
+                        necesitan. No pujar no te salva.
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-white">El sobre misterioso</h3>
+                      <p className="mt-1.5 text-white/60">
+                        De vez en cuando llega una ronda sin silueta para nadie: sólo la
+                        nacionalidad, la temporada y los títulos que ganó.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button onClick={() => setShowRules(true)} className="btn-ghost mt-7">
                     Ver las reglas completas
                   </button>
                 </div>
               </section>
+
+              <Leaderboard />
             </div>
+
           </>
         )}
 
