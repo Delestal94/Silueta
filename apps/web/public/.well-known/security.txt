@@ -1,0 +1,10 @@
+# Si encontraste un problema de seguridad en Silumatch, escribinos antes de
+# publicarlo. Es un proyecto chico y sin fines comerciales: no hay programa de
+# recompensas, pero sí quien lea y arregle.
+#
+# https://datatracker.ietf.org/doc/html/rfc9116
+
+Contact: mailto:delestal.miguelignacio@gmail.com
+Expires: 2027-08-04T00:00:00.000Z
+Preferred-Languages: es, en
+Canonical: https://silumatch.vercel.app/.well-known/security.txt
