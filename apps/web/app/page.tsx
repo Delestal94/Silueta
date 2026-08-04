@@ -8,6 +8,7 @@ import { Scoreboard } from '@/components/Scoreboard';
 import { HeroSilhouette } from '@/components/HeroSilhouette';
 import { Logo } from '@/components/Logo';
 import { RulesModal } from '@/components/RulesModal';
+import { Footer } from '@/components/Footer';
 
 type Mode = 'menu' | 'create' | 'join';
 
@@ -404,6 +405,10 @@ export default function Home() {
           </aside>
         )}
       </div>
+
+      {/* Not while a form has the screen: the footer belongs to the landing
+          page, not to the two fields you are filling in. */}
+      {!focused && <Footer />}
     </main>
   );
 }
