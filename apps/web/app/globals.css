@@ -162,3 +162,39 @@ body::before {
     animation: none;
   }
 }
+
+/* --- Puntero propio ------------------------------------------------------ */
+
+/* Two declarations, not one: browsers that do not know image-set() drop the
+   second and keep the first, which is the plain 1x file. The hotspot sits on
+   the fingertips, and both states share it — the fist is drawn at a different
+   angle, so giving each its own would move the click a few pixels from where
+   the user aimed. */
+body {
+  cursor: url('/cursor/glove.png') 13 0, auto;
+  cursor: image-set(url('/cursor/glove.png') 1x, url('/cursor/glove-2x.png') 2x) 13 0, auto;
+}
+
+:active {
+  cursor: url('/cursor/glove-grab.png') 13 0, auto;
+  cursor: image-set(url('/cursor/glove-grab.png') 1x, url('/cursor/glove-grab-2x.png') 2x) 13 0,
+    auto;
+}
+
+/* Typing is the one place the glove gets in the way: it hides the caret and
+   the text under it, and there is nothing to catch. */
+input,
+textarea,
+[contenteditable] {
+  cursor: text;
+}
+
+/* A 40px glove is heavier than a system arrow. Anyone who has asked the OS to
+   calm animations down is unlikely to want it, and it is the closest signal
+   the platform gives us. */
+@media (prefers-reduced-motion: reduce) {
+  body,
+  :active {
+    cursor: auto;
+  }
+}
