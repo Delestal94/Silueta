@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Leaderboard } from '@/components/Leaderboard';
+import { Scoreboard } from '@/components/Scoreboard';
 import { HeroSilhouette } from '@/components/HeroSilhouette';
 import { Logo } from '@/components/Logo';
 import { RulesModal } from '@/components/RulesModal';
@@ -116,12 +117,21 @@ export default function Home() {
         className={
           focused
             ? 'mx-auto w-full max-w-md'
-            : // The rail lives at the far right of the viewport; a centred
+            : // The rails live at the far edges of the viewport; a centred
               // 1152px container left a third of a wide monitor empty beside it.
-              'mx-auto w-full max-w-[1700px] xl:grid xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start xl:gap-8'
+              // Flex below xl rather than plain block, because `order` only
+              // applies to flex and grid children — as a block the scoreboard
+              // sat first in the DOM and pushed the headline off a phone screen.
+              'mx-auto flex w-full max-w-[1700px] flex-col xl:grid xl:grid-cols-[300px_minmax(0,1fr)_340px] xl:items-start xl:gap-6'
         }
       >
-        <div className="min-w-0">
+        {!focused && (
+          <aside className="order-2 mt-6 xl:order-none xl:sticky xl:top-8 xl:mt-0">
+            <Scoreboard />
+          </aside>
+        )}
+
+        <div className="order-1 min-w-0 xl:order-none">
 
         {stuckAt && (
           <div className="panel animate-rise mb-4 border-orange-400/30 p-4 text-center">
@@ -142,7 +152,10 @@ export default function Home() {
                 nothing to look at. */}
             <section className="relative isolate grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,46%)]">
               <div className="relative text-center lg:text-left">
-                <Logo size={72} className="mx-auto lg:mx-0 lg:!h-[92px] lg:!w-[92px]" />
+                {/* The badge carries its own wordmark, so it has to be big
+                    enough to read it. Below ~110px the three lines of type
+                    inside collapse into a smudge. */}
+                <Logo size={112} className="mx-auto lg:mx-0 lg:!h-[150px] lg:!w-[150px]" />
 
                 <h1 className="mt-4 text-[2.6rem] font-black leading-[0.95] tracking-tight sm:text-6xl lg:mt-6 lg:text-7xl">
                   Adiviná al
@@ -190,19 +203,25 @@ export default function Home() {
             <section className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {(
                 [
-                  ['🕵️', 'Sólo la silueta', 'Ni nombre ni club hasta que cierra la puja.'],
-                  ['⏳', 'Y qué época', 'El Maradona del 86 vale 95. El del 96, 86.'],
-                  ['🪄', 'Poderes', 'Apagones, espejismos e impuestos para el rival.'],
-                  ['🏆', 'Gana el mejor equipo', 'Cinco fichajes, más puntos, menos gastado.'],
+                  ['silueta', 'Sólo la silueta', 'Ni nombre ni club hasta que cierra la puja.'],
+                  ['epoca', 'Y qué época', 'El Maradona del 86 vale 95. El del 96, 86.'],
+                  ['poderes', 'Poderes', 'Apagones, espejismos e impuestos para el rival.'],
+                  ['trofeo', 'Gana el mejor equipo', 'Cinco fichajes, más puntos, menos gastado.'],
                 ] as [string, string, string][]
               ).map(([icon, title, text]) => (
                 <div
                   key={title}
                   className="panel border-t-2 border-t-orange-500/50 p-5 transition hover:bg-white/[0.06]"
                 >
-                  <span className="text-2xl" aria-hidden>
-                    {icon}
-                  </span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/icons/${icon}.png`}
+                    alt=""
+                    width={44}
+                    height={44}
+                    loading="lazy"
+                    className="h-11 w-11"
+                  />
                   <h3 className="mt-2.5 font-bold">{title}</h3>
                   <p className="mt-1 text-sm leading-snug text-white/55">{text}</p>
                 </div>
@@ -380,7 +399,7 @@ export default function Home() {
         </div>
 
         {!focused && (
-          <aside className="mt-6 xl:sticky xl:top-8 xl:mt-0">
+          <aside className="order-3 mt-6 xl:order-none xl:sticky xl:top-8 xl:mt-0">
             <Leaderboard />
           </aside>
         )}

@@ -22,3 +22,8 @@ legacy/
 
 # Playwright screenshots
 apps/web/e2e/*.png
+
+# Incremental typecheck cache, and the throwaway screenshot harnesses that
+# only ever exist while a layout is being tuned.
+*.tsbuildinfo
+apps/web/e2e/_*.mjs

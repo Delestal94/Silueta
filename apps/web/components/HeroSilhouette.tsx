@@ -38,7 +38,10 @@ export function HeroSilhouette() {
   }, [urls]);
 
   return (
-    <div className="relative flex min-h-[260px] items-center justify-center sm:min-h-[420px] lg:min-h-[520px]">
+    // The glow below is a 420px box on what can be a 390px screen, which gave
+    // the phone 15px of sideways scroll. Its gradient is already transparent
+    // well before the box edge, so clipping costs nothing visually.
+    <div className="relative flex min-h-[260px] items-center justify-center overflow-hidden sm:min-h-[420px] lg:min-h-[520px]">
       <div
         aria-hidden
         className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl sm:h-[560px] sm:w-[560px]"

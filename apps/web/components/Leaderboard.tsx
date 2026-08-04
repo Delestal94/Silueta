@@ -61,11 +61,10 @@ export function Leaderboard() {
       {/* Four columns, not six: in a 360px sidebar the extra ones were clipped
           off the right edge. The averages ride under the figures they
           qualify instead of claiming columns of their own. */}
-      {/* Twenty two-line rows stand far taller than anything placed beside
-          them, so the tail scrolls instead of dragging the layout down. */}
-      <div className="max-h-[420px] overflow-y-auto pr-1">
-        <table className="w-full border-collapse text-sm">
-          <thead className="sticky top-0 bg-[#131f38]">
+      {/* No inner scroll: a scrollbar inside a panel is worse than a longer
+          panel, and the rail has the height to spare. */}
+      <table className="w-full border-collapse text-sm">
+          <thead>
             <tr className="text-left text-[11px] uppercase tracking-wider text-white/40">
             <th className="pb-2 pr-2 font-medium">#</th>
             <th className="pb-2 pr-3 font-medium">Jugador</th>
@@ -99,7 +98,6 @@ export function Leaderboard() {
           ))}
         </tbody>
         </table>
-      </div>
     </section>
   );
 }
