@@ -7,8 +7,9 @@ import { useEffect, useState } from 'react';
  *
  * The previous landing scattered seven of them at 13% opacity behind the copy,
  * where they read as smudges rather than as the game. The silhouette is the
- * only genuinely striking thing this product has; it belongs at full contrast,
- * at size, with the question the game actually asks written under it.
+ * only genuinely striking thing this product has; it belongs at full contrast
+ * and at size, on its own — the headline beside it already says what the game
+ * is, so a caption under the figure only repeated it.
  */
 export function HeroSilhouette() {
   const [urls, setUrls] = useState<string[]>([]);
@@ -38,13 +39,15 @@ export function HeroSilhouette() {
   }, [urls]);
 
   return (
-    // The glow below is a 420px box on what can be a 390px screen, which gave
-    // the phone 15px of sideways scroll. Its gradient is already transparent
-    // well before the box edge, so clipping costs nothing visually.
-    <div className="relative flex min-h-[260px] items-center justify-center overflow-hidden sm:min-h-[420px] lg:min-h-[520px]">
+    <div className="relative flex min-h-[260px] items-center justify-center sm:min-h-[420px] lg:min-h-[520px]">
+      {/* The glow is capped at the container width rather than clipped by it.
+          A fixed 420px box overflowed a 390px phone, and hiding the overflow
+          traded the sideways scroll for a visible rectangular edge across the
+          blur — the blur reaches the box corners, so there was nothing safe to
+          cut. Capping the width means there is no overflow to hide. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl sm:h-[560px] sm:w-[560px]"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-full max-w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl sm:h-[560px] sm:max-w-[560px]"
         style={{ background: 'radial-gradient(circle, rgba(245,130,31,0.35), transparent 62%)' }}
       />
 
@@ -62,10 +65,6 @@ export function HeroSilhouette() {
           }}
         />
       )}
-
-      <span className="absolute bottom-0 rounded-full border border-orange-400/30 bg-black/40 px-4 py-1.5 text-sm font-semibold text-orange-300 backdrop-blur">
-        ¿Quién es?
-      </span>
     </div>
   );
 }
