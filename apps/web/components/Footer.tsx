@@ -25,7 +25,7 @@ export function Footer() {
 
         <Column title="El juego">
           <FooterLink href="/">Crear una sala</FooterLink>
-          <FooterLink href="/jugadores">Proponer un jugador</FooterLink>
+          {/* Proponer jugadores está deshabilitado por seguridad; ver page.tsx. */}
         </Column>
 
         <Column title="Los datos">
