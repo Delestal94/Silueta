@@ -24,6 +24,7 @@ import { FinalStandings } from '@/components/FinalStandings';
 import { Toasts, useToasts } from '@/components/Toasts';
 import { PowerPanel } from '@/components/PowerPanel';
 import { RulesModal } from '@/components/RulesModal';
+import { useConfirm } from '@/components/ConfirmDialog';
 import { POWER_BY_ID, type PowerId } from '@/lib/game/powers';
 import type { GameState } from '@/lib/game/types';
 
@@ -56,6 +57,7 @@ export default function RoomPage() {
     identity?.clientToken ?? null
   );
   const { toasts, push } = useToasts();
+  const { confirm, dialog } = useConfirm();
 
   // Ticks on the server's clock, not this device's.
   const [now, setNow] = useState(() => serverNow());
@@ -157,21 +159,36 @@ export default function RoomPage() {
   }, [act, code, push]);
 
   const leaveRoom = useCallback(async () => {
-    if (!confirm('¿Salir de la sala? Perdés los jugadores que compraste.')) return;
+    const ok = await confirm({
+      title: '¿Salir de la sala?',
+      body: 'Perdés los jugadores que compraste y no podés volver a la misma partida.',
+      confirm: 'Salir',
+      cancel: 'Quedarme',
+      danger: true,
+    });
+    if (!ok) return;
+
     const data = await act(`/api/rooms/${code}/members`, { action: 'leave' });
     if (data) {
       localStorage.removeItem(`room_${code}`);
       window.location.href = '/';
     }
-  }, [act, code]);
+  }, [act, code, confirm]);
 
   const kick = useCallback(
     async (targetId: string, name: string) => {
-      if (!confirm(`¿Echar a ${name} de la sala?`)) return;
+      const ok = await confirm({
+        title: `¿Echar a ${name}?`,
+        body: 'Pierde su equipo y la subasta sigue sin esa persona.',
+        confirm: 'Echar',
+        danger: true,
+      });
+      if (!ok) return;
+
       const data = await act(`/api/rooms/${code}/members`, { action: 'kick', targetId });
       if (data) push(`${name} salió de la sala`, 'info');
     },
-    [act, code, push]
+    [act, code, push, confirm]
   );
 
   const castPower = useCallback(
@@ -320,6 +337,7 @@ export default function RoomPage() {
       <Toasts toasts={toasts} />
       {flipping && <CoinFlip />}
       {showRules && <RulesModal onClose={() => setShowRules(false)} />}
+      {dialog}
 
       <div className="mx-auto max-w-7xl">
         <Header
