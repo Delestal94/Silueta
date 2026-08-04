@@ -34,6 +34,34 @@ export function Header() {
 
     getSupabaseClient()
       .then(async (supabase) => {
+        // Un código de Google que aterrizó donde no debía.
+        //
+        // El flujo pide volver a /auth/callback, que lo canjea en el servidor.
+        // Si esa URL no está en la lista de permitidas de Supabase, Supabase
+        // descarta la ruta y devuelve al visitante a la Site URL con el código
+        // colgando en la query — la sesión nunca se completa y el botón sigue
+        // diciendo "Entrar con Google" sin explicar nada.
+        //
+        // El canje también se puede hacer acá: el verificador PKCE vive en una
+        // cookie de este navegador, así que el código sirve igual. Arreglar la
+        // configuración es lo correcto, pero un login que depende de que una
+        // lista esté bien escrita se rompe en silencio, y esto no.
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+
+        if (code) {
+          await supabase.auth.exchangeCodeForSession(code).catch(() => {});
+          // Fuera de la URL: recargar reintentaría un código ya gastado, y
+          // además no es algo que uno quiera compartir por copiar y pegar.
+          params.delete('code');
+          const rest = params.toString();
+          window.history.replaceState(
+            {},
+            '',
+            window.location.pathname + (rest ? `?${rest}` : '')
+          );
+        }
+
         const read = async () => {
           const { data } = await supabase.auth.getUser();
           const u = data.user;
