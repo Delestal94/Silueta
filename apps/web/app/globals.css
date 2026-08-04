@@ -2,42 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Silumatch: navy and orange, taken from the badge. */
 :root {
-  --pitch-deep: #04140d;
-  --pitch: #072418;
+  --navy-deep: #0b1324;
+  --navy: #14203a;
+  --navy-soft: #1d2c4d;
+  --flame: #f5821f;
+  --flame-bright: #ff9d3d;
 }
 
 html,
 body {
-  height: 100%;
+  /* height:100% clipped the painted area to one screen, so anything below the
+     fold sat on bare canvas. */
+  min-height: 100%;
+}
+
+/* Painted on the root element: it always covers the whole canvas, however
+   long the document turns out to be. */
+html {
+  background:
+    radial-gradient(1100px 650px at 50% -12%, rgba(245, 130, 31, 0.16), transparent 62%),
+    radial-gradient(900px 600px at 85% 105%, rgba(60, 120, 255, 0.1), transparent 60%),
+    linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
+  background-attachment: fixed;
 }
 
 body {
-  background:
-    radial-gradient(1200px 700px at 50% -10%, rgba(182, 255, 59, 0.13), transparent 60%),
-    radial-gradient(900px 600px at 12% 110%, rgba(0, 200, 255, 0.08), transparent 60%),
-    linear-gradient(180deg, var(--pitch) 0%, var(--pitch-deep) 100%);
-  background-attachment: fixed;
-  color: #e9fbe9;
+  color: #e8eefc;
   font-feature-settings: 'tnum' 1;
 }
 
-/* Faint pitch stripes so the background reads as a stadium, not a flat panel. */
+/* Faint floodlight streaks, echoing the badge. */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
   background: repeating-linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.018) 0 64px,
-    transparent 64px 128px
+    100deg,
+    rgba(255, 255, 255, 0.014) 0 2px,
+    transparent 2px 90px
   );
 }
 
 @layer components {
   .panel {
-    @apply rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-xl;
+    @apply rounded-2xl border border-white/10 bg-white/[0.035] backdrop-blur-xl;
   }
 
   .btn {
@@ -46,8 +57,9 @@ body::before {
   }
 
   .btn-primary {
-    @apply btn bg-lime-300 text-emerald-950 hover:bg-lime-200
-           shadow-[0_0_28px_-6px_rgba(182,255,59,0.7)];
+    @apply btn text-white hover:brightness-110
+           shadow-[0_8px_30px_-8px_rgba(245,130,31,0.8)];
+    background: linear-gradient(135deg, var(--flame-bright), var(--flame));
   }
 
   .btn-ghost {
@@ -56,8 +68,8 @@ body::before {
 
   .field {
     @apply w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-white
-           placeholder-white/35 outline-none transition focus:border-lime-300/70
-           focus:ring-2 focus:ring-lime-300/20;
+           placeholder-white/35 outline-none transition focus:border-orange-400/70
+           focus:ring-2 focus:ring-orange-400/20;
   }
 
   .chip {

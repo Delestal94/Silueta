@@ -1,4 +1,4 @@
-# Siluetas — Subasta Futbolera
+# Silumatch — Fútbol & Siluetas
 
 Juego web multijugador en tiempo real inspirado en el formato de **412**. Aparece la silueta
 de un futbolista, todos pujan a ciegas con un presupuesto virtual, y el nombre se revela

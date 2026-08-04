@@ -6,9 +6,26 @@ import { POWERS } from '@/lib/game/powers';
  * Single source of truth for the rules, rendered both on the landing page and
  * inside a game. Two copies would drift the moment a rule changes.
  */
-export function Rules({ compact = false }: { compact?: boolean }) {
+export function Rules({
+  compact = false,
+  columns = false,
+}: {
+  compact?: boolean;
+  /** Flow the sections into two columns on a wide screen. */
+  columns?: boolean;
+}) {
   return (
-    <div className={compact ? 'space-y-5 text-sm' : 'space-y-6'}>
+    <div
+      className={
+        compact
+          ? 'space-y-5 text-sm'
+          : columns
+            ? // The sections are the column items; wrapping them in one block
+              // that refuses to break would pile everything into column one.
+              'gap-x-10 lg:columns-2 [&>section]:mb-6 [&>section]:break-inside-avoid'
+            : 'space-y-6'
+      }
+    >
       <Section title="El objetivo" icon="🎯">
         <p>
           Armá un equipo de cinco: <strong>1 arquero, 2 defensas, 1 mediocampista y 1
@@ -110,7 +127,7 @@ export function Rules({ compact = false }: { compact?: boolean }) {
                 <span className="font-semibold">{p.name}</span>
                 <span className="text-white/55"> — {p.description}</span>
               </span>
-              <span className="shrink-0 font-black text-lime-300">{p.cost}</span>
+              <span className="shrink-0 font-black text-orange-400">{p.cost}</span>
             </li>
           ))}
         </ul>

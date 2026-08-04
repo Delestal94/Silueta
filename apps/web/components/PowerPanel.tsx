@@ -54,7 +54,7 @@ export function PowerPanel({
             <li
               key={power.id}
               className={`rounded-xl border transition ${
-                open ? 'border-lime-300/40 bg-lime-300/5' : 'border-white/10 bg-white/[0.03]'
+                open ? 'border-orange-400/40 bg-orange-400/5' : 'border-white/10 bg-white/[0.03]'
               }`}
             >
               <button
@@ -79,7 +79,7 @@ export function PowerPanel({
                   <span className="flex-1 text-sm font-semibold">{power.name}</span>
                   <span
                     className={`rounded-md px-1.5 py-0.5 text-xs font-black tabular-nums ${
-                      affordable ? 'bg-lime-300/15 text-lime-300' : 'bg-white/5 text-white/30'
+                      affordable ? 'bg-orange-400/15 text-orange-400' : 'bg-white/5 text-white/30'
                     }`}
                   >
                     {power.cost}
@@ -125,7 +125,7 @@ export function PowerPanel({
       </ul>
 
       {castByMe.length > 0 && (
-        <p className="mt-3 text-xs text-lime-300/70">
+        <p className="mt-3 text-xs text-orange-400/70">
           Tenés {castByMe.length} poder{castByMe.length === 1 ? '' : 'es'} en juego.
         </p>
       )}

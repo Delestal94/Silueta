@@ -48,7 +48,7 @@ export function RosterRail({
               key={p.id}
               className={`rounded-xl border px-3 py-2.5 transition ${
                 leading
-                  ? 'border-lime-300/50 bg-lime-300/10'
+                  ? 'border-orange-400/50 bg-orange-500/10'
                   : isMe
                     ? 'border-white/20 bg-white/[0.07]'
                     : 'border-white/10 bg-white/[0.03]'
@@ -62,7 +62,7 @@ export function RosterRail({
                 </p>
                 <div className="flex shrink-0 items-center gap-1.5">
                   <div className="text-right leading-tight">
-                    <span className="block font-black text-lime-300">{totalPoints(p)} pts</span>
+                    <span className="block font-black text-orange-400">{totalPoints(p)} pts</span>
                     <span className="block text-[11px] text-white/40">💰 {p.remaining_budget}</span>
                   </div>
                   {onKick && !isMe && !p.is_host && (
@@ -87,7 +87,7 @@ export function RosterRail({
                       key={pos}
                       className={`flex-1 rounded-md px-1 py-1 text-center text-[10px] font-bold ${
                         have >= need
-                          ? 'bg-lime-300/20 text-lime-300'
+                          ? 'bg-orange-400/20 text-orange-400'
                           : 'bg-white/5 text-white/45'
                       }`}
                       title={`${POSITION_SHORT[pos]} ${have}/${need}`}
@@ -100,11 +100,11 @@ export function RosterRail({
 
               <div className="mt-1.5 flex items-center justify-between text-[11px] text-white/40">
                 <span>
-                  {p.is_ready && <span className="text-lime-300">listo · </span>}
+                  {p.is_ready && <span className="text-orange-400">listo · </span>}
                   {position && hasPass(p, position) ? 'pase disponible' : 'pase usado'}
                 </span>
-                {complete && <span className="text-lime-300">completo ✓</span>}
-                {leading && !complete && <span className="text-lime-300">pujando</span>}
+                {complete && <span className="text-orange-400">completo ✓</span>}
+                {leading && !complete && <span className="text-orange-400">pujando</span>}
               </div>
             </li>
           );

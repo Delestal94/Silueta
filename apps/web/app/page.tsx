@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Rules } from '@/components/Rules';
 import { Leaderboard } from '@/components/Leaderboard';
+import { SilhouetteStrip } from '@/components/SilhouetteStrip';
+import { Logo } from '@/components/Logo';
 
 type Mode = 'menu' | 'create' | 'join';
 
@@ -102,21 +104,16 @@ export default function Home() {
     }
   };
 
+  // Away from the menu the page is a single form, and a form reads better
+  // narrow than spread across a desktop monitor.
+  const focused = mode !== 'menu';
+
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-10">
-      {/* The rules need room to breathe; the forms read better narrow. */}
-      <div className={`w-full ${mode === 'menu' ? 'max-w-xl' : 'max-w-md'}`}>
-        <div className="mb-8 text-center">
-          <p className="text-xs uppercase tracking-[0.35em] text-lime-300/70">Subasta futbolera</p>
-          <h1 className="mt-2 text-5xl font-black tracking-tight">SILUETAS</h1>
-          <p className="mt-3 text-white/55">
-            Aparece la silueta de un futbolista. Pujás a ciegas. El nombre se revela recién cuando
-            cierra la puja.
-          </p>
-        </div>
+    <main className="min-h-screen px-4 py-8 sm:px-6 sm:py-12">
+      <div className={`mx-auto w-full ${focused ? 'max-w-md' : 'max-w-6xl'}`}>
 
         {stuckAt && (
-          <div className="panel animate-rise mb-4 border-lime-300/30 p-4 text-center">
+          <div className="panel animate-rise mb-4 border-orange-400/30 p-4 text-center">
             <p className="text-sm text-white/70">Ya estás en la sala, pero no te redirigió.</p>
             {/* Deliberately a full page load: if the client-side router is the
                 thing that stalled, a <Link> would stall with it. */}
@@ -127,17 +124,98 @@ export default function Home() {
           </div>
         )}
 
-        <div className="panel p-6">
-          {mode === 'menu' && (
-            <div className="animate-rise space-y-3">
-              <button onClick={() => setMode('create')} className="btn-primary w-full py-3 text-lg">
-                Crear sala
-              </button>
-              <button onClick={() => setMode('join')} className="btn-ghost w-full py-3 text-lg">
-                Unirme con un código
-              </button>
+        {/* Hero and ranking sit side by side on a wide screen: stacking them
+            left a 576px column adrift in two thousand pixels of nothing. */}
+        <div
+          className={
+            focused ? '' : 'grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)]'
+          }
+        >
+          <div>
+            {/* Hidden once a form is open: leaving it up meant two "Crear
+                sala" buttons on screen at the same time. */}
+            {!focused && (
+            <section className="panel relative isolate overflow-hidden px-6 py-10 text-center lg:py-14">
+              <SilhouetteStrip />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute left-1/2 top-0 h-[460px] w-[460px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
+                style={{
+                  background: 'radial-gradient(circle, rgba(245,130,31,0.24), transparent 65%)',
+                }}
+              />
+              <div className="relative">
+                {/* The badge already carries the wordmark, so repeating it as
+                    a heading said the name twice. The h1 stays for structure
+                    and screen readers. */}
+                <h1 className="sr-only">Silumatch — El juego de adivinar futbolistas</h1>
+                <Logo size={168} className="mx-auto" />
+                <p className="mt-4 text-xs uppercase tracking-[0.3em] text-white/40">
+                  El juego de adivinar · Fútbol &amp; Siluetas
+                </p>
+
+                <p className="mx-auto mt-5 max-w-lg text-white/60 sm:text-lg">
+                  Aparece la silueta de un futbolista. Pujás a ciegas, sin saber quién es{' '}
+                  <em className="not-italic text-white/85">ni de qué momento de su carrera</em>. El
+                  nombre se revela recién cuando cierra la puja.
+                </p>
+
+                <div className="mx-auto mt-7 flex max-w-md flex-col gap-3 sm:flex-row">
+                  <button
+                    onClick={() => setMode('create')}
+                    className="btn-primary flex-1 py-3 text-lg"
+                  >
+                    Crear sala
+                  </button>
+                  <button
+                    onClick={() => setMode('join')}
+                    className="btn-ghost flex-1 py-3 text-lg"
+                  >
+                    Unirme con un código
+                  </button>
+                </div>
+
+                <p className="mt-5 text-xs text-white/40">
+                  1 arquero · 2 defensas · 1 mediocampista · 1 delantero
+                </p>
+                <p className="mt-2 text-sm">
+                  <Link href="/jugadores" className="text-white/45 underline hover:text-white">
+                    ¿Falta un jugador? Proponelo
+                  </Link>
+                </p>
+              </div>
+            </section>
+            )}
+
+            {!focused && (
+              <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                {(
+                  [
+                    ['🕵️', 'Adiviná a ciegas', 'Sólo ves la silueta. El nombre aparece al cerrar la puja.'],
+                    ['⏳', 'Y de qué época', 'Cada ronda sortea un momento de su carrera. No es lo mismo el 86 que el 96.'],
+                    ['🪄', 'Saboteá al rival', 'Gastá presupuesto en poderes: apagones, espejismos, impuestos.'],
+                  ] as [string, string, string][]
+                ).map(([icon, title, text]) => (
+                  <div key={title} className="panel p-5 text-left">
+                    <span className="text-2xl" aria-hidden>
+                      {icon}
+                    </span>
+                    <h3 className="mt-2 font-bold">{title}</h3>
+                    <p className="mt-1 text-sm leading-snug text-white/55">{text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {!focused && (
+            <div className="lg:sticky lg:top-8">
+              <Leaderboard />
             </div>
           )}
+        </div>
+
+        <div className={focused ? 'panel p-6' : 'hidden'}>
 
           {mode === 'create' && (
             <form onSubmit={createRoom} className="animate-rise space-y-4">
@@ -252,25 +330,14 @@ export default function Home() {
           )}
         </div>
 
-        <p className="mt-6 text-center text-xs text-white/35">
-          Armá tu equipo: 1 arquero, 2 defensas, 1 mediocampista y 1 delantero.
-        </p>
 
-        {mode === 'menu' && (
-          <>
-            <p className="mt-3 text-center text-sm">
-              <Link href="/jugadores" className="text-white/45 underline hover:text-white">
-                ¿Falta un jugador? Proponelo
-              </Link>
-            </p>
-
-            <Leaderboard />
-
-            <section className="panel mt-5 p-6">
-              <h2 className="mb-5 text-center text-xl font-black">Cómo se juega</h2>
-              <Rules />
-            </section>
-          </>
+        {!focused && (
+          <section className="panel mt-6 p-6 sm:p-8">
+            <h2 className="mb-6 text-center text-2xl font-black">Cómo se juega</h2>
+            {/* Two columns on a wide screen: one long ribbon of text was the
+                least readable shape for the widest viewport. */}
+            <Rules columns />
+          </section>
         )}
       </div>
     </main>
@@ -317,7 +384,7 @@ function Choice<T extends string>({
             onClick={() => onChange(o.value)}
             className={`rounded-lg px-2 py-2 text-sm font-semibold transition ${
               value === o.value
-                ? 'bg-lime-300 text-emerald-950'
+                ? 'bg-orange-500 text-white'
                 : 'text-white/60 hover:bg-white/5 hover:text-white'
             }`}
           >

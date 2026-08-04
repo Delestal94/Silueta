@@ -12,13 +12,13 @@ function ageAt(birthDate: string | null | undefined, year: number | null): numbe
 const ERA_TONE: Record<string, string> = {
   Promesa: 'border-sky-300/40 bg-sky-400/15 text-sky-200',
   'En ascenso': 'border-teal-300/40 bg-teal-400/15 text-teal-200',
-  Prime: 'border-lime-300/50 bg-lime-300/20 text-lime-200',
+  Prime: 'border-orange-400/50 bg-orange-400/20 text-orange-300',
   Veterano: 'border-amber-300/40 bg-amber-400/15 text-amber-200',
   'Último tramo': 'border-rose-300/40 bg-rose-400/15 text-rose-200',
 };
 
 function ratingTone(rating: number): string {
-  if (rating >= 88) return 'text-lime-300';
+  if (rating >= 88) return 'text-orange-400';
   if (rating >= 82) return 'text-emerald-300';
   if (rating >= 75) return 'text-amber-300';
   return 'text-white/70';
@@ -79,7 +79,7 @@ export function RevealCard({
           <div
             aria-hidden
             className="pointer-events-none absolute left-1/2 top-1/2 h-[460px] w-[460px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
-            style={{ background: 'radial-gradient(circle, rgba(182,255,59,0.22), transparent 65%)' }}
+            style={{ background: 'radial-gradient(circle, rgba(245,130,31,0.22), transparent 65%)' }}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -98,7 +98,7 @@ export function RevealCard({
             <img
               src={p.ea_card_url || p.photo_url || ''}
               alt={p.name}
-              className="animate-pop w-full drop-shadow-[0_0_28px_rgba(182,255,59,0.35)]"
+              className="animate-pop w-full drop-shadow-[0_0_28px_rgba(245,130,31,0.35)]"
             />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
@@ -106,7 +106,7 @@ export function RevealCard({
           )}
 
           {rating !== null && (
-            <div className="rounded-2xl border border-lime-300/25 bg-black/40 px-3 py-3 text-center">
+            <div className="rounded-2xl border border-orange-400/25 bg-black/40 px-3 py-3 text-center">
               <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">
                 Puntos de esta subasta
               </p>
@@ -126,7 +126,7 @@ export function RevealCard({
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-xs uppercase tracking-[0.2em] text-lime-300">
+            <p className="text-xs uppercase tracking-[0.2em] text-orange-400">
               {round.status === 'unsold' ? 'Nadie lo compró' : 'Vendido'}
             </p>
             {round.era_label && (
@@ -149,12 +149,12 @@ export function RevealCard({
 
           {winnerName && round.status === 'sold' && (
             <p className="mt-2 text-white/70">
-              Se lo lleva <span className="font-bold text-lime-300">{winnerName}</span> por{' '}
-              <span className="font-bold text-lime-300">{round.current_bid}</span>
+              Se lo lleva <span className="font-bold text-orange-400">{winnerName}</span> por{' '}
+              <span className="font-bold text-orange-400">{round.current_bid}</span>
               {rating !== null && (
                 <>
                   {' '}
-                  y suma <span className="font-bold text-lime-300">{rating}</span> puntos
+                  y suma <span className="font-bold text-orange-400">{rating}</span> puntos
                 </>
               )}
             </p>

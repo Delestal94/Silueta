@@ -424,7 +424,7 @@ function MobileTabs({
             aria-selected={tab === id}
             onClick={() => setTab(id)}
             className={`min-h-[44px] flex-1 rounded-lg px-2 text-sm font-semibold transition ${
-              tab === id ? 'bg-lime-300 text-emerald-950' : 'text-white/60'
+              tab === id ? 'bg-orange-500 text-white' : 'text-white/60'
             }`}
           >
             {label}
@@ -497,7 +497,7 @@ function JoinHere({
       <form onSubmit={submit} className="panel animate-rise w-full max-w-sm space-y-4 p-6">
         <div className="text-center">
           <p className="text-xs uppercase tracking-[0.3em] text-white/45">Entrar a la sala</p>
-          <p className="mt-1 font-mono text-3xl tracking-[0.3em] text-lime-300">{code}</p>
+          <p className="mt-1 font-mono text-3xl tracking-[0.3em] text-orange-400">{code}</p>
         </div>
 
         <label className="block">
@@ -566,7 +566,7 @@ function CoinFlip() {
   return (
     <div className="fixed inset-0 z-40 grid place-items-center bg-black/70 backdrop-blur-sm">
       <div className="text-center">
-        <div className="animate-flip mx-auto grid h-28 w-28 place-items-center rounded-full bg-gradient-to-br from-lime-200 to-lime-500 text-5xl shadow-[0_0_60px_-10px_rgba(182,255,59,0.9)]">
+        <div className="animate-flip mx-auto grid h-28 w-28 place-items-center rounded-full bg-gradient-to-br from-orange-300 to-orange-600 text-5xl shadow-[0_0_60px_-10px_rgba(245,130,31,0.9)]">
           ⚽
         </div>
         <p className="mt-5 text-lg font-bold">Todos pasaron — se sortea</p>
@@ -606,8 +606,8 @@ function Header({
           {/* The full title is a luxury a phone header cannot afford; it wrapped
               onto three rows and pushed the auction down the page. */}
           <h1 className="truncate text-lg font-black leading-tight sm:text-2xl">
-            <span className="sm:hidden">Siluetas</span>
-            <span className="hidden sm:inline">Subasta Futbolera</span>
+            <span className="sm:hidden">Silumatch</span>
+            <span className="hidden sm:inline">Silumatch</span>
           </h1>
         </div>
 
@@ -620,7 +620,7 @@ function Header({
           className="chip min-h-[44px] shrink-0 hover:bg-white/10"
           title="Copiar código de sala"
         >
-          <span className="font-mono text-sm tracking-[0.2em] text-lime-300 sm:text-base sm:tracking-[0.25em]">
+          <span className="font-mono text-sm tracking-[0.2em] text-orange-400 sm:text-base sm:tracking-[0.25em]">
             {room.code}
           </span>
           <span className="hidden text-white/50 sm:inline">{copied ? '¡copiado!' : 'copiar'}</span>
@@ -640,7 +640,7 @@ function Header({
         {me && (
           <div className="text-right leading-tight">
             <p className="hidden text-sm text-white/60 sm:block">{me.display_name}</p>
-            <p className="text-lg font-bold text-lime-300 sm:text-xl">
+            <p className="text-lg font-bold text-orange-400 sm:text-xl">
               {me.remaining_budget} <span aria-hidden>💰</span>
             </p>
           </div>
@@ -716,7 +716,7 @@ function Idle({
           <span
             key={p.id}
             className={`chip ${
-              p.is_ready ? 'border-lime-300/40 bg-lime-300/15 text-lime-200' : 'text-white/45'
+              p.is_ready ? 'border-orange-400/40 bg-orange-400/15 text-orange-300' : 'text-white/45'
             }`}
           >
             {p.is_ready ? '✓' : '⋯'} {p.display_name}
@@ -733,7 +733,7 @@ function Idle({
           {busy ? 'Un segundo…' : 'Estoy listo'}
         </button>
       ) : (
-        <p className="chip mt-1 border-lime-300/40 text-lime-200">Marcaste que estás listo</p>
+        <p className="chip mt-1 border-orange-400/40 text-orange-300">Marcaste que estás listo</p>
       )}
 
       {isHost && waiting.length > 0 && (
@@ -780,11 +780,11 @@ function BidPanel({
       <div className="mb-4 flex items-end justify-between">
         <div>
           <p className="text-xs uppercase tracking-widest text-white/45">Tu presupuesto</p>
-          <p className="text-3xl font-black text-lime-300">{budget}</p>
+          <p className="text-3xl font-black text-orange-400">{budget}</p>
         </div>
         {notice && (
           <p
-            className={`text-sm ${iAmTopBidder ? 'text-lime-300' : 'text-amber-300'}`}
+            className={`text-sm ${iAmTopBidder ? 'text-orange-400' : 'text-amber-300'}`}
             role="status"
           >
             {notice}
@@ -804,7 +804,7 @@ function BidPanel({
               className="btn-ghost flex-col gap-0 py-3 disabled:opacity-30"
               title={affordable ? `Pujar ${amount}` : 'No te alcanza'}
             >
-              <span className="text-lg font-black text-lime-300">+{step}</span>
+              <span className="text-lg font-black text-orange-400">+{step}</span>
               <span className="text-xs text-white/50">= {amount}</span>
             </button>
           );
@@ -842,9 +842,9 @@ function MyTeam({
       <div className="mb-4 flex items-center justify-between">
         <h3 className="font-bold">
           Tu equipo{' '}
-          <span className="ml-1 font-black text-lime-300">{totalPoints(participant)} pts</span>
+          <span className="ml-1 font-black text-orange-400">{totalPoints(participant)} pts</span>
         </h3>
-        {complete && <span className="chip border-lime-300/30 text-lime-300">Completo ✓</span>}
+        {complete && <span className="chip border-orange-400/30 text-orange-400">Completo ✓</span>}
       </div>
 
       <div className="grid grid-cols-4 gap-2">
@@ -856,13 +856,13 @@ function MyTeam({
             <div
               key={pos}
               className={`rounded-xl border px-3 py-2.5 text-center transition ${
-                done ? 'border-lime-300/40 bg-lime-300/10' : 'border-white/10 bg-white/5'
+                done ? 'border-orange-400/40 bg-orange-500/10' : 'border-white/10 bg-white/5'
               }`}
             >
               <p className="text-[11px] uppercase tracking-wider text-white/50">
                 {POSITION_SHORT[pos]}
               </p>
-              <p className={`text-lg font-black ${done ? 'text-lime-300' : 'text-white'}`}>
+              <p className={`text-lg font-black ${done ? 'text-orange-400' : 'text-white'}`}>
                 {have}/{need}
               </p>
             </div>
@@ -894,7 +894,7 @@ function MyTeam({
                 </p>
               </div>
               <div className="shrink-0 text-right leading-tight">
-                <span className="block text-sm font-black text-lime-300">
+                <span className="block text-sm font-black text-orange-400">
                   {signing.rating ?? '—'}
                 </span>
                 <span className="block text-[10px] text-white/35">pagó {signing.purchase_price}</span>

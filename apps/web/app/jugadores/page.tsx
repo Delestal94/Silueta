@@ -28,7 +28,7 @@ export default function PlayersPage() {
 
       <div className="mx-auto max-w-2xl">
         <div className="mb-6 text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-lime-300/70">Comunidad</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-orange-400/70">Comunidad</p>
           <h1 className="mt-2 text-4xl font-black">Jugadores</h1>
           <p className="mt-3 text-sm text-white/55">
             Proponé un jugador que falte o corregí datos de uno existente. Las propuestas
@@ -48,7 +48,7 @@ export default function PlayersPage() {
               key={id}
               onClick={() => setTab(id)}
               className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition ${
-                tab === id ? 'bg-lime-300 text-emerald-950' : 'text-white/60 hover:bg-white/5'
+                tab === id ? 'bg-orange-500 text-white' : 'text-white/60 hover:bg-white/5'
               }`}
             >
               {label}
@@ -166,7 +166,7 @@ function NewPlayerForm({ push }: { push: Push }) {
             className="field"
           >
             {POSITION_TYPES.map((p) => (
-              <option key={p} value={p} className="bg-emerald-950">
+              <option key={p} value={p} className="bg-slate-900">
                 {POSITION_LABELS_ES[p]}
               </option>
             ))}
@@ -179,10 +179,10 @@ function NewPlayerForm({ push }: { push: Push }) {
             onChange={(e) => set({ gender: e.target.value })}
             className="field"
           >
-            <option value="men" className="bg-emerald-950">
+            <option value="men" className="bg-slate-900">
               Masculino
             </option>
-            <option value="women" className="bg-emerald-950">
+            <option value="women" className="bg-slate-900">
               Femenino
             </option>
           </select>
@@ -289,7 +289,7 @@ function NewPlayerForm({ push }: { push: Push }) {
           type="checkbox"
           checked={form.imageIsTransparent}
           onChange={(e) => set({ imageIsTransparent: e.target.checked })}
-          className="mt-0.5 h-4 w-4 accent-lime-400"
+          className="mt-0.5 h-4 w-4 accent-orange-500"
         />
         <span className="text-sm text-white/70">
           Confirmo que la imagen tiene <strong>fondo transparente</strong>. Una foto normal
@@ -432,11 +432,11 @@ function EditPlayerForm({ push }: { push: Push }) {
           onChange={(e) => setPatch({ ...patch, positionType: e.target.value })}
           className="field"
         >
-          <option value="" className="bg-emerald-950">
+          <option value="" className="bg-slate-900">
             Sin cambios
           </option>
           {POSITION_TYPES.map((p) => (
-            <option key={p} value={p} className="bg-emerald-950">
+            <option key={p} value={p} className="bg-slate-900">
               {POSITION_LABELS_ES[p]}
             </option>
           ))}
@@ -647,7 +647,7 @@ function ReviewQueue({ push }: { push: Push }) {
               href={s.payload.imageUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 block text-xs text-lime-300 underline"
+              className="mt-3 block text-xs text-orange-400 underline"
             >
               Abrir la imagen propuesta antes de aprobar ↗
             </a>

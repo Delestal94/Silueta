@@ -59,15 +59,15 @@ export function Leaderboard() {
       </p>
 
       <div className="-mx-2 overflow-x-auto px-2">
-        <table className="w-full min-w-[460px] border-collapse text-sm">
+        <table className="w-full min-w-[340px] border-collapse text-sm">
           <thead>
             <tr className="text-left text-[11px] uppercase tracking-wider text-white/40">
               <th className="pb-2 pr-2 font-medium">#</th>
               <th className="pb-2 pr-3 font-medium">Jugador</th>
               <th className="pb-2 pr-3 text-right font-medium">Mejor</th>
-              <th className="pb-2 pr-3 text-right font-medium">Promedio</th>
+              <th className="hidden pb-2 pr-3 text-right font-medium sm:table-cell">Prom.</th>
               <th className="pb-2 pr-3 text-right font-medium">Ganadas</th>
-              <th className="pb-2 text-right font-medium">Partidas</th>
+              <th className="pb-2 text-right font-medium">Jug.</th>
             </tr>
           </thead>
           <tbody>
@@ -80,10 +80,12 @@ export function Leaderboard() {
                 <td className="max-w-[10rem] truncate py-2 pr-3 font-semibold" title={e.display_name}>
                   {e.display_name}
                 </td>
-                <td className="py-2 pr-3 text-right font-black tabular-nums text-lime-300">
+                <td className="py-2 pr-3 text-right font-black tabular-nums text-orange-400">
                   {e.best_score}
                 </td>
-                <td className="py-2 pr-3 text-right tabular-nums">{e.average_score}</td>
+                <td className="hidden py-2 pr-3 text-right tabular-nums sm:table-cell">
+                  {e.average_score}
+                </td>
                 <td className="py-2 pr-3 text-right tabular-nums">{e.wins}</td>
                 <td className="py-2 text-right tabular-nums text-white/45">{e.games}</td>
               </tr>

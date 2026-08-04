@@ -2,20 +2,17 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Siluetas - Subasta Futbolera',
-  description: 'Juego de subasta de futbolistas en tiempo real',
+  title: 'Silumatch — El juego de adivinar futbolistas',
+  description:
+    'Aparece la silueta de un futbolista y todos pujan a ciegas. El nombre se revela recién cuando cierra la puja.',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
-      <body className="bg-gray-900 text-white">
-        {children}
-      </body>
+      {/* No background colour here: an opaque class on the body covers the
+          gradient painted on the root element. */}
+      <body className="text-white">{children}</body>
     </html>
   );
 }

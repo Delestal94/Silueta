@@ -40,7 +40,7 @@ export function RulesModal({ onClose }: { onClose: () => void }) {
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.25em] text-lime-300/70">Siluetas</p>
+            <p className="text-xs uppercase tracking-[0.25em] text-orange-400/70">Silumatch</p>
             <h2 className="text-2xl font-black">Reglas</h2>
           </div>
           <button onClick={onClose} className="btn-ghost px-3 py-1.5 text-sm" autoFocus>
