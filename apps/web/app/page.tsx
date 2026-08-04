@@ -112,7 +112,16 @@ export default function Home() {
   return (
     <main className="min-h-screen px-4 py-8 sm:px-6 sm:py-12">
       {showRules && <RulesModal onClose={() => setShowRules(false)} />}
-      <div className={`mx-auto w-full ${focused ? 'max-w-md' : 'max-w-6xl'}`}>
+      <div
+        className={
+          focused
+            ? 'mx-auto w-full max-w-md'
+            : // The rail lives at the far right of the viewport; a centred
+              // 1152px container left a third of a wide monitor empty beside it.
+              'mx-auto w-full max-w-[1700px] xl:grid xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start xl:gap-8'
+        }
+      >
+        <div className="min-w-0">
 
         {stuckAt && (
           <div className="panel animate-rise mb-4 border-orange-400/30 p-4 text-center">
@@ -200,9 +209,7 @@ export default function Home() {
               ))}
             </section>
 
-            {/* Rules take the width; the ranking is a sidebar, so it sits on
-                the right where a sidebar belongs. */}
-            <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
+            <div className="mt-6">
               <section className="panel relative overflow-hidden p-6 sm:p-8">
                 <div
                   aria-hidden
@@ -252,10 +259,7 @@ export default function Home() {
                   </button>
                 </div>
               </section>
-
-              <Leaderboard />
             </div>
-
           </>
         )}
 
@@ -373,8 +377,13 @@ export default function Home() {
             </form>
           )}
         </div>
+        </div>
 
-
+        {!focused && (
+          <aside className="mt-6 xl:sticky xl:top-8 xl:mt-0">
+            <Leaderboard />
+          </aside>
+        )}
       </div>
     </main>
   );
