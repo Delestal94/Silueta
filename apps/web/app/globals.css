@@ -188,12 +188,22 @@ label {
   cursor: image-set(url('/cursor/glove.png') 1x, url('/cursor/glove-2x.png') 2x) 13 0, pointer;
 }
 
-/* Después de las anteriores a propósito: con la misma especificidad, gana la
-   última, y apretar tiene que verse siempre. */
-:active {
-  cursor: url('/cursor/glove-grab.png') 13 0, auto;
+/* Sólo sobre controles, no sobre cualquier cosa que se esté apretando.
+   Arrastrar para seleccionar texto también activa :active, así que un `:active`
+   suelto cambiaba el cursor en mitad del arrastre — y el navegador no repinta
+   un cursor propio a mitad de una selección: se queda con el del sistema. Un
+   puño al seleccionar un párrafo tampoco quería decir nada.
+
+   Va después de la regla anterior a propósito: con la misma especificidad gana
+   la última, y apretar un botón tiene que verse siempre. */
+button:active,
+[role='button']:active,
+a:active,
+summary:active,
+label:active {
+  cursor: url('/cursor/glove-grab.png') 13 0, pointer;
   cursor: image-set(url('/cursor/glove-grab.png') 1x, url('/cursor/glove-grab-2x.png') 2x) 13 0,
-    auto;
+    pointer;
 }
 
 /* Typing is the one place the glove gets in the way: it hides the caret and
