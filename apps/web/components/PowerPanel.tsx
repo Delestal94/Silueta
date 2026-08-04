@@ -20,6 +20,7 @@ export function PowerPanel({
   busy: boolean;
 }) {
   const [picked, setPicked] = useState<PowerId | null>(null);
+  const [hovered, setHovered] = useState<PowerId | null>(null);
 
   if (!rivals.length) {
     return (
@@ -35,6 +36,11 @@ export function PowerPanel({
   const hexedIds = new Set(effects.filter((e) => e.status === 'pending').map((e) => e.target_id));
   const castByMe = effects.filter((e) => e.caster_id === meId && e.status !== 'consumed');
 
+  // What the strip under the icons is explaining right now. Hovering wins over
+  // the open one so you can read a second power without closing the first.
+  const shown = POWERS.find((p) => p.id === (hovered ?? picked)) ?? null;
+  const open = POWERS.find((p) => p.id === picked) ?? null;
+
   return (
     <div className="panel p-4 sm:p-5">
       <div className="mb-1 flex items-baseline justify-between gap-2">
@@ -45,18 +51,13 @@ export function PowerPanel({
         Se activan en la próxima ronda. Uno por rival a la vez.
       </p>
 
-      <ul className="space-y-2">
+      <ul className="grid grid-cols-6 gap-1.5" onMouseLeave={() => setHovered(null)}>
         {POWERS.map((power) => {
           const affordable = power.cost <= budget;
-          const open = picked === power.id;
+          const active = picked === power.id;
 
           return (
-            <li
-              key={power.id}
-              className={`rounded-xl border transition ${
-                open ? 'border-orange-400/40 bg-orange-400/5' : 'border-white/10 bg-white/[0.03]'
-              }`}
-            >
+            <li key={power.id}>
               <button
                 onClick={() => {
                   // Self-targeted powers have nobody to choose, so they fire
@@ -66,63 +67,89 @@ export function PowerPanel({
                     setPicked(null);
                     return;
                   }
-                  setPicked(open ? null : power.id);
+                  setPicked(active ? null : power.id);
                 }}
+                onMouseEnter={() => setHovered(power.id)}
+                onFocus={() => setHovered(power.id)}
+                onBlur={() => setHovered(null)}
                 disabled={!affordable || busy}
-                className="w-full px-3 py-2.5 text-left disabled:opacity-40"
-                aria-expanded={open}
+                // The strip below carries the name and the effect; without
+                // this a screen reader would hear only an emoji.
+                aria-label={`${power.name}, ${power.cost} de presupuesto. ${power.description}`}
+                aria-expanded={active}
+                className={`flex min-h-[52px] w-full flex-col items-center justify-center gap-0.5 rounded-xl border transition disabled:opacity-30 ${
+                  active
+                    ? 'border-orange-400/60 bg-orange-400/10'
+                    : 'border-white/10 bg-white/[0.03] hover:border-white/25 hover:bg-white/[0.07]'
+                }`}
               >
-                <span className="flex items-center gap-2">
-                  <span className="text-lg leading-none" aria-hidden>
-                    {power.icon}
-                  </span>
-                  <span className="flex-1 text-sm font-semibold">{power.name}</span>
-                  <span
-                    className={`rounded-md px-1.5 py-0.5 text-xs font-black tabular-nums ${
-                      affordable ? 'bg-orange-400/15 text-orange-400' : 'bg-white/5 text-white/30'
-                    }`}
-                  >
-                    {power.cost}
-                  </span>
+                <span className="text-lg leading-none" aria-hidden>
+                  {power.icon}
                 </span>
-                {/* Wraps rather than truncating: a power whose effect you
-                    cannot read is a power nobody will risk buying. */}
-                <span className="mt-1 block text-xs leading-snug text-white/50">
-                  {power.description}
+                <span
+                  className={`text-[11px] font-black leading-none tabular-nums ${
+                    affordable ? 'text-orange-400' : 'text-white/30'
+                  }`}
+                  aria-hidden
+                >
+                  {power.cost}
                 </span>
               </button>
-
-              {open && !power.selfTargeted && (
-                <div className="animate-rise border-t border-white/10 px-3 py-2.5">
-                  <p className="mb-2 text-[11px] uppercase tracking-wider text-white/45">¿A quién?</p>
-                  <div className="flex flex-wrap gap-2">
-                    {rivals.map((rival) => {
-                      const alreadyHexed = hexedIds.has(rival.id);
-                      const blocked = alreadyHexed;
-
-                      return (
-                        <button
-                          key={rival.id}
-                          onClick={() => {
-                            onCast(power.id, rival.id);
-                            setPicked(null);
-                          }}
-                          disabled={busy || blocked}
-                          title={alreadyHexed ? 'Ya tiene un poder esperando' : `Tirarle ${power.name}`}
-                          className="btn-ghost min-h-[44px] px-3 py-2 text-sm disabled:opacity-30"
-                        >
-                          {rival.display_name}
-                          {blocked && ' 🚫'}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
             </li>
           );
         })}
       </ul>
+
+      {/* A fixed strip rather than a floating tooltip: this panel lives in a
+          rail with overflow-y-auto, which would clip anything absolutely
+          positioned over its edge. It also gives touch — where there is no
+          hover at all — the same explanation on tap. */}
+      <div className="mt-2 min-h-[3.75rem] rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+        {shown ? (
+          <>
+            <p className="flex items-baseline gap-1.5 text-sm font-semibold">
+              {shown.name}
+              <span className="text-[11px] font-black tabular-nums text-orange-400">
+                {shown.cost}
+              </span>
+            </p>
+            <p className="mt-0.5 text-xs leading-snug text-white/55">{shown.description}</p>
+          </>
+        ) : (
+          <p className="text-xs leading-snug text-white/35">
+            Pasá el mouse por un icono para ver qué hace. Tocalo para tirarlo.
+          </p>
+        )}
+      </div>
+
+      {open && !open.selfTargeted && (
+        <div className="animate-rise mt-2 rounded-xl border border-orange-400/30 bg-orange-400/5 px-3 py-2.5">
+          <p className="mb-2 text-[11px] uppercase tracking-wider text-white/45">
+            ¿A quién le tirás {open.name}?
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {rivals.map((rival) => {
+              const blocked = hexedIds.has(rival.id);
+
+              return (
+                <button
+                  key={rival.id}
+                  onClick={() => {
+                    onCast(open.id, rival.id);
+                    setPicked(null);
+                  }}
+                  disabled={busy || blocked}
+                  title={blocked ? 'Ya tiene un poder esperando' : `Tirarle ${open.name}`}
+                  className="btn-ghost min-h-[44px] px-3 py-2 text-sm disabled:opacity-30"
+                >
+                  {rival.display_name}
+                  {blocked && ' 🚫'}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {castByMe.length > 0 && (
         <p className="mt-3 text-xs text-orange-400/70">

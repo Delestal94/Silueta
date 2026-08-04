@@ -31,7 +31,12 @@ export function RosterRail({
   const ordered = rankParticipants(room.room_participants);
 
   return (
-    <aside className="panel h-fit p-4 lg:sticky lg:top-5">
+    // Not sticky. The rail it lives in is already its own scroll container, so
+    // pinning this panel only made the ones below slide over it — and since
+    // they come later in the DOM with an opaque background, they win. It went
+    // unnoticed with one player because the powers panel is a stub until there
+    // is somebody to aim at, and the rail had nothing to scroll.
+    <aside className="panel h-fit p-4">
       {showHeading && (
         <h3 className="mb-3 px-1 font-bold">Tabla ({room.room_participants.length})</h3>
       )}
