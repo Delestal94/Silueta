@@ -84,6 +84,8 @@ export interface Room {
   round_seconds: number;
   /** 'open' es la subasta de siempre; 'sealed', a sobre cerrado. */
   auction_mode: 'open' | 'sealed';
+  /** Si entran las leyendas retiradas al sorteo de jugadores. */
+  include_legends: boolean;
   requirements: Record<PositionType, number>;
   room_participants: Participant[];
 }

@@ -59,7 +59,8 @@ export function Rules({
         </p>
         <p>
           También entran <strong>leyendas retiradas</strong>: Maradona, Pelé, Cruyff, Zidane,
-          Ronaldinho y unos cuantos más.
+          Ronaldinho y medio centenar más. Vienen encendidas, y el que arma la sala las puede
+          apagar para jugar sólo con futbolistas en actividad.
         </p>
         <p>
           Los puntos que suma son los de <strong>esa</strong> época, no los de hoy.
@@ -173,8 +174,8 @@ export function Rules({
       <Section title="El anfitrión" icon="👑">
         <p>
           Quien crea la sala elige la configuración: el modo de subasta, el presupuesto, los
-          segundos por ronda, si juegan futbolistas masculinos, femeninas o ambos, y si el
-          catálogo se limita a los más famosos o entra completo. Si se va, el rol pasa a otro para que la sala no quede
+          segundos por ronda, si juegan futbolistas masculinos, femeninas o ambos, si entran las
+          leyendas retiradas, y si el catálogo se limita a los más famosos o entra completo. Si se va, el rol pasa a otro para que la sala no quede
           trabada.
         </p>
       </Section>

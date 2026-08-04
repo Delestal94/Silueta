@@ -7,6 +7,7 @@ export const createRoomSchema = z.object({
   genderFilter: z.enum(['men', 'women', 'any']).default('any'),
   pool: z.enum(['famous', 'all']).default('famous'),
   auctionMode: z.enum(['open', 'sealed']).default('open'),
+  includeLegends: z.boolean().default(true),
 });
 
 export const joinRoomSchema = z.object({

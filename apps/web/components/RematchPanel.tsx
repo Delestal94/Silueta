@@ -9,6 +9,7 @@ export interface RematchSettings {
   genderFilter: 'men' | 'women' | 'any';
   pool: 'famous' | 'all';
   auctionMode: 'open' | 'sealed';
+  includeLegends: boolean;
 }
 
 /**
@@ -41,6 +42,7 @@ export function RematchPanel({
     genderFilter: 'any',
     pool: 'famous',
     auctionMode: room.auction_mode,
+    includeLegends: room.include_legends,
   });
 
   if (!isHost) {
@@ -125,6 +127,13 @@ export function RematchPanel({
             ]}
           />
 
+          <Toggle
+            label="Leyendas retiradas"
+            hint="Maradona, Pelé, Cruyff y compañía entran al sorteo."
+            checked={settings.includeLegends}
+            onChange={(v) => set('includeLegends', v)}
+          />
+
           <Choice
             label="Catálogo"
             value={settings.pool}
@@ -137,6 +146,33 @@ export function RematchPanel({
         </div>
       )}
     </div>
+  );
+}
+
+function Toggle({
+  label,
+  hint,
+  checked,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-black/25 p-3">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="mt-0.5 h-5 w-5 shrink-0 accent-orange-500"
+      />
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold">{label}</span>
+        <span className="block text-xs leading-snug text-white/45">{hint}</span>
+      </span>
+    </label>
   );
 }
 

@@ -21,6 +21,7 @@ export default function Home() {
   const [genderFilter, setGenderFilter] = useState<'men' | 'women' | 'any'>('any');
   const [pool, setPool] = useState<'famous' | 'all'>('famous');
   const [auctionMode, setAuctionMode] = useState<'open' | 'sealed'>('open');
+  const [includeLegends, setIncludeLegends] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [stuckAt, setStuckAt] = useState<string | null>(null);
@@ -65,6 +66,7 @@ export default function Home() {
           genderFilter,
           pool,
           auctionMode,
+          includeLegends,
         }),
       });
       const data = await res.json();
@@ -369,6 +371,13 @@ export default function Home() {
                 }
               />
 
+              <Toggle
+                label="Leyendas retiradas"
+                hint="Maradona, Pelé, Cruyff y compañía entran al sorteo. Como su fama está puesta a mano y bien alta, en «más famosos» salen seguido."
+                checked={includeLegends}
+                onChange={setIncludeLegends}
+              />
+
               {error && <Alert>{error}</Alert>}
 
               <button
@@ -484,6 +493,33 @@ function Choice<T extends string>({
       </div>
       {hint && <p className="mt-1.5 text-xs text-white/40">{hint}</p>}
     </div>
+  );
+}
+
+function Toggle({
+  label,
+  hint,
+  checked,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-black/25 p-3">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="mt-0.5 h-5 w-5 shrink-0 accent-orange-500"
+      />
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold">{label}</span>
+        <span className="block text-xs leading-snug text-white/45">{hint}</span>
+      </span>
+    </label>
   );
 }
 

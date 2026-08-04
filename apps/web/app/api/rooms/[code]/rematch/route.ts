@@ -13,6 +13,7 @@ const schema = z.object({
   genderFilter: z.enum(['men', 'women', 'any']).optional(),
   pool: z.enum(['famous', 'all']).optional(),
   auctionMode: z.enum(['open', 'sealed']).optional(),
+  includeLegends: z.boolean().optional(),
 });
 
 const ERRORS: Record<string, [string, number]> = {
@@ -55,6 +56,7 @@ export async function POST(
       p_gender_filter: input.genderFilter ?? null,
       p_pool: input.pool ?? null,
       p_auction_mode: input.auctionMode ?? null,
+      p_include_legends: input.includeLegends ?? null,
     });
 
     if (error) {
