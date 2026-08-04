@@ -7,15 +7,25 @@ export const dynamic = 'force-dynamic';
 const LEAGUE = '4406';
 const API = `https://www.thesportsdb.com/api/v1/json/${process.env.THESPORTSDB_KEY || '3'}`;
 
+/** Where the matches are played, which is the calendar the reader lives in. */
+const TZ = 'America/Argentina/Buenos_Aires';
+
 interface Event {
   idEvent: string;
   strHomeTeam: string | null;
   strAwayTeam: string | null;
   intHomeScore: string | null;
   intAwayScore: string | null;
+  intRound: string | null;
   strStatus: string | null;
+  strPostponed: string | null;
   strTime: string | null;
+  strTimeLocal: string | null;
   dateEvent: string | null;
+  dateEventLocal: string | null;
+  strVenue: string | null;
+  strLeague: string | null;
+  strSeason: string | null;
   strHomeTeamBadge?: string | null;
   strAwayTeamBadge?: string | null;
 }
@@ -28,30 +38,80 @@ interface Match {
   awayBadge: string | null;
   homeScore: number | null;
   awayScore: number | null;
-  /** 'live' | 'final' | 'upcoming' */
+  /** 'live' | 'final' | 'upcoming' | 'off' */
   state: string;
+  /** What to print in the status slot: 'Entretiempo', 'Final', '21:15'. */
   label: string;
+  round: number | null;
+  venue: string | null;
+  time: string;
+  day: string;
 }
 
-const LIVE = new Set(['1H', '2H', 'HT', 'ET', 'P', 'BT', 'LIVE']);
-const DONE = new Set(['FT', 'AET', 'PEN', 'Match Finished']);
+interface Day {
+  date: string;
+  /** 'Hoy', 'Ayer', 'Mañana' or a weekday. */
+  title: string;
+  /** '3 de agosto'. */
+  subtitle: string;
+  /** The matchday, when every game that day belongs to the same one. */
+  round: number | null;
+  matches: Match[];
+}
+
+/**
+ * The upstream status codes, in the words a reader uses.
+ *
+ * The free feed carries no elapsed minute, so "1er tiempo" is as precise as
+ * this can get — promiedos prints 62' because it pays for a live data feed.
+ */
+const PHASE: Record<string, string> = {
+  '1H': '1er tiempo',
+  '2H': '2do tiempo',
+  HT: 'Entretiempo',
+  ET: 'Alargue',
+  BT: 'Descanso',
+  P: 'Penales',
+  LIVE: 'En vivo',
+};
+
+const ENDED: Record<string, string> = {
+  FT: 'Final',
+  'Match Finished': 'Final',
+  AET: 'Final (alargue)',
+  PEN: 'Final (penales)',
+};
+
+const CALLED_OFF: Record<string, string> = {
+  PST: 'Postergado',
+  CANC: 'Suspendido',
+  ABD: 'Abandonado',
+  SUSP: 'Suspendido',
+};
+
+/** '21:15:00' → '21:15'. */
+const hhmm = (t: string | null) => (t || '').slice(0, 5);
 
 function classify(e: Event): Match {
   const status = (e.strStatus || '').trim();
-  const home = Number(e.intHomeScore);
-  const away = Number(e.intAwayScore);
   const hasScore = e.intHomeScore !== null && e.intAwayScore !== null;
+  const time = hhmm(e.strTimeLocal || e.strTime);
 
   let state = 'upcoming';
-  let label = (e.strTime || '').slice(0, 5);
+  let label = time;
 
-  if (LIVE.has(status)) {
+  if (PHASE[status]) {
     state = 'live';
-    label = status === 'HT' ? 'Entretiempo' : 'En vivo';
-  } else if (DONE.has(status) || (hasScore && status !== 'NS')) {
+    label = PHASE[status];
+  } else if (ENDED[status] || (hasScore && status !== 'NS')) {
     state = 'final';
-    label = 'Final';
+    label = ENDED[status] ?? 'Final';
+  } else if (CALLED_OFF[status] || e.strPostponed === 'yes') {
+    state = 'off';
+    label = CALLED_OFF[status] ?? 'Postergado';
   }
+
+  const round = Number(e.intRound);
 
   return {
     id: e.idEvent,
@@ -59,17 +119,45 @@ function classify(e: Event): Match {
     away: e.strAwayTeam ?? '—',
     homeBadge: e.strHomeTeamBadge ?? null,
     awayBadge: e.strAwayTeamBadge ?? null,
-    homeScore: hasScore ? home : null,
-    awayScore: hasScore ? away : null,
+    homeScore: hasScore ? Number(e.intHomeScore) : null,
+    awayScore: hasScore ? Number(e.intAwayScore) : null,
     state,
     label,
+    round: Number.isFinite(round) && round > 0 ? round : null,
+    venue: e.strVenue || null,
+    time,
+    // The local date matters: a 21:15 kick-off in Buenos Aires is already the
+    // next day in UTC, so grouping by dateEvent filed Sunday night's games
+    // under Monday.
+    day: e.dateEventLocal || e.dateEvent || '',
   };
 }
 
-function day(offset: number): string {
-  const d = new Date();
-  d.setUTCDate(d.getUTCDate() + offset);
+/** Today where the matches are played, as YYYY-MM-DD. */
+function today(): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date());
+}
+
+/** Shifts a YYYY-MM-DD by whole days, away from any timezone edge. */
+function shift(date: string, days: number): string {
+  const d = new Date(`${date}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
+}
+
+function label(date: string, base: string): { title: string; subtitle: string } {
+  const at = new Date(`${date}T12:00:00Z`);
+  const named = (opts: Intl.DateTimeFormatOptions) =>
+    new Intl.DateTimeFormat('es-AR', { ...opts, timeZone: 'UTC' }).format(at);
+
+  const subtitle = named({ day: 'numeric', month: 'long' });
+
+  if (date === base) return { title: 'Hoy', subtitle };
+  if (date === shift(base, -1)) return { title: 'Ayer', subtitle };
+  if (date === shift(base, 1)) return { title: 'Mañana', subtitle };
+
+  const weekday = named({ weekday: 'long' });
+  return { title: weekday[0].toUpperCase() + weekday.slice(1), subtitle };
 }
 
 async function fetchDay(date: string, query = `l=${LEAGUE}`): Promise<Event[]> {
@@ -91,42 +179,70 @@ async function fetchDay(date: string, query = `l=${LEAGUE}`): Promise<Event[]> {
 }
 
 /**
- * Today's fixtures, plus yesterday's results — a single day is often empty
- * mid-week, and an empty scoreboard looks broken rather than quiet.
+ * Yesterday, today and tomorrow in Buenos Aires, grouped by day.
+ *
+ * The upstream day index is UTC, and a local day runs three hours behind it, so
+ * covering three local days takes four UTC ones.
  */
 export async function GET() {
   try {
-    const [yesterday, today, tomorrow, liveFeed] = await Promise.all([
-      fetchDay(day(-1)),
-      fetchDay(day(0)),
-      fetchDay(day(1)),
+    const base = today();
+    const utcDays = [shift(base, -1), base, shift(base, 1), shift(base, 2)];
+
+    const [live, ...league] = await Promise.all([
       // The league-filtered day endpoint answers with a stale status — it was
       // still reporting "not started" for matches already in the first half.
       // The sport-wide one is fresh, so it supplies the status.
-      fetchDay(day(0), 's=Soccer'),
+      fetchDay(base, 's=Soccer'),
+      ...utcDays.map((d) => fetchDay(d)),
     ]);
 
-    const freshStatus = new Map(
-      liveFeed.filter((e) => e.idEvent).map((e) => [e.idEvent, e])
-    );
+    const fresh = new Map(live.filter((e) => e.idEvent).map((e) => [e.idEvent, e]));
 
+    const wanted = new Set([shift(base, -1), base, shift(base, 1)]);
     const seen = new Set<string>();
-    const matches: Match[] = [];
+    const byDay = new Map<string, Match[]>();
+    let league_name: string | null = null;
+    let season: string | null = null;
 
-    for (const e of [...today, ...yesterday, ...tomorrow]) {
+    for (const e of league.flat()) {
       if (!e.idEvent || seen.has(e.idEvent)) continue;
       seen.add(e.idEvent);
 
-      const live = freshStatus.get(e.idEvent);
-      matches.push(classify(live ? { ...e, ...live } : e));
+      const patched = fresh.get(e.idEvent);
+      const match = classify(patched ? { ...e, ...patched } : e);
+      if (!wanted.has(match.day)) continue;
+
+      league_name ??= e.strLeague;
+      season ??= e.strSeason;
+
+      byDay.set(match.day, [...(byDay.get(match.day) ?? []), match]);
     }
 
-    // Live first, then what just finished, then what is coming.
-    const order: Record<string, number> = { live: 0, final: 1, upcoming: 2 };
-    matches.sort((a, b) => order[a.state] - order[b.state]);
+    // Today first — it is what the reader came for — then what is next, then
+    // what they may have missed.
+    const order = [base, shift(base, 1), shift(base, -1)];
+    const rank: Record<string, number> = { live: 0, upcoming: 1, off: 2, final: 3 };
+
+    const days: Day[] = order
+      .filter((d) => byDay.has(d))
+      .map((date) => {
+        const matches = (byDay.get(date) ?? []).sort(
+          (a, b) => rank[a.state] - rank[b.state] || a.time.localeCompare(b.time)
+        );
+        const rounds = new Set(matches.map((m) => m.round).filter((r) => r !== null));
+
+        return {
+          date,
+          ...label(date, base),
+          // Only claim a matchday when the day does not straddle two of them.
+          round: rounds.size === 1 ? [...rounds][0]! : null,
+          matches,
+        };
+      });
 
     return NextResponse.json(
-      { matches: matches.slice(0, 10) },
+      { league: league_name, season, days },
       { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' } }
     );
   } catch (error) {
