@@ -179,16 +179,40 @@ async function fetchDay(date: string, query = `l=${LEAGUE}`, revalidate = 60): P
   }
 }
 
+/** Guards the `?d=` parameter: a date, and one we are willing to look up. */
+function requestedDay(raw: string | null, base: string): string {
+  if (!raw || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return base;
+
+  const at = new Date(`${raw}T12:00:00Z`);
+  if (Number.isNaN(at.getTime())) return base;
+
+  // A crawler walking the arrows forever would be one upstream call per step,
+  // against a quota we do not control. A season either side is plenty.
+  const days = (Date.parse(`${raw}T12:00:00Z`) - Date.parse(`${base}T12:00:00Z`)) / 86_400_000;
+  return Math.abs(days) > 240 ? base : raw;
+}
+
 /**
- * Yesterday, today and tomorrow in Buenos Aires, grouped by day.
+ * One day in Buenos Aires, plus the days either side so the arrows have
+ * somewhere to go.
  *
- * The upstream day index is UTC, and a local day runs three hours behind it, so
- * covering three local days takes four UTC ones.
+ * The upstream day index is UTC and a local day runs three hours behind it, so
+ * a single local day straddles two UTC ones.
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const base = today();
-    const utcDays = [shift(base, -1), base, shift(base, 1), shift(base, 2)];
+    const asked = new URL(request.url).searchParams.get('d');
+    const day = requestedDay(asked, base);
+
+    // Nobody picked a day, so we get to pick a good one. The league plays
+    // Friday to Monday, which would leave the panel empty half the week; when
+    // today has nothing, fall back to the last day that did. Asking for a day
+    // explicitly is different — then an empty Tuesday is the answer.
+    const explicit = asked !== null && day === asked;
+    const back = explicit ? 0 : 4;
+    const utcDays = [];
+    for (let i = -back; i <= 1; i++) utcDays.push(shift(day, i));
 
     const [live, ...league] = await Promise.all([
       // The league-filtered day endpoint answers with a stale status — it was
@@ -196,14 +220,14 @@ export async function GET() {
       // The sport-wide one is fresh, so it supplies the status and, while a
       // match is running, the score too. It is the only thing here that
       // changes minute to minute, so it is the only one worth asking twice as
-      // often; fixtures and finished results do not move.
-      fetchDay(base, 's=Soccer', 30),
+      // often; fixtures and finished results do not move. Only worth asking at
+      // all for days that can still have a match in progress.
+      day === base || day === shift(base, -1) ? fetchDay(base, 's=Soccer', 30) : [],
       ...utcDays.map((d) => fetchDay(d)),
     ]);
 
     const fresh = new Map(live.filter((e) => e.idEvent).map((e) => [e.idEvent, e]));
 
-    const wanted = new Set([shift(base, -1), base, shift(base, 1)]);
     const seen = new Set<string>();
     const byDay = new Map<string, Match[]>();
     let league_name: string | null = null;
@@ -215,38 +239,32 @@ export async function GET() {
 
       const patched = fresh.get(e.idEvent);
       const match = classify(patched ? { ...e, ...patched } : e);
-      if (!wanted.has(match.day)) continue;
 
       league_name ??= e.strLeague;
       season ??= e.strSeason;
-
       byDay.set(match.day, [...(byDay.get(match.day) ?? []), match]);
     }
 
-    // Today first — it is what the reader came for — then what is next, then
-    // what they may have missed.
-    const order = [base, shift(base, 1), shift(base, -1)];
+    let shown = day;
+    for (let i = 1; i <= back && !byDay.get(shown)?.length; i++) shown = shift(day, -i);
+
     const rank: Record<string, number> = { live: 0, upcoming: 1, off: 2, final: 3 };
+    const matches = (byDay.get(shown) ?? []).sort(
+      (a, b) => rank[a.state] - rank[b.state] || a.time.localeCompare(b.time)
+    );
 
-    const days: Day[] = order
-      .filter((d) => byDay.has(d))
-      .map((date) => {
-        const matches = (byDay.get(date) ?? []).sort(
-          (a, b) => rank[a.state] - rank[b.state] || a.time.localeCompare(b.time)
-        );
-        const rounds = new Set(matches.map((m) => m.round).filter((r) => r !== null));
+    const rounds = new Set(matches.map((m) => m.round).filter((r) => r !== null));
 
-        return {
-          date,
-          ...label(date, base),
-          // Only claim a matchday when the day does not straddle two of them.
-          round: rounds.size === 1 ? [...rounds][0]! : null,
-          matches,
-        };
-      });
+    const result: Day = {
+      date: shown,
+      ...label(shown, base),
+      // Only claim a matchday when the day does not straddle two of them.
+      round: rounds.size === 1 ? [...rounds][0]! : null,
+      matches,
+    };
 
     return NextResponse.json(
-      { league: league_name, season, days },
+      { league: league_name, season, today: base, day: result },
       {
         // max-age=0 keeps this out of the browser's own cache: with max-age=60
         // and a 60s poll the client kept answering itself with the copy it
