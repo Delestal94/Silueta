@@ -11,7 +11,7 @@ const schema = z.object({
   startingBudget: z.number().int().min(50).max(1000).optional(),
   roundSeconds: z.number().int().min(5).max(120).optional(),
   genderFilter: z.enum(['men', 'women', 'any']).optional(),
-  pool: z.enum(['famous', 'all']).optional(),
+  pool: z.enum(['famous', 'all', 'balanced']).optional(),
   auctionMode: z.enum(['open', 'sealed']).optional(),
   includeLegends: z.boolean().optional(),
 });

@@ -19,7 +19,7 @@ export default function Home() {
   const [budget, setBudget] = useState(200);
   const [roundSeconds, setRoundSeconds] = useState(10);
   const [genderFilter, setGenderFilter] = useState<'men' | 'women' | 'any'>('any');
-  const [pool, setPool] = useState<'famous' | 'all'>('famous');
+  const [pool, setPool] = useState<'famous' | 'all' | 'balanced'>('famous');
   const [auctionMode, setAuctionMode] = useState<'open' | 'sealed'>('open');
   const [includeLegends, setIncludeLegends] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -347,12 +347,15 @@ export default function Home() {
                 onChange={setPool}
                 options={[
                   { value: 'famous', label: 'Más famosos' },
+                  { value: 'balanced', label: 'Equilibrado' },
                   { value: 'all', label: 'Todos' },
                 ]}
                 hint={
                   pool === 'famous'
-                    ? 'Sólo el top del ranking de EA — más fáciles de reconocer.'
-                    : 'Todo el catálogo, incluidos jugadores menos conocidos.'
+                    ? 'Sólo el top del ranking de fama — más fáciles de reconocer.'
+                    : pool === 'balanced'
+                      ? 'Mitad y mitad: cada ronda sortea si el jugador sale de los famosos o del resto.'
+                      : 'Todo el catálogo, incluidos jugadores menos conocidos.'
                 }
               />
 

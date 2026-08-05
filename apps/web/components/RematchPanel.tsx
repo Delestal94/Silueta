@@ -7,7 +7,7 @@ export interface RematchSettings {
   startingBudget: number;
   roundSeconds: number;
   genderFilter: 'men' | 'women' | 'any';
-  pool: 'famous' | 'all';
+  pool: 'famous' | 'all' | 'balanced';
   auctionMode: 'open' | 'sealed';
   includeLegends: boolean;
 }
@@ -142,6 +142,7 @@ export function RematchPanel({
             onChange={(v) => set('pool', v)}
             options={[
               { value: 'famous', label: 'Más famosos' },
+              { value: 'balanced', label: 'Equilibrado' },
               { value: 'all', label: 'Todos' },
             ]}
           />

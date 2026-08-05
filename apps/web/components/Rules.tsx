@@ -174,8 +174,13 @@ export function Rules({
       <Section title="El anfitrión" icon="👑">
         <p>
           Quien crea la sala elige la configuración: el modo de subasta, el presupuesto, los
-          segundos por ronda, si juegan futbolistas masculinos, femeninas o ambos, si entran las
-          leyendas retiradas, y si el catálogo se limita a los más famosos o entra completo. Si se va, el rol pasa a otro para que la sala no quede
+          segundos por ronda, si juegan futbolistas masculinos, femeninas o ambos, y si entran las
+          leyendas retiradas.
+        </p>
+        <p>
+          El catálogo tiene tres opciones: <strong>más famosos</strong>, sólo los reconocibles;{' '}
+          <strong>todos</strong>, el catálogo entero; y <strong>equilibrado</strong>, que sortea
+          en cada ronda si el jugador sale de una mitad o de la otra. Si se va, el rol pasa a otro para que la sala no quede
           trabada.
         </p>
       </Section>

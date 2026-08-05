@@ -5,7 +5,7 @@ export const createRoomSchema = z.object({
   startingBudget: z.number().int().min(50).max(1000).default(200),
   roundSeconds: z.number().int().min(5).max(120).default(10),
   genderFilter: z.enum(['men', 'women', 'any']).default('any'),
-  pool: z.enum(['famous', 'all']).default('famous'),
+  pool: z.enum(['famous', 'all', 'balanced']).default('famous'),
   auctionMode: z.enum(['open', 'sealed']).default('open'),
   includeLegends: z.boolean().default(true),
 });

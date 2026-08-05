@@ -15,10 +15,19 @@
 -- Nothing in a finished game referenced it, and the effect is cosmetic.
 delete from public.power_effects where power = 'niebla';
 
-alter table public.power_effects drop constraint if exists power_effects_power_check;
-alter table public.power_effects
-  add constraint power_effects_power_check
-  check (power in ('soplo', 'apagon', 'espejismo', 'impuesto', 'traba', 'manotazo'));
+-- 0050 agrega 'empujon' a esta misma restricción. En una base que ya pasó por
+-- ahí, reponer la lista vieja falla contra filas que hoy son válidas — y como
+-- el lote se corre entero cada vez, esa falla salía en cada corrida. Si ya se
+-- pasó de acá, no se toca.
+do $$
+begin
+  if not exists (select 1 from public.power_effects where power = 'empujon') then
+    alter table public.power_effects drop constraint if exists power_effects_power_check;
+    alter table public.power_effects
+      add constraint power_effects_power_check
+      check (power in ('soplo', 'apagon', 'espejismo', 'impuesto', 'traba', 'manotazo'));
+  end if;
+end $$;
 
 create or replace function public.power_cost(p_power text)
 returns integer language sql immutable as $$
