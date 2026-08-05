@@ -72,13 +72,22 @@ export function SilhouetteStage({
         </div>
       </div>
 
-      <div className="relative flex min-h-[38vh] flex-1 items-end justify-center px-6 py-2">
+      {/* min-h-0, no una altura mínima en vh. Un mínimo medido contra la
+          ventana no sabe cuánto le quedó al panel después del encabezado, los
+          controles y los avisos de poderes: en 1366x768 reclamaba más espacio
+          del que había y empujaba la silueta fuera del panel. Con flex-1 se
+          queda con lo que sobre, sea mucho o poco. */}
+      <div className="relative flex min-h-0 flex-1 items-end justify-center px-6 py-2">
         {silhouetteUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={silhouetteUrl}
             alt={`Silueta de un ${POSITION_LABELS[position].toLowerCase()} por identificar`}
-            className="animate-pop h-full max-h-[52vh] w-auto object-contain drop-shadow-[0_0_40px_rgba(245,130,31,0.25)]"
+            // max-h-full contra el contenedor, no 52vh contra la ventana. La
+            // altura de la ventana no dice cuánto espacio quedó libre acá
+            // adentro, así que al aparecer el aviso de un poder la imagen
+            // seguía midiendo lo mismo y el panel la recortaba por abajo.
+            className="animate-pop max-h-full max-w-full w-auto object-contain drop-shadow-[0_0_40px_rgba(245,130,31,0.25)]"
             style={{
               filter:
                 'brightness(0) saturate(100%) invert(96%) sepia(6%) saturate(300%) hue-rotate(190deg)' +

@@ -413,9 +413,20 @@ export default function RoomPage() {
                 controls stay on screen. Scrolling away from the silhouette to
                 place a bid is fatal in a ten-second round. */}
             <div className="mt-4 hidden gap-5 lg:grid lg:grid-cols-[minmax(0,1fr)_360px]">
-              <div className="flex flex-col gap-4 lg:h-[calc(100vh-9rem)]">
+              {/* En una pantalla baja los controles van al costado, no abajo.
+                  Medido en 1366x768: apilados, el panel de puja se llevaba 318
+                  de los 624px de la columna y a la silueta le quedaban 103 —
+                  con un aviso de poder encima, 13. Al costado la silueta se
+                  queda con casi todo el alto, que es lo único que hay que
+                  mirar durante la ronda.
+
+                  El corte va por alto y no por ancho: el problema es un monitor
+                  de 19 pulgadas a 768px de alto, no uno angosto. */}
+              <div className="mesa flex flex-col gap-4 lg:h-[calc(100vh-9rem)]">
                 {stage}
-                {controls}
+                <div className="mesa-controles flex flex-col gap-3">
+                  {controls}
+                </div>
               </div>
               <div className="space-y-4 lg:h-[calc(100vh-9rem)] lg:overflow-y-auto lg:pr-1">
                 {rail}

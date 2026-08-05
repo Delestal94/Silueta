@@ -270,3 +270,34 @@ textarea,
 ::-webkit-scrollbar-corner {
   background: transparent;
 }
+
+/* --- La sala en pantallas bajas ----------------------------------------- */
+
+/* En un monitor ancho pero de poco alto —1366x768 y 1440x900 son los de 19 y
+   24 pulgadas— apilar la silueta arriba y los controles abajo no entra. Medido
+   en 1366x768: el panel de puja se llevaba 318 de los 624px de la columna y a
+   la silueta le quedaban 103; con el aviso de un poder encima, 13.
+
+   Al costado, la silueta se queda con casi todo el alto, que es lo único que
+   hay que mirar durante la ronda.
+
+   El corte está en 900px de alto y no más abajo por aritmética: apilado, el
+   encabezado, el pie y el panel de puja suman unos 520px fijos, así que hace
+   falta pasar los 900 para que a la silueta le queden 250px decentes. Un
+   monitor de 1080 llega; uno de 900 no.
+
+   El corte va por alto y no por ancho a propósito: el problema es la altura,
+   no que el monitor sea angosto. Se escribe acá y no como variante de Tailwind
+   porque una consulta con dos condiciones necesita guiones bajos en lugar de
+   espacios, y esa clase pasa desapercibida cuando no se genera. */
+@media (min-width: 1024px) and (max-height: 900px) {
+  .mesa {
+    flex-direction: row;
+  }
+
+  .mesa-controles {
+    width: 330px;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+}
