@@ -106,7 +106,7 @@ export const POWERS: Power[] = [
     icon: '👊',
     cost: 20,
     description:
-      'Oferta 25 por él apenas arranca la próxima ronda, quiera o no. Si no le alcanza, pone todo lo que tiene.',
+      'Le saca 25 apenas arranca la próxima ronda y los oferta por él, quiera o no. Si no le alcanza, pierde todo lo que tiene.',
     // Se entera al ver la ronda: su oferta ya está puesta y no la puso él.
     victimNotice: 'Te empujaron: ya ofertaste en esta ronda sin quererlo.',
   },

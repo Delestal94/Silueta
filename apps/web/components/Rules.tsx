@@ -93,8 +93,8 @@ export function Rules({
           <li>
             <strong>Sobre cerrado:</strong> cada uno anota en secreto el máximo que pagaría.
             Nadie ve el número ajeno —sólo cuántos ya pusieron el suyo— y el reloj no se
-            reinicia. Al cerrar se abren todos: gana el más alto y paga exactamente eso. Si dos
-            empatan, gana el que lo puso primero. Podés cambiar tu sobre hasta que cierre.
+            reinicia. Al cerrar se abren todos: gana el más alto y paga exactamente eso. Podés
+            cambiar tu sobre hasta que cierre.
           </li>
           <li>En los dos, nunca podés pasarte de tu presupuesto.</li>
           <li>Si ya completaste ese puesto, quedás afuera de esa ronda.</li>
@@ -102,6 +102,10 @@ export function Rules({
             Si <strong>nadie oferta</strong>, el jugador se sortea entre todos los que todavía
             necesitan ese puesto, al precio mínimo. Quedarte quieto no te salva: para eso está
             el pase, y tenés uno solo por puesto.
+          </li>
+          <li>
+            Si dos ofertan <strong>lo mismo</strong> —pasa cuando a varios los empujan— sale una
+            ruleta con los nombres tapados y destapa al que se lo lleva.
           </li>
         </ul>
       </Section>

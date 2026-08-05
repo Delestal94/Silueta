@@ -118,6 +118,9 @@ export interface CurrentRound {
   /** Clue this viewer paid for with "soplo". */
   tip: { nationality: string | null; team: string | null } | null;
 
+  /** Quiénes empataron la oferta y fueron a sorteo. Sólo al cerrar la ronda. */
+  draw?: { id: string; display_name: string }[] | null;
+
   /** Sealed-bid round. The fields below only mean anything when this is true. */
   sealed?: boolean;
   /** What this viewer put in, and only this viewer. */

@@ -22,6 +22,7 @@ import { RevealCard } from '@/components/RevealCard';
 import { RosterRail } from '@/components/RosterRail';
 import { FinalStandings } from '@/components/FinalStandings';
 import { RematchPanel, type RematchSettings } from '@/components/RematchPanel';
+import { Ruleta } from '@/components/Ruleta';
 import { Toasts, useToasts } from '@/components/Toasts';
 import { PowerPanel } from '@/components/PowerPanel';
 import { RulesModal } from '@/components/RulesModal';
@@ -299,6 +300,15 @@ export default function RoomPage() {
     )
   ) : round && round.revealed ? (
     <>
+      {/* Antes de la ficha: primero se sabe quién se lo llevó, después quién
+          era. Al revés, la ruleta giraría sobre un resultado ya cantado. */}
+      {round.draw && round.draw.length > 1 && (
+        <Ruleta
+          sorteados={round.draw}
+          ganadorId={round.current_bid_by}
+          meId={me?.id ?? null}
+        />
+      )}
       <RevealCard
         round={round}
         winnerName={
