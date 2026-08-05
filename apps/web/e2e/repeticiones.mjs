@@ -6,6 +6,7 @@
  * nombres: hay homónimos en el catálogo.
  */
 import { chromium } from 'playwright';
+import { avanzar, esperarRevelacion } from './helpers.mjs';
 
 const BASE = process.argv[2] || 'http://localhost:3000';
 const browser = await chromium.launch();
@@ -55,13 +56,8 @@ async function partida() {
     const r = s.currentRound;
     if (r?.revealed && r.player?.id && !vistos.includes(r.player.id)) vistos.push(r.player.id);
 
-    const next = page.getByRole('button', { name: 'Siguiente silueta' });
-    if (await next.count()) {
-      await next.click().catch(() => {});
-      await page.waitForTimeout(900);
-    } else {
-      await page.waitForTimeout(1800);
-    }
+    if (await avanzar(page)) await page.waitForTimeout(900);
+    else await page.waitForTimeout(1800);
   }
   return vistos;
 }

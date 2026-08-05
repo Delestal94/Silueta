@@ -6,6 +6,7 @@
  * field, not anywhere in the payload. Everything else is ordinary game logic.
  */
 import { chromium } from 'playwright';
+import { avanzar, esperarRevelacion } from './helpers.mjs';
 
 const BASE = process.argv[2] || 'http://localhost:3000';
 const browser = await chromium.launch();
@@ -106,7 +107,7 @@ check('se cuentan los sobres puestos', hs.envelopesIn === 2, `envelopesIn=${hs.e
 check('no viaja la lista de sobres', hs.envelopes === null || hs.envelopes === undefined);
 
 // --- Let the clock run out and check who won
-await host.waitForSelector('text=Siguiente silueta', { timeout: 45000 });
+await esperarRevelacion(host);
 await host.waitForTimeout(1500);
 
 const after = JSON.parse(await stateOf(host)).currentRound;

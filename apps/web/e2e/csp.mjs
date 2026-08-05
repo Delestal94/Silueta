@@ -16,6 +16,7 @@
  *   node apps/web/e2e/csp.mjs http://localhost:3001
  */
 import { chromium } from 'playwright';
+import { avanzar, esperarRevelacion } from './helpers.mjs';
 
 const BASE = process.argv[2] || 'http://localhost:3000';
 const browser = await chromium.launch();
@@ -69,7 +70,7 @@ await guest.getByRole('button', { name: 'Estoy listo' }).click();
 await host.getByRole('button', { name: 'Estoy listo' }).click();
 await host.waitForSelector('img[alt*="Silueta"]', { timeout: 25000 });
 await guest.getByTitle(/^Pujar/).first().click();
-await host.waitForSelector('text=Siguiente silueta', { timeout: 45000 });
+await esperarRevelacion(host);
 await host.waitForTimeout(2500);
 
 // La revelación trae la foto en color y la carta de EA, de dominios distintos.

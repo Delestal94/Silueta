@@ -7,6 +7,7 @@
  * se rompió cuando una migración redefinió next_round desde una copia vieja.
  */
 import { chromium } from 'playwright';
+import { avanzar, esperarRevelacion } from './helpers.mjs';
 
 const BASE = process.argv[2] || 'http://localhost:3000';
 const browser = await chromium.launch();
@@ -68,13 +69,8 @@ async function jugar(pool, rondas) {
       vistos.push({ id: r.player.id, name: r.player.name });
     }
 
-    const next = page.getByRole('button', { name: 'Siguiente silueta' });
-    if (await next.count()) {
-      await next.click().catch(() => {});
-      await page.waitForTimeout(800);
-    } else {
-      await page.waitForTimeout(1700);
-    }
+    if (await avanzar([page, guest])) await page.waitForTimeout(800);
+    else await page.waitForTimeout(1700);
   }
 
   await guest.context().close();

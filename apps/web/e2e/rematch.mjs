@@ -6,6 +6,7 @@
  * que la configuración nueva realmente rija.
  */
 import { chromium } from 'playwright';
+import { avanzar, esperarRevelacion } from './helpers.mjs';
 
 const BASE = process.argv[2] || 'http://localhost:3000';
 const browser = await chromium.launch();
@@ -55,14 +56,9 @@ for (let i = 0; i < 40; i++) {
   const s = await stateOf();
   if (s.room?.status === 'finished') break;
 
-  const next = host.getByRole('button', { name: 'Siguiente silueta' });
-  if (await next.count()) {
-    await next.click().catch(() => {});
-    await host.waitForTimeout(900);
-  } else {
-    // Ronda en curso: dejar que el reloj la cierre.
-    await host.waitForTimeout(1800);
-  }
+  // Ronda en curso: dejar que el reloj la cierre. Terminada, confirmar.
+  if (await avanzar(host)) await host.waitForTimeout(900);
+  else await host.waitForTimeout(1800);
 }
 
 const fin = await stateOf();

@@ -1,4 +1,5 @@
 import { chromium } from 'playwright';
+import { avanzar, esperarRevelacion } from './helpers.mjs';
 const BASE = process.argv[2] || 'http://localhost:3000';
 const SHOT = 'C:/Users/migue/AppData/Local/Temp/claude/d--Programas-Utilities-Proyectos-Siluetas/ed3f0880-0d1f-472e-b522-7dccb38476fc/scratchpad';
 
@@ -59,16 +60,27 @@ const bidText = await host.locator('text=va ganando').first().textContent();
 console.log('PASS host sees live bid:', bidText?.trim());
 
 // --- Wait for the round to settle and reveal
-await host.waitForSelector('text=Siguiente silueta', { timeout: 40000 });
+await esperarRevelacion(host);
 console.log('PASS round auto-finalized and revealed');
 
-// Every visible image must actually decode, not just have a src.
-await host.waitForTimeout(2500);
+// Every visible image must actually decode, not just have a src. Wait for them
+// to settle first: measuring right away reported a perfectly good EA card as
+// broken simply because it had not finished downloading.
+await host.waitForFunction(
+  () => [...document.images].every((i) => i.complete),
+  null,
+  { timeout: 20000 }
+).catch(() => {});
+
 const imgs = await host.evaluate(() =>
   [...document.images].map((i) => ({ src: i.currentSrc.slice(-40), ok: i.complete && i.naturalWidth > 0 }))
 );
 const broken = imgs.filter((i) => !i.ok);
-console.log(`PASS all ${imgs.length} images loaded:`, broken.length === 0, broken.map(b => b.src).join(','));
+// PASS/FAIL de verdad: antes decía PASS y a continuación imprimía false.
+console.log(
+  `${broken.length === 0 ? 'PASS' : 'FAIL'} all ${imgs.length} images loaded`,
+  broken.map((b) => b.src).join(',')
+);
 await host.screenshot({ path: `${SHOT}/ui_3_reveal.png` });
 
 const revealed = await host.locator('h2').last().textContent();

@@ -3,6 +3,7 @@
  * quién entra al sorteo, cuánto paga, y qué épocas salen.
  */
 import { chromium } from 'playwright';
+import { avanzar, esperarRevelacion } from './helpers.mjs';
 
 const BASE = process.argv[2] || 'http://localhost:3000';
 const browser = await chromium.launch();
@@ -63,7 +64,7 @@ const antes = await stateOf(host);
 const yo = antes.me.id;
 
 await host.getByRole('button', { name: /^Pasar/ }).click();
-await host.waitForSelector('text=Siguiente silueta', { timeout: 45000 });
+await esperarRevelacion(host);
 await host.waitForTimeout(1500);
 
 const despues = await stateOf(host);
@@ -75,7 +76,7 @@ check('el sorteo cobra el piso de 10', r.current_bid === 10, `pagó ${r.current_
 // Las épocas, sobre las rondas que se vayan jugando.
 const epocas = new Set([r.era_label].filter(Boolean));
 for (let i = 0; i < 6; i++) {
-  await host.getByRole('button', { name: 'Siguiente silueta' }).click().catch(() => {});
+  await avanzar(host);
   await host.waitForTimeout(1200);
   const s = await stateOf(host);
   if (s.currentRound?.era_label) epocas.add(s.currentRound.era_label);
