@@ -125,7 +125,19 @@ function parseBirthdate(raw: string | null): string | null {
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 }
 
-async function fetchJson<T>(url: string, attempts = 4): Promise<T | null> {
+/**
+ * Cuántas veces se quedó sin datos por cuota y no porque el dato no exista.
+ *
+ * La diferencia importa: lo primero se recupera volviendo a correr, lo segundo
+ * no. Sin separarlos, un jugador bloqueado por la cuota se contaba igual que
+ * uno que TheSportsDB no tiene, y el resumen final decía que faltan miles de
+ * fotos cuando en realidad falta cuota.
+ */
+export const throttled = { hits: 0 };
+
+async function fetchJson<T>(url: string, attempts = 6): Promise<T | null> {
+  let porCuota = false;
+
   for (let i = 0; i < attempts; i++) {
     try {
       const res = await fetch(url, {
@@ -134,7 +146,8 @@ async function fetchJson<T>(url: string, attempts = 4): Promise<T | null> {
       });
 
       if (res.status === 429 || res.status >= 500) {
-        await sleep(3500 * (i + 1));
+        porCuota = true;
+        await sleep(5000 * (i + 1));
         continue;
       }
       if (!res.ok) return null;
@@ -142,7 +155,11 @@ async function fetchJson<T>(url: string, attempts = 4): Promise<T | null> {
       const body = await res.text();
       // Throttled responses come back as an HTML page on a 200.
       if (!body.trim() || body.trimStart().startsWith('<')) {
-        await sleep(4000 * (i + 1));
+        porCuota = true;
+        // Espera larga a propósito. Con la clave gratuita la cuota se recupera
+        // en decenas de segundos, y perder al jugador cuesta más que esperar:
+        // volver a intentarlo después implica repetir toda la corrida.
+        await sleep(6000 * (i + 1));
         continue;
       }
 
@@ -151,6 +168,8 @@ async function fetchJson<T>(url: string, attempts = 4): Promise<T | null> {
       await sleep(2500 * (i + 1));
     }
   }
+
+  if (porCuota) throttled.hits++;
   return null;
 }
 
@@ -387,6 +406,8 @@ async function main() {
   console.log(
     `
 subastables=${withSilhouette} sinSilueta=${noSilhouette} yaEstaban=${skipped} incompletos=${incomplete}` +
+      `
+de los que fallaron, ${throttled.hits} fue por cuota agotada y no porque falte el dato` +
       `
 Volvé a correr con --resume para reintentar los que quedaron sin silueta.`
   );
