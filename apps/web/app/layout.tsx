@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -12,7 +13,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es">
       {/* No background colour here: an opaque class on the body covers the
           gradient painted on the root element. */}
-      <body className="text-white">{children}</body>
+      <body className="text-white">
+        {children}
+        <SpeedInsights />
+      </body>
     </html>
   );
 }
