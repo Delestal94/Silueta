@@ -32,3 +32,4 @@ apps/web/e2e/_*.mjs
 # texto plano. No hace falta en el repo: el secreto vive en el panel de
 # Supabase, no acá.
 client_secret*.json
+jugadores-y-puntajes*.csv

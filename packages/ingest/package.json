@@ -18,7 +18,8 @@
     "colours": "tsx --env-file-if-exists=.env src/mirror-renders.ts",
     "legends": "tsx --env-file-if-exists=.env src/ingest-legends.ts",
     "icons": "tsx src/make-icons.ts",
-    "cursors": "tsx src/make-cursors.ts"
+    "cursors": "tsx src/make-cursors.ts",
+    "scores": "tsx --env-file-if-exists=.env src/export-scores.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
