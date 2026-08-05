@@ -1,8 +1,8 @@
 /**
  * La ruleta de empate, jugada de punta a punta.
  *
- * Dos empujados ofertan 25 cada uno y nadie más puja. Lo que hay que ver:
- * que a los dos se les cobre, que el ganador no pague dos veces, que la ruleta
+ * Dos empujados ofertan 25 cada uno y nadie más puja. Lo que hay que ver: que
+ * ofertar no les cueste nada, que sólo pague el que se lo lleva, que la ruleta
  * aparezca, y —lo más importante— que los nombres no estén en el DOM mientras
  * gira. Un nombre tapado con CSS se lee igual desde el inspector.
  */
@@ -76,10 +76,10 @@ await host.waitForTimeout(1200);
 
 const enRonda = await estado(host);
 check(
-  'a los dos empujados les cobraron 25',
+  'a los empujados no se les cobra al ofertar',
   enRonda.room.room_participants
     .filter((p) => p.display_name !== 'Davo')
-    .every((p) => p.remaining_budget === 175),
+    .every((p) => p.remaining_budget === 200),
   enRonda.room.room_participants.map((p) => `${p.display_name}=${p.remaining_budget}`).join(' ')
 );
 check('nadie figura ganando', enRonda.currentRound.current_bid_by === null);
@@ -103,9 +103,18 @@ const fin = await estado(host);
 const ganador = fin.room.room_participants.find((p) => p.id === fin.currentRound.current_bid_by);
 check('el destapado es el que ganó', ganador && destapado[0] === ganador.display_name, ganador?.display_name);
 check(
-  'el ganador no pagó dos veces',
+  'sólo paga el que se lo lleva',
   ganador && ganador.remaining_budget === 175,
   String(ganador?.remaining_budget)
+);
+
+const perdedor = fin.room.room_participants.find(
+  (p) => p.display_name !== 'Davo' && p.id !== fin.currentRound.current_bid_by
+);
+check(
+  'al que perdió el sorteo no le costó nada',
+  perdedor && perdedor.remaining_budget === 200,
+  String(perdedor?.remaining_budget)
 );
 
 console.log(fallos ? `\n${fallos} fallaron` : '\ntodo en orden');
