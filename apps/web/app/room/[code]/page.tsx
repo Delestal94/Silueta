@@ -212,6 +212,12 @@ export default function RoomPage() {
   const castPower = useCallback(
     async (power: PowerId, targetId: string | null) => {
       const data = await act(`/api/rooms/${code}/powers`, { power, targetId });
+
+      // Se lo pararon: no es un error, es el escudo del otro haciendo lo suyo.
+      if (data?.blocked) {
+        push('Tenía escudo. Te lo pararon y perdiste lo que pusiste.', 'info');
+        return;
+      }
       if (data) {
         const label = POWER_BY_ID[power].name;
         push(

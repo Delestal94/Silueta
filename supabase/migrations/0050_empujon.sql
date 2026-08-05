@@ -32,10 +32,17 @@ returns integer language sql immutable as $$
   end;
 $$;
 
-alter table public.power_effects drop constraint if exists power_effects_power_check;
-alter table public.power_effects
-  add constraint power_effects_power_check
-  check (power in ('soplo', 'apagon', 'espejismo', 'impuesto', 'traba', 'manotazo', 'empujon'));
+-- 0054 agrega 'escudo' y 'reversa' a esta misma restricción. Si ya se pasó de
+-- acá, reponer la lista vieja falla contra filas que hoy son válidas.
+do $$
+begin
+  if not exists (select 1 from public.power_effects where power in ('escudo', 'reversa')) then
+    alter table public.power_effects drop constraint if exists power_effects_power_check;
+    alter table public.power_effects
+      add constraint power_effects_power_check
+      check (power in ('soplo', 'apagon', 'espejismo', 'impuesto', 'traba', 'manotazo', 'empujon'));
+  end if;
+end $$;
 
 -- ---------- la ronda ejecuta la oferta forzada ----------
 

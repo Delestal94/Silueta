@@ -15,6 +15,7 @@ const schema = z.object({
 
 const ERRORS: Record<string, [string, number]> = {
   unknown_power: ['Ese poder no existe', 400],
+  already_defended: ['Ya tenés esa defensa puesta', 409],
   not_a_participant: ['No estás en esta sala', 403],
   cannot_target_self: ['No podés tirártelo a vos mismo', 400],
   target_not_found: ['Ese jugador no está en la sala', 404],
@@ -69,8 +70,11 @@ export async function POST(
     // The response never names the decoy: the caster could relay it, but more
     // to the point it would sit in the victim's own network tab on the refresh
     // that follows.
+    // `blocked` sí viaja: el que tiró tiene que enterarse de que se lo pararon.
+    // `reflected` no, a propósito — si la reversa avisara, dejaría de ser una
+    // trampa y se volvería un escudo más caro.
     return NextResponse.json(
-      { power, immediate: data?.immediate ?? false },
+      { power, immediate: data?.immediate ?? false, blocked: data?.blocked ?? false },
       { status: 201 }
     );
   } catch (error) {

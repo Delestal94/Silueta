@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { POWERS, type PowerId } from '@/lib/game/powers';
+import { DEFENSIVE_POWERS, POWERS, type PowerId } from '@/lib/game/powers';
 import type { Participant, PowerEffect } from '@/lib/game/types';
 
 export function PowerPanel({
@@ -33,7 +33,13 @@ export function PowerPanel({
     );
   }
 
-  const hexedIds = new Set(effects.filter((e) => e.status === 'pending').map((e) => e.target_id));
+  // Sin excluir los defensivos, alguien con escudo figuraba como intocable —
+  // y el escudo tiene que bloquear un poder, no volverlo inmune.
+  const hexedIds = new Set(
+    effects
+      .filter((e) => e.status === 'pending' && !DEFENSIVE_POWERS.has(e.power as PowerId))
+      .map((e) => e.target_id)
+  );
   const castByMe = effects.filter((e) => e.caster_id === meId && e.status !== 'consumed');
 
   // What the strip under the icons is explaining right now. Hovering wins over

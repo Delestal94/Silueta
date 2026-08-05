@@ -5,7 +5,9 @@ export type PowerId =
   | 'impuesto'
   | 'traba'
   | 'manotazo'
-  | 'empujon';
+  | 'empujon'
+  | 'escudo'
+  | 'reversa';
 
 export interface Power {
   id: PowerId;
@@ -79,6 +81,26 @@ export const POWERS: Power[] = [
     victimNotice: 'Impuesto: si ganás esta ronda, pagás el doble.',
   },
   {
+    id: 'escudo',
+    icon: '🛡️',
+    name: 'Escudo',
+    cost: 14,
+    description:
+      'Para el próximo poder que te tiren. Se gasta al hacerlo, y el que tiró pierde lo que puso.',
+    victimNotice: '',
+    selfTargeted: true,
+  },
+  {
+    id: 'reversa',
+    icon: '↩️',
+    name: 'Reversa',
+    cost: 20,
+    description:
+      'El próximo poder que te tiren le cae a quien lo tiró. No se entera hasta la ronda siguiente.',
+    victimNotice: '',
+    selfTargeted: true,
+  },
+  {
     id: 'empujon',
     name: 'Empujón',
     icon: '👊',
@@ -89,6 +111,16 @@ export const POWERS: Power[] = [
     victimNotice: 'Te empujaron: ya ofertaste en esta ronda sin quererlo.',
   },
 ];
+
+/**
+ * Los que uno se compra para defenderse.
+ *
+ * Importa distinguirlos porque se guardan como un efecto pendiente apuntando a
+ * uno mismo, igual que un poder hostil. Contándolos como tales, el panel leía
+ * "ya tiene un poder esperando" y no dejaba apuntarle a nadie que tuviera
+ * escudo — que lo convertía en invulnerabilidad, y de paso lo delataba.
+ */
+export const DEFENSIVE_POWERS: ReadonlySet<PowerId> = new Set<PowerId>(['escudo', 'reversa']);
 
 export const POWER_BY_ID: Record<PowerId, Power> = Object.fromEntries(
   POWERS.map((p) => [p.id, p])
