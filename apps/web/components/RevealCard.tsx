@@ -27,15 +27,12 @@ function ratingTone(rating: number): string {
 export function RevealCard({
   round,
   winnerName,
-  isHost,
-  onNext,
-  busy,
+  footer,
 }: {
   round: CurrentRound;
   winnerName: string | null;
-  isHost: boolean;
-  onNext: () => void;
-  busy: boolean;
+  /** El control para pasar de ronda. Lo arma la sala, que sabe quién falta. */
+  footer: React.ReactNode;
 }) {
   // Espejismo stays quiet during the bidding, so the reveal is the first the
   // victim hears of it.
@@ -210,13 +207,10 @@ export function RevealCard({
         <p className="text-sm text-white/50">
           Ronda {round.round_number} · {POSITION_LABELS[round.position_type]}
         </p>
-        {isHost ? (
-          <button onClick={onNext} disabled={busy} className="btn-primary shrink-0">
-            {busy ? 'Preparando…' : 'Siguiente silueta'}
-          </button>
-        ) : (
-          <p className="text-sm text-white/50">Esperando al anfitrión…</p>
-        )}
+        {/* Confirman todos, no sólo el anfitrión: antes la ficha desaparecía
+            cuando a otro se le ocurría seguir, sin que el resto llegara a
+            leerla. */}
+        {footer}
       </div>
     </section>
   );

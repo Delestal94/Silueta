@@ -23,6 +23,7 @@ import { RosterRail } from '@/components/RosterRail';
 import { FinalStandings } from '@/components/FinalStandings';
 import { RematchPanel, type RematchSettings } from '@/components/RematchPanel';
 import { Ruleta } from '@/components/Ruleta';
+import { ConfirmarRonda } from '@/components/ConfirmarRonda';
 import { Toasts, useToasts } from '@/components/Toasts';
 import { PowerPanel } from '@/components/PowerPanel';
 import { RulesModal } from '@/components/RulesModal';
@@ -257,6 +258,13 @@ export default function RoomPage() {
     currentPos && myCounts ? myCounts[currentPos] >= (requirements[currentPos] ?? 0) : false;
 
   const currentBid = round?.current_bid ?? 0;
+// Con todos los equipos completos ya no queda ronda por jugar: lo que sigue
+  // es la tabla final, y el botón tiene que decir eso.
+  const todosCompletos =
+    !!room &&
+    room.room_participants.length > 0 &&
+    room.room_participants.every((p) => isTeamComplete(p, room.requirements));
+
   const iAmTopBidder = !!me && round?.current_bid_by === me.id;
   const budget = meParticipant?.remaining_budget ?? 0;
 
@@ -314,9 +322,18 @@ export default function RoomPage() {
         winnerName={
           room.room_participants.find((p) => p.id === round.current_bid_by)?.display_name ?? null
         }
-        isHost={!!identity?.hostToken}
-        onNext={startRound}
-        busy={busy}
+        footer={
+          <ConfirmarRonda
+            participants={room.room_participants}
+            meId={me?.id ?? null}
+            isHost={!!identity?.hostToken}
+            onReady={markReady}
+            onForce={startRound}
+            busy={busy}
+            terminado={todosCompletos}
+            compact
+          />
+        }
       />
       {/* Half the point of the mode: seeing what everybody else was willing to
           pay is the only feedback you get about how far off you were. */}
@@ -340,6 +357,7 @@ export default function RoomPage() {
   );
 
   const sealedMode = room?.auction_mode === 'sealed';
+
 
   const controls = liveRound ? (
     <>
