@@ -232,3 +232,41 @@ textarea,
     cursor: pointer;
   }
 }
+
+/* --- Barras de desplazamiento ------------------------------------------- */
+
+/* La del sistema en Windows es blanca y ancha: sobre un panel oscuro se lee
+   como un error de la página, no como un control. Ésta es fina, del color del
+   borde de los paneles, y se aclara al pasar el mouse para que siga siendo
+   visible cuando hace falta agarrarla.
+
+   Se estiliza y no se esconde a propósito: sin barra, nada avisa que abajo hay
+   más contenido, y en el rail de la sala eso es media tabla de posiciones. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Sin esto, el ángulo donde se cruzan las dos barras queda de un gris claro
+   que el resto de la regla no alcanza. */
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
