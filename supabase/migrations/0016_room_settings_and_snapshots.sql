@@ -40,9 +40,17 @@ alter table public.rooms
   add constraint rooms_gender_filter_check
   check (gender_filter in ('men', 'women', 'any'));
 
-alter table public.rooms drop constraint if exists rooms_pool_check;
-alter table public.rooms
-  add constraint rooms_pool_check check (pool in ('famous', 'all'));
+-- 0051 agrega 'balanced' a esta misma restricción. En una base que ya pasó por
+-- ahí, reponer la lista vieja falla contra salas que hoy son válidas — y como
+-- el lote se corre entero cada vez, esa falla salía en cada corrida.
+do $$
+begin
+  if not exists (select 1 from public.rooms where pool = 'balanced') then
+    alter table public.rooms drop constraint if exists rooms_pool_check;
+    alter table public.rooms
+      add constraint rooms_pool_check check (pool in ('famous', 'all'));
+  end if;
+end $$;
 
 grant select (
   id, code, status, starting_budget, round_number,
