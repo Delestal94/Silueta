@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { errorResponse } from '@/lib/game/http';
 import { z } from 'zod';
+import { POWERS, type PowerId } from '@/lib/game/powers';
 
 const schema = z.object({
-  power: z.enum(['soplo', 'apagon', 'espejismo', 'impuesto', 'traba', 'manotazo']),
+  // Derivado del catálogo, no escrito a mano: con la lista repetida acá, un
+  // poder nuevo pasaba el tipado y el panel lo dibujaba, pero esta ruta lo
+  // rechazaba antes de llegar a la base — y sin error visible en pantalla.
+  power: z.enum(POWERS.map((p) => p.id) as [PowerId, ...PowerId[]]),
   // "soplo" is bought for yourself, so it carries no target.
   targetId: z.string().uuid().nullish(),
 });

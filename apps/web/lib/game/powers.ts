@@ -1,4 +1,11 @@
-export type PowerId = 'soplo' | 'apagon' | 'espejismo' | 'impuesto' | 'traba' | 'manotazo';
+export type PowerId =
+  | 'soplo'
+  | 'apagon'
+  | 'espejismo'
+  | 'impuesto'
+  | 'traba'
+  | 'manotazo'
+  | 'empujon';
 
 export interface Power {
   id: PowerId;
@@ -18,7 +25,8 @@ export interface Power {
  * about it costs more, and taking money costs most. They come out of the same
  * budget used to buy players, so sabotage always weakens your own squad.
  *
- * Kept in sync with power_cost() in migration 0020.
+ * Kept in sync with power_cost(), whose latest version is migration 0050 —
+ * and that one is the authority: esta lista sólo los muestra.
  */
 export const POWERS: Power[] = [
   {
@@ -69,6 +77,16 @@ export const POWERS: Power[] = [
     cost: 20,
     description: 'Si gana la próxima ronda, paga el doble.',
     victimNotice: 'Impuesto: si ganás esta ronda, pagás el doble.',
+  },
+  {
+    id: 'empujon',
+    name: 'Empujón',
+    icon: '👊',
+    cost: 20,
+    description:
+      'Oferta 25 por él apenas arranca la próxima ronda, quiera o no. Si no le alcanza, pone todo lo que tiene.',
+    // Se entera al ver la ronda: su oferta ya está puesta y no la puso él.
+    victimNotice: 'Te empujaron: ya ofertaste en esta ronda sin quererlo.',
   },
 ];
 

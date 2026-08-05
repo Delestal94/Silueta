@@ -51,7 +51,9 @@ export function PowerPanel({
         Se activan en la próxima ronda. Uno por rival a la vez.
       </p>
 
-      <ul className="grid grid-cols-6 gap-1.5" onMouseLeave={() => setHovered(null)}>
+      {/* Cuatro columnas y dos filas: con siete poderes en una sola fila cada
+          icono baja de los 44px que hace falta para tocarlo con el dedo. */}
+      <ul className="grid grid-cols-4 gap-1.5" onMouseLeave={() => setHovered(null)}>
         {POWERS.map((power) => {
           const affordable = power.cost <= budget;
           const active = picked === power.id;
