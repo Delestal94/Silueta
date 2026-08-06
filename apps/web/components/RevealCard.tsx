@@ -181,7 +181,7 @@ export function RevealCard({
 
           {/* Silueta a la derecha */}
           {p.colour_url && (
-            <div className="relative aspect-square flex items-start justify-center overflow-hidden">
+            <div className="relative aspect-square flex items-center justify-center overflow-hidden">
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0 flex items-center justify-center"
@@ -195,7 +195,7 @@ export function RevealCard({
               <img
                 src={p.colour_url}
                 alt={p.name}
-                className="animate-reveal relative max-h-[280px] w-auto object-contain"
+                className="animate-reveal relative max-h-full max-w-full w-auto h-auto object-contain"
               />
             </div>
           )}
