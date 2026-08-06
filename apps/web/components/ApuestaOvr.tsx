@@ -2,6 +2,17 @@
 
 import { useState } from 'react';
 
+const spinStyles = `
+  @keyframes ovr-spin {
+    0% { transform: scale(1) rotateY(0deg); opacity: 1; }
+    50% { transform: scale(1.1) rotateY(180deg); opacity: 0.7; }
+    100% { transform: scale(1) rotateY(360deg); opacity: 1; }
+  }
+  .ovr-spinning {
+    animation: ovr-spin 0.3s infinite;
+  }
+`;
+
 /**
  * El reto por el OVR del jugador que acabás de comprar.
  *
@@ -100,7 +111,9 @@ export function ApuestaOvr({
   };
 
   return (
-    <section className="panel animate-pop space-y-4 p-5">
+    <>
+      <style>{spinStyles}</style>
+      <section className="panel animate-pop space-y-4 p-5">
       <header className="space-y-1">
         <h3 className="text-lg font-bold">
           ¿Te la jugás por el OVR?
@@ -114,7 +127,7 @@ export function ApuestaOvr({
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Izquierda: lo que está en juego. */}
         <div className="flex flex-col justify-between gap-4">
-          <div className="space-y-3">
+          <div className={`space-y-3 ${ocupado ? 'ovr-spinning' : ''}`}>
             <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-3">
               <span className="flex items-center gap-2 text-lg font-bold text-emerald-300">
                 <Tendencia sube /> +{reto.gana} OVR
@@ -163,6 +176,7 @@ export function ApuestaOvr({
         </div>
       </div>
     </section>
+    </>
   );
 }
 
