@@ -84,18 +84,41 @@ export default function RoomPage() {
     [room, me]
   );
 
-  // El reto por el OVR de la ronda que se acaba de revelar: el fichaje del que
-  // se llevó la silueta, sea quien sea. Decide el dueño, pero lo mira toda la
-  // sala — la gracia es ver cómo le fue. Se busca por el fichaje y no por la
-  // ronda: la apuesta vive con el jugador comprado, así que sobrevive a un
-  // refresco y no se puede volver a tirar.
-  const retoDeLaRonda = useMemo(() => {
+  // El fichaje de la ronda que se acaba de revelar: la fila del que se llevó
+  // la silueta, sea quien sea. De acá salen el reto por el OVR y el rating con
+  // el que quedó el jugador. Se busca por el fichaje y no por la ronda: la
+  // apuesta vive con el jugador comprado, así que sobrevive a un refresco y no
+  // se puede volver a tirar.
+  const fichajeDeLaRonda = useMemo(() => {
     if (!round?.revealed || !round.player?.id || !round.current_bid_by) return null;
     const duenio = room?.room_participants.find((p) => p.id === round.current_bid_by);
     const fichaje = duenio?.team_players.find((s) => s.players.id === round.player.id);
-    if (!duenio || !fichaje || typeof fichaje.ovr_prob !== 'number') return null;
+    if (!duenio || !fichaje) return null;
     return { fichaje, quien: duenio.display_name, mio: duenio.id === me?.id };
   }, [round, room, me]);
+
+  // El reto sólo existe si el fichaje trae los números sorteados. Los que se
+  // compraron antes de que existiera la apuesta no tienen ninguno.
+  const retoDeLaRonda =
+    fichajeDeLaRonda && typeof fichajeDeLaRonda.fichaje.ovr_prob === 'number'
+      ? fichajeDeLaRonda
+      : null;
+
+  // Desde cuándo se puede mostrar arriba el rating con la apuesta ya aplicada.
+  // Lo avisa el panel del reto al frenar la ruleta: si el número de la ficha se
+  // actualizara al llegar la respuesta del servidor, cantaría el resultado
+  // mientras las dos filas todavía están girando. Se guarda el id del jugador
+  // y no un booleano para que la ronda siguiente arranque tapada sola.
+  const [ovrRevelado, setOvrRevelado] = useState<string | null>(null);
+  const marcarOvrRevelado = useCallback(() => {
+    const id = round?.player?.id;
+    if (id) setOvrRevelado(id);
+  }, [round?.player?.id]);
+
+  const ratingFinal =
+    fichajeDeLaRonda && ovrRevelado === round?.player?.id
+      ? fichajeDeLaRonda.fichaje.rating
+      : null;
 
   const msLeft = round?.status === 'active' ? new Date(round.ends_at).getTime() - now : 0;
   const secondsLeft = Math.max(0, Math.ceil(msLeft / 1000));
@@ -344,6 +367,7 @@ export default function RoomPage() {
       )}
       <RevealCard
         round={round}
+        ratingFinal={ratingFinal}
         winnerName={
           room.room_participants.find((p) => p.id === round.current_bid_by)?.display_name ?? null
         }
@@ -377,6 +401,7 @@ export default function RoomPage() {
           bet={retoDeLaRonda.fichaje.ovr_bet ?? null}
           delta={retoDeLaRonda.fichaje.ovr_delta}
           onDecidir={apostarOvr}
+          onRevelado={marcarOvrRevelado}
         />
       )}
       {/* Half the point of the mode: seeing what everybody else was willing to

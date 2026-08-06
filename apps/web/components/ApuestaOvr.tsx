@@ -120,6 +120,7 @@ export function ApuestaOvr({
   bet,
   delta,
   onDecidir,
+  onRevelado,
 }: {
   reto: RetoOvr;
   playerId: string;
@@ -133,6 +134,13 @@ export function ApuestaOvr({
   bet: string | null;
   delta: number | null;
   onDecidir: (decision: 'va' | 'paso') => Promise<void>;
+  /**
+   * Se avisa cuando la ruleta frena y el resultado queda a la vista, para que
+   * la ficha de arriba pueda mostrar recién ahí el rating ya corregido. Sin
+   * esto el número de la ficha cambiaría al llegar la respuesta del servidor,
+   * cantando el final con las filas todavía girando.
+   */
+  onRevelado?: () => void;
 }) {
   const [ocupado, setOcupado] = useState(false);
   /** Hasta cuándo sigue girando la ruleta, o null si no está girando. */
@@ -177,6 +185,10 @@ export function ApuestaOvr({
   const decidido = bet !== null && !girando;
   const subio = (delta ?? 0) > 0;
   const bajo = (delta ?? 0) < 0;
+
+  useEffect(() => {
+    if (decidido) onRevelado?.();
+  }, [decidido, onRevelado]);
 
   // Durante la ruleta se turnan las dos filas. Cuando ya se sabe, queda
   // encendida la que salió; con delta en cero —un 99 que no puede subir más,

@@ -27,10 +27,17 @@ function ratingTone(rating: number): string {
 export function RevealCard({
   round,
   winnerName,
+  ratingFinal,
   footer,
 }: {
   round: CurrentRound;
   winnerName: string | null;
+  /**
+   * El rating con el que quedó el fichaje después del reto por el OVR, o null
+   * mientras no haya nada que corregir. La sala lo pasa recién cuando la
+   * ruleta frenó: antes de eso este número contaría el final.
+   */
+  ratingFinal?: number | null;
   /** El control para pasar de ronda. Lo arma la sala, que sabe quién falta. */
   footer: React.ReactNode;
 }) {
@@ -39,7 +46,14 @@ export function RevealCard({
   const wasFooled = round.myHex?.power === 'espejismo';
   const p = round.player;
   const age = ageAt(p.birth_date, round.season_year);
-  const rating = round.era_rating;
+  // Los puntos de la subasta son los que se lleva el que compró, así que si la
+  // apuesta movió el OVR el número de acá arriba tiene que moverse con él: es
+  // el que todos miran, y el que suma en la tabla.
+  const rating = ratingFinal ?? round.era_rating;
+  const ajusteOvr =
+    ratingFinal !== null && ratingFinal !== undefined && round.era_rating !== null
+      ? ratingFinal - round.era_rating
+      : 0;
 
   // EA reuses the same six slots for keepers, but they mean diving, handling,
   // kicking, reflexes, speed and positioning — not the outfield attributes.
@@ -103,6 +117,19 @@ export function RevealCard({
                 Puntos de esta subasta
               </p>
               <p className={`text-5xl font-black leading-none ${ratingTone(rating)}`}>{rating}</p>
+              {/* De dónde salió el cambio. Sin esto el número aparece movido
+                  respecto del que se cantó al venderlo y no queda claro por
+                  qué. */}
+              {ajusteOvr !== 0 && (
+                <p
+                  className={`animate-pop mt-1 text-xs font-bold tabular-nums ${
+                    ajusteOvr > 0 ? 'text-emerald-300' : 'text-rose-300'
+                  }`}
+                >
+                  {ajusteOvr > 0 ? '+' : ''}
+                  {ajusteOvr} por la apuesta
+                </p>
+              )}
               {round.season_year && (
                 <p className="mt-1 text-xs text-white/45">
                   temporada {round.season_year}
