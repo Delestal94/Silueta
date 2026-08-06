@@ -10,6 +10,20 @@
  * blobs; TheSportsDB's `strRender` is a full-body action pose that actually
  * reads as a specific player. A player without a render is imported but left
  * un-auctionable (`notable = false`).
+ *
+ * Modos:
+ *
+ *   npm run ingest      -- CATALOG_SIZE=400 por defecto, o "all"
+ *   npm run ingest:resume  -- saltea a los que ya tienen silueta de render
+ *   npm run recuperar      -- reintenta sólo a los que quedaron en cuarentena
+ *
+ * Sobre la cuota: TheSportsDB con la clave gratuita corta con 429 y un
+ * `error code: 1015` de Cloudflare que dura un buen rato. fetchJson reintenta
+ * con esperas crecientes, pero si el bloqueo persiste toda la corrida termina
+ * diciendo "sin silueta jugable" para gente que sí tiene foto. Por eso el
+ * resumen final separa `throttled.hits`: si ese número es alto, la corrida no
+ * midió nada y hay que repetirla más tarde, no sacar conclusiones de ella.
+ * `--recuperar` existe para que repetirla cueste minutos y no horas.
  */
 import { createClient } from '@supabase/supabase-js';
 import sharp from 'sharp';
@@ -177,11 +191,49 @@ async function findRender(ea: EaPlayer, name: string): Promise<SportsDbPlayer | 
   return full?.players?.[0] ?? null;
 }
 
+/**
+ * Los ea_id que están fuera de juego por tener la silueta de otra persona.
+ *
+ * Se usa para reintentar sólo a ésos. Sin esto hay que recorrer los 17.470 de
+ * EA desde el puesto 1 para llegar a doscientos y pico repartidos por todo el
+ * ranking, y con la cuota de TheSportsDB eso son horas — de las cuales casi
+ * todas se van en jugadores que ya están bien.
+ */
+async function enCuarentena(): Promise<Set<number>> {
+  const ids = new Set<number>();
+  const TAMANO = 1000;
+
+  for (let desde = 0; ; desde += TAMANO) {
+    const { data, error } = await supabase
+      .from('players')
+      .select('ea_id')
+      .eq('notable', false)
+      .not('silhouette_url', 'is', null)
+      .not('ea_id', 'is', null)
+      .range(desde, desde + TAMANO - 1);
+
+    if (error) {
+      console.error(`No se pudo leer la cuarentena: ${error.message}`);
+      process.exit(1);
+    }
+
+    for (const r of data || []) ids.add(r.ea_id as number);
+    if (!data || data.length < TAMANO) break;
+  }
+
+  return ids;
+}
+
 async function main() {
   const resume = process.argv.includes('--resume');
+  // Reintenta únicamente a los que quedaron con la silueta de otro.
+  const soloCuarentena = process.argv.includes('--recuperar');
   // "all" walks EA's entire roster; a number caps it.
   const requested = process.env.CATALOG_SIZE ?? '400';
-  const wanted = requested === 'all' ? Number.POSITIVE_INFINITY : Number(requested);
+  const wanted =
+    // Recuperar necesita el listado entero de EA para encontrarlos: están
+    // repartidos por todo el ranking, no en la punta.
+    soloCuarentena || requested === 'all' ? Number.POSITIVE_INFINITY : Number(requested);
 
   console.log(`Pulling the top ${wanted} EA FC players\n`);
 
@@ -194,7 +246,14 @@ async function main() {
     await sleep(700);
   }
 
-  const catalog = Number.isFinite(wanted) ? roster.slice(0, wanted) : roster;
+  let catalog = Number.isFinite(wanted) ? roster.slice(0, wanted) : roster;
+
+  if (soloCuarentena) {
+    const ids = await enCuarentena();
+    catalog = catalog.filter((p) => ids.has(p.id));
+    console.log(`\nSólo cuarentena: ${ids.size} marcados, ${catalog.length} encontrados en EA`);
+  }
+
   console.log(`\nProcessing ${catalog.length} players\n`);
 
   const alreadyNotable = new Set<number>();
