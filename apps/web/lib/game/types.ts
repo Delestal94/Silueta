@@ -55,6 +55,20 @@ export interface TeamSigning {
   season_year: number | null;
   era_label: string | null;
   players: CatalogPlayer;
+  /**
+   * El reto por el OVR. La probabilidad y los puntos se sortean por separado
+   * al cerrarse la compra y viajan con el fichaje, no con la ronda: el que la
+   * ronda ya haya pasado no borra una apuesta pendiente.
+   *
+   * `ovr_bet` en null es "todavía no decidió"; 'va' es que se la jugó y
+   * 'paso' que no. Sin ese tercer estado no habría cómo distinguir a alguien
+   * que rechazó el reto de alguien a quien todavía no se lo ofrecieron.
+   */
+  ovr_bet: string | null;
+  ovr_delta: number | null;
+  ovr_prob: number | null;
+  ovr_gana: number | null;
+  ovr_pierde: number | null;
 }
 
 export interface Participant {

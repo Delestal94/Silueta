@@ -126,6 +126,24 @@ export function Rules({
         </p>
       </Section>
 
+      <Section title="Jugarse el OVR" icon="🎲">
+        <p>
+          Cuando te llevás una silueta te aparece un <strong>reto</strong>: podés arriesgar el
+          rating del jugador que acabás de comprar. Si sale, vale más de lo que pagaste; si no,
+          se te fue parte de la compra.
+        </p>
+        <p>
+          Los dos números salen sorteados y son independientes: la probabilidad puede ser
+          60‑40, 50‑50 o 40‑60, y lo que está en juego +3/−2, +2/−2 o +2/−3. O sea que puede
+          tocarte un 60% para ganar 3 y perder 2, que es un regalo, o un 40% para ganar 2 y
+          perder 3, que conviene dejar pasar. Por eso hay una salida.
+        </p>
+        <p>
+          Una sola vez por jugador, y sólo el que se lo llevó. La tirada la hace el servidor, así
+          que recargar la página no cambia el reto que te tocó.
+        </p>
+      </Section>
+
       <Section title="Poderes" icon="🪄">
         <p className="mb-3">
           Podés gastar presupuesto en sabotear a un rival en la ronda siguiente, o en darte

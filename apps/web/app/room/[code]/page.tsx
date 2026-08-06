@@ -24,6 +24,7 @@ import { FinalStandings } from '@/components/FinalStandings';
 import { RematchPanel, type RematchSettings } from '@/components/RematchPanel';
 import { Ruleta } from '@/components/Ruleta';
 import { ConfirmarRonda } from '@/components/ConfirmarRonda';
+import { ApuestaOvr, ResultadoOvr } from '@/components/ApuestaOvr';
 import { Toasts, useToasts } from '@/components/Toasts';
 import { PowerPanel } from '@/components/PowerPanel';
 import { RulesModal } from '@/components/RulesModal';
@@ -71,7 +72,6 @@ export default function RoomPage() {
   }, [serverNow]);
 
   const [busy, setBusy] = useState(false);
-  const [flipping, setFlipping] = useState(false);
   const [showRules, setShowRules] = useState(false);
   const finalizedRef = useRef<string | null>(null);
 
@@ -83,6 +83,14 @@ export default function RoomPage() {
     () => room?.room_participants.find((p) => p.id === me?.id) ?? null,
     [room, me]
   );
+
+  // El fichaje de la ronda que se acaba de revelar, si lo gané yo. Es lo que
+  // decide si se ofrece el reto por el OVR y si ya se resolvió.
+  const miFichajeDeEstaRonda = useMemo(() => {
+    if (!round?.revealed || !round.player?.id) return null;
+    if (!me?.id || round.current_bid_by !== me.id) return null;
+    return meParticipant?.team_players.find((s) => s.players.id === round.player.id) ?? null;
+  }, [round, me, meParticipant]);
 
   const msLeft = round?.status === 'active' ? new Date(round.ends_at).getTime() - now : 0;
   const secondsLeft = Math.max(0, Math.ceil(msLeft / 1000));
@@ -155,13 +163,27 @@ export default function RoomPage() {
 
   const pass = useCallback(async () => {
     const data = await act(`/api/rounds/${round?.id}/pass`);
-    if (data?.coin_flip) {
-      setFlipping(true);
-      setTimeout(() => setFlipping(false), 1900);
+    // Pasar ya no adjudica: si pasan todos, la silueta se saltea y no se la
+    // lleva nadie. Acá se avisaba de un sorteo que ya no ocurre.
+    if (data?.todos_pasaron) {
+      push('Pasaron todos. Este se va sin dueño.', 'info');
     } else if (data?.passed) {
-      push('Pasaste. Si todos pasan, se sortea.', 'info');
+      push('Pasaste. Quedás afuera del sorteo de esta silueta.', 'info');
     }
   }, [act, round?.id, push]);
+
+  const apostarOvr = useCallback(
+    async (decision: 'va' | 'paso') => {
+      const data = await act(`/api/rounds/${round?.id}/ovr`, { decision });
+      if (data?.ovr_bet === 'va') {
+        push(
+          data.gano ? `¡Entró! ${data.delta > 0 ? '+' : ''}${data.delta} OVR` : `La erró. ${data.delta} OVR`,
+          data.gano ? 'success' : 'error'
+        );
+      }
+    },
+    [act, round?.id, push]
+  );
 
   const markReady = useCallback(async () => {
     const data = await act(`/api/rooms/${code}/members`, { action: 'ready' });
@@ -335,6 +357,30 @@ export default function RoomPage() {
           />
         }
       />
+      {/* El reto por el OVR, sólo para el que se lo llevó. Se busca por el
+          fichaje y no por la ronda: la apuesta vive con el jugador comprado,
+          así que sobrevive a un refresco y no se puede volver a tirar. */}
+      {miFichajeDeEstaRonda &&
+        (miFichajeDeEstaRonda.ovr_bet ? (
+          <ResultadoOvr
+            bet={miFichajeDeEstaRonda.ovr_bet}
+            delta={miFichajeDeEstaRonda.ovr_delta}
+            rating={miFichajeDeEstaRonda.rating}
+          />
+        ) : (
+          typeof miFichajeDeEstaRonda.ovr_prob === 'number' && (
+            <ApuestaOvr
+              reto={{
+                prob: miFichajeDeEstaRonda.ovr_prob,
+                gana: miFichajeDeEstaRonda.ovr_gana ?? 0,
+                pierde: miFichajeDeEstaRonda.ovr_pierde ?? 0,
+              }}
+              playerId={round.player.id}
+              rating={miFichajeDeEstaRonda.rating}
+              onDecidir={apostarOvr}
+            />
+          )
+        ))}
       {/* Half the point of the mode: seeing what everybody else was willing to
           pay is the only feedback you get about how far off you were. */}
       {round.sealed && round.envelopes && (
@@ -417,7 +463,6 @@ export default function RoomPage() {
   return (
     <div className="min-h-screen px-3 py-3 sm:px-6 sm:py-5 lg:px-8">
       <Toasts toasts={toasts} />
-      {flipping && <CoinFlip />}
       {showRules && <RulesModal onClose={() => setShowRules(false)} />}
       {dialog}
 
@@ -679,19 +724,6 @@ function HexNotice({ power }: { power: string }) {
         {info.icon}
       </span>
       <p className="text-sm text-rose-100">{info.victimNotice}</p>
-    </div>
-  );
-}
-
-function CoinFlip() {
-  return (
-    <div className="fixed inset-0 z-40 grid place-items-center bg-black/70 backdrop-blur-sm">
-      <div className="text-center">
-        <div className="animate-flip mx-auto grid h-28 w-28 place-items-center rounded-full bg-gradient-to-br from-orange-300 to-orange-600 text-5xl shadow-[0_0_60px_-10px_rgba(245,130,31,0.9)]">
-          ⚽
-        </div>
-        <p className="mt-5 text-lg font-bold">Todos pasaron — se sortea</p>
-      </div>
     </div>
   );
 }
