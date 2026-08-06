@@ -111,35 +111,35 @@ export function ApuestaOvr({
         <p className="text-sm text-white/50">Una sola vez, y sólo por este jugador.</p>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         {/* Izquierda: lo que está en juego. */}
-        <div className="space-y-3">
-          <div className="space-y-2">
+        <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-3">
-              <span className="flex items-center gap-2 font-bold text-emerald-300">
+              <span className="flex items-center gap-2 text-lg font-bold text-emerald-300">
                 <Tendencia sube /> +{reto.gana} OVR
               </span>
-              <span className="rounded-full bg-emerald-400/20 px-2.5 py-1 text-sm font-bold text-emerald-300 tabular-nums">
+              <span className="rounded-full bg-emerald-400/20 px-3 py-1.5 text-sm font-bold text-emerald-300 tabular-nums">
                 {reto.prob}%
               </span>
             </div>
             <div className="flex items-center justify-between gap-3 rounded-xl border border-rose-400/25 bg-rose-400/10 px-4 py-3">
-              <span className="flex items-center gap-2 font-bold text-rose-300">
+              <span className="flex items-center gap-2 text-lg font-bold text-rose-300">
                 <Tendencia sube={false} /> −{reto.pierde} OVR
               </span>
-              <span className="rounded-full bg-rose-400/20 px-2.5 py-1 text-sm font-bold text-rose-300 tabular-nums">
+              <span className="rounded-full bg-rose-400/20 px-3 py-1.5 text-sm font-bold text-rose-300 tabular-nums">
                 {100 - reto.prob}%
               </span>
             </div>
           </div>
 
-          <p className="text-sm italic leading-snug text-white/55">
+          <p className="text-base italic leading-relaxed text-white/60">
             {frase(ARENGAS, playerId)}
           </p>
 
           <button
             type="button"
-            className="btn-primary w-full"
+            className="btn-primary w-full py-3 text-base font-bold"
             disabled={ocupado}
             onClick={() => decidir('va')}
           >
@@ -148,11 +148,13 @@ export function ApuestaOvr({
         </div>
 
         {/* Derecha: la salida. */}
-        <div className="flex flex-col justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
-          <p className="text-sm italic leading-snug text-white/55">{frase(EXCUSAS, playerId)}</p>
+        <div className="flex flex-col justify-between gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-5">
+          <p className="text-base italic leading-relaxed text-center text-white/60">
+            {frase(EXCUSAS, playerId)}
+          </p>
           <button
             type="button"
-            className="btn-ghost w-full"
+            className="btn-ghost w-full py-3 text-base font-bold"
             disabled={ocupado}
             onClick={() => decidir('paso')}
           >

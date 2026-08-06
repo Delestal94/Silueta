@@ -456,7 +456,6 @@ export default function RoomPage() {
         onCast={castPower}
         busy={busy}
       />
-      {meParticipant && <MyTeam participant={meParticipant} requirements={requirements} />}
     </>
   );
 
@@ -511,6 +510,13 @@ export default function RoomPage() {
                 {rail}
               </div>
             </div>
+
+            {/* Tu equipo: full width, entre la silueta y el reto */}
+            {meParticipant && (
+              <div className="mt-6 mb-4 rounded-2xl border border-white/10 bg-white/[0.035] backdrop-blur-xl p-5">
+                <MyTeam participant={meParticipant} requirements={requirements} />
+              </div>
+            )}
 
             {/* Mobile: the stage and the controls own the screen; everything
                 else moves behind tabs instead of a two-thousand-pixel scroll. */}
