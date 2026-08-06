@@ -34,7 +34,12 @@ export function SilhouetteStage({
         style={{ background: 'radial-gradient(circle, rgba(245,130,31,0.22), transparent 65%)' }}
       />
 
-      <div className="relative flex items-start justify-between px-5 pt-5">
+      {/* La ficha y el reloj flotan sobre las esquinas en vez de ocupar una
+          banda propia arriba. En el flujo se llevaban unos 110px de alto del
+          panel, y como el panel está topado a 45vh eso salía directamente del
+          alto de la silueta. Nada de acá adentro se toca, así que dejarlo por
+          encima de la imagen no le quita el clic a nadie. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between px-5 pt-5">
         <span className="chip border-orange-400/25 text-orange-300">
           {POSITION_LABELS[position]}
         </span>
@@ -77,7 +82,11 @@ export function SilhouetteStage({
           controles y los avisos de poderes: en 1366x768 reclamaba más espacio
           del que había y empujaba la silueta fuera del panel. Con flex-1 se
           queda con lo que sobre, sea mucho o poco. */}
-      <div className="relative flex min-h-0 flex-1 items-center justify-center px-6 py-2">
+      {/* El px-24 deja libres las dos esquinas donde ahora flotan la ficha y el
+          reloj. No le cuesta alto a la silueta: el panel es más ancho que alto,
+          así que object-contain la está limitando por la altura y le sobra
+          ancho de todos modos. */}
+      <div className="relative flex min-h-0 flex-1 items-center justify-center px-6 py-2 sm:px-24">
         {silhouetteUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
