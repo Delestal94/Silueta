@@ -181,7 +181,7 @@ export function RevealCard({
 
           {/* Silueta a la derecha */}
           {p.colour_url && (
-            <div className="relative aspect-square flex items-end justify-center overflow-hidden">
+            <div className="relative aspect-square flex items-start justify-center overflow-hidden">
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0 flex items-center justify-center"

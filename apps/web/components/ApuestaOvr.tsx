@@ -113,7 +113,7 @@ export function ApuestaOvr({
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Izquierda: lo que está en juego. */}
-        <div className="space-y-4">
+        <div className="flex flex-col justify-between gap-4">
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-3">
               <span className="flex items-center gap-2 text-lg font-bold text-emerald-300">
