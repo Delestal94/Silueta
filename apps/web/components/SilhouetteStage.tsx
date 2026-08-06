@@ -77,17 +77,20 @@ export function SilhouetteStage({
           controles y los avisos de poderes: en 1366x768 reclamaba más espacio
           del que había y empujaba la silueta fuera del panel. Con flex-1 se
           queda con lo que sobre, sea mucho o poco. */}
-      <div className="relative flex min-h-0 flex-1 items-end justify-center px-6 py-2">
+      <div className="relative flex min-h-0 flex-1 items-center justify-center px-6 py-2">
         {silhouetteUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={silhouetteUrl}
             alt={`Silueta de un ${POSITION_LABELS[position].toLowerCase()} por identificar`}
-            // max-h-full contra el contenedor, no 52vh contra la ventana. La
-            // altura de la ventana no dice cuánto espacio quedó libre acá
-            // adentro, así que al aparecer el aviso de un poder la imagen
-            // seguía midiendo lo mismo y el panel la recortaba por abajo.
-            className="animate-pop max-h-full max-w-full w-auto object-contain drop-shadow-[0_0_40px_rgba(245,130,31,0.25)]"
+            // h-full contra el contenedor, no max-h-full ni 52vh contra la
+            // ventana. Un máximo sólo achica al que se pasa: los recortes que
+            // vienen más chicos que la caja se quedaban en su tamaño original
+            // con aire alrededor. Y la altura de la ventana no dice cuánto
+            // espacio quedó libre acá adentro, así que al aparecer el aviso de
+            // un poder la imagen seguía midiendo lo mismo y el panel la
+            // recortaba por abajo. object-contain la agranda sin deformarla.
+            className="animate-pop h-full w-full object-contain drop-shadow-[0_0_40px_rgba(245,130,31,0.25)]"
             style={{
               filter:
                 'brightness(0) saturate(100%) invert(96%) sepia(6%) saturate(300%) hue-rotate(190deg)' +

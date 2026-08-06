@@ -80,7 +80,7 @@ export function RevealCard({
           next round. Letting the photo and the stats scroll costs a reader
           nothing — losing the button costs them the game. */}
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
           {/* Tarjeta y detalles a la izquierda */}
           <div className="grid gap-6 sm:grid-cols-[190px_minmax(0,1fr)]">
         <div className="mx-auto w-full max-w-[190px] space-y-3">
@@ -152,12 +152,16 @@ export function RevealCard({
             </p>
           )}
 
+          {/* Tres columnas, no seis. La ficha comparte fila con la silueta, así
+              que a esta mitad le quedan unos 380px: en seis columnas cada caja
+              baja de 60px y el rótulo (RIT, REG, FÍS) sale más ancho que su
+              caja, que es lo que las deformaba en óvalos. */}
           {attributes.length > 0 && (
-            <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-6">
+            <div className="mt-4 grid grid-cols-3 gap-2 2xl:grid-cols-6">
               {attributes.map(([label, value]) => (
                 <div
                   key={label}
-                  className="rounded-xl border border-white/10 bg-black/25 px-3 py-3 text-center"
+                  className="rounded-xl border border-white/10 bg-black/25 px-2 py-2 text-center"
                 >
                   <p className="text-[10px] uppercase tracking-wider text-white/40">{label}</p>
                   <p className="text-lg font-black">{value}</p>
@@ -181,7 +185,7 @@ export function RevealCard({
 
           {/* Silueta a la derecha */}
           {p.colour_url && (
-            <div className="relative min-h-[280px] flex items-center justify-center overflow-hidden">
+            <div className="relative flex min-h-[320px] items-center justify-center overflow-hidden">
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0 flex items-center justify-center"
@@ -191,11 +195,15 @@ export function RevealCard({
                   style={{ background: 'radial-gradient(circle, rgba(245,130,31,0.22), transparent 65%)' }}
                 />
               </div>
+              {/* h-full, no max-h-full: un máximo sólo recorta al que se pasa, y
+                  estos recortes vienen más chicos que la caja, así que quedaban
+                  en su tamaño original con aire alrededor. object-contain se
+                  encarga de no deformarlos al agrandarlos. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={p.colour_url}
                 alt={p.name}
-                className="animate-reveal relative max-h-full max-w-full w-auto h-auto object-contain"
+                className="animate-reveal relative h-full w-full object-contain"
               />
             </div>
           )}

@@ -1,17 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-
-const spinStyles = `
-  @keyframes ovr-spin {
-    0% { transform: scale(1) rotateY(0deg); opacity: 1; }
-    50% { transform: scale(1.1) rotateY(180deg); opacity: 0.7; }
-    100% { transform: scale(1) rotateY(360deg); opacity: 1; }
-  }
-  .ovr-spinning {
-    animation: ovr-spin 0.3s infinite;
-  }
-`;
+import { useEffect, useState } from 'react';
 
 /**
  * El reto por el OVR del jugador que acabás de comprar.
@@ -99,21 +88,67 @@ export function ApuestaOvr({
   onDecidir: (decision: 'va' | 'paso') => Promise<void>;
 }) {
   const [ocupado, setOcupado] = useState(false);
+  const [sorteando, setSorteando] = useState(false);
+  /** Cuál de las dos filas está encendida mientras corre la ruleta. */
+  const [encendida, setEncendida] = useState<0 | 1>(0);
+
+  /**
+   * La ruleta: se van encendiendo una y otra fila, cada vez más lento.
+   *
+   * Con setInterval el paso sería siempre igual y parecería un parpadeo; con
+   * un setTimeout que se reagenda solo, cada salto tarda un poco más que el
+   * anterior y queda el frenado de una ruleta de verdad. El sorteo ya está
+   * hecho en el servidor, así que esto es puro suspenso — no decide nada.
+   */
+  useEffect(() => {
+    if (!sorteando) return;
+
+    let temporizador: ReturnType<typeof setTimeout>;
+    let espera = 70;
+
+    const saltar = () => {
+      setEncendida((v) => (v === 0 ? 1 : 0));
+      espera = Math.min(240, espera + 7);
+      temporizador = setTimeout(saltar, espera);
+    };
+
+    temporizador = setTimeout(saltar, espera);
+    return () => clearTimeout(temporizador);
+  }, [sorteando]);
 
   const decidir = async (decision: 'va' | 'paso') => {
     if (ocupado) return;
     setOcupado(true);
     try {
-      await onDecidir(decision);
+      if (decision === 'paso') {
+        await onDecidir(decision);
+        return;
+      }
+      // La ruleta corre un mínimo aunque el servidor conteste al instante:
+      // sin este piso el resultado aparecía antes de que se llegara a ver
+      // girar, que es justo la parte que da el nervio.
+      setSorteando(true);
+      await Promise.all([
+        onDecidir(decision),
+        new Promise((listo) => setTimeout(listo, 1800)),
+      ]);
     } finally {
+      setSorteando(false);
       setOcupado(false);
     }
   };
 
+  // Cada fila se apaga cuando le toca a la otra. Fuera del sorteo las dos
+  // están en su estado normal.
+  const luz = (fila: 0 | 1) => {
+    if (!sorteando) return '';
+    return encendida === fila
+      ? 'scale-[1.04] brightness-125'
+      : 'opacity-30 saturate-50';
+  };
+
   return (
-    <>
-      <style>{spinStyles}</style>
-      <section className="panel animate-pop space-y-4 p-5">
+    <section className="panel animate-pop space-y-4 p-5">
       <header className="space-y-1">
         <h3 className="text-lg font-bold">
           ¿Te la jugás por el OVR?
@@ -127,8 +162,10 @@ export function ApuestaOvr({
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Izquierda: lo que está en juego. */}
         <div className="flex flex-col justify-between gap-4">
-          <div className={`space-y-3 ${ocupado ? 'ovr-spinning' : ''}`}>
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-3">
+          <div className="space-y-3">
+            <div
+              className={`flex items-center justify-between gap-3 rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-3 transition-all duration-100 ${luz(0)}`}
+            >
               <span className="flex items-center gap-2 text-lg font-bold text-emerald-300">
                 <Tendencia sube /> +{reto.gana} OVR
               </span>
@@ -136,7 +173,9 @@ export function ApuestaOvr({
                 {reto.prob}%
               </span>
             </div>
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-rose-400/25 bg-rose-400/10 px-4 py-3">
+            <div
+              className={`flex items-center justify-between gap-3 rounded-xl border border-rose-400/25 bg-rose-400/10 px-4 py-3 transition-all duration-100 ${luz(1)}`}
+            >
               <span className="flex items-center gap-2 text-lg font-bold text-rose-300">
                 <Tendencia sube={false} /> −{reto.pierde} OVR
               </span>
@@ -156,7 +195,7 @@ export function ApuestaOvr({
             disabled={ocupado}
             onClick={() => decidir('va')}
           >
-            Me la juego
+            {sorteando ? 'Girando…' : 'Me la juego'}
           </button>
         </div>
 
@@ -176,7 +215,6 @@ export function ApuestaOvr({
         </div>
       </div>
     </section>
-    </>
   );
 }
 
