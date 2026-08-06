@@ -507,13 +507,13 @@ export default function RoomPage() {
 
                   El corte va por alto y no por ancho: el problema es un monitor
                   de 19 pulgadas a 768px de alto, no uno angosto. */}
-              <div className="mesa flex flex-col gap-4 lg:h-[calc(100vh-9rem)]">
+              <div className="mesa flex flex-col gap-4">
                 {stage}
                 <div className="mesa-controles flex flex-col gap-3">
                   {controls}
                 </div>
               </div>
-              <div className="space-y-4 lg:h-[calc(100vh-9rem)] lg:overflow-y-auto lg:pr-1">
+              <div className="space-y-3 overflow-y-auto pr-1">
                 {rail}
               </div>
             </div>
@@ -1054,18 +1054,28 @@ function MyTeam({
                 {signings.map((signing) => (
                   <div
                     key={signing.players.id}
-                    className="rounded-lg bg-black/20 px-1.5 py-1"
+                    className="flex items-center gap-1.5 rounded-lg bg-black/20 px-1.5 py-1"
                   >
-                    <p className="truncate text-[11px] font-semibold leading-tight">
-                      {signing.players.name}
-                    </p>
-                    <p className="text-[9px] text-orange-400">
-                      {signing.rating}
-                    </p>
+                    {signing.players.photo_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={signing.players.photo_url}
+                        alt=""
+                        className="h-6 w-6 shrink-0 rounded-full object-cover"
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-semibold leading-tight">
+                        {(signing.players.name ?? '').split(' ').pop()}
+                      </p>
+                      <p className="truncate text-[10px] text-white/40">
+                        {signing.rating} · {signing.purchase_price}
+                      </p>
+                    </div>
                   </div>
                 ))}
                 {have === 0 && (
-                  <p className="py-1 text-center text-[10px] text-white/30">
+                  <p className="py-1 text-center text-xs text-white/30">
                     {have}/{need}
                   </p>
                 )}
