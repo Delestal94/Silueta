@@ -472,18 +472,13 @@ export default function RoomPage() {
           onOpenRules={() => setShowRules(true)}
           onLeave={leaveRoom}
         />
-      </div>
 
-      {/* Tu equipo: arriba y todo el ancho real (fuera del max-w-7xl) */}
-      {room.status !== 'finished' && meParticipant && (
-        <div className="mt-3 px-3 sm:px-6 lg:px-8">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.035] backdrop-blur-xl p-4">
+        {/* Tu equipo: arriba, mismo ancho que el contenedor */}
+        {room.status !== 'finished' && meParticipant && (
+          <div className="mt-3">
             <MyTeam participant={meParticipant} requirements={requirements} />
           </div>
-        </div>
-      )}
-
-      <div className="mx-auto max-w-7xl">
+        )}
 
         {room.status === 'finished' ? (
           <>
@@ -1016,8 +1011,18 @@ function MyTeam({
   participant: Participant;
   requirements: Record<PositionType, number>;
 }) {
-  const counts = countByPosition(participant);
   const complete = isTeamComplete(participant, requirements);
+
+  // Agrupa los jugadores por posición
+  const byPosition = new Map<PositionType, typeof participant.team_players>();
+  for (const pos of POSITION_ORDER) {
+    byPosition.set(pos, []);
+  }
+  for (const signing of participant.team_players) {
+    const list = byPosition.get(signing.players.position_type) ?? [];
+    list.push(signing);
+    byPosition.set(signing.players.position_type, list);
+  }
 
   return (
     <div className="panel p-3">
@@ -1029,62 +1034,46 @@ function MyTeam({
         {complete && <span className="chip border-orange-400/30 py-0.5 text-[10px] text-orange-400">Completo ✓</span>}
       </div>
 
-      <div className="grid grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-4 gap-2">
         {POSITION_ORDER.map((pos) => {
-          const have = counts[pos];
+          const signings = byPosition.get(pos) ?? [];
+          const have = signings.length;
           const need = requirements[pos] ?? 0;
           const done = have >= need;
           return (
             <div
               key={pos}
-              className={`rounded-lg border px-2 py-1.5 text-center transition ${
+              className={`rounded-lg border px-2 py-2 transition ${
                 done ? 'border-orange-400/40 bg-orange-500/10' : 'border-white/10 bg-white/5'
               }`}
             >
-              <p className="text-[10px] uppercase tracking-wider text-white/50">
+              <p className="mb-1 text-[10px] uppercase tracking-wider text-white/50">
                 {POSITION_SHORT[pos]}
               </p>
-              <p className={`text-base font-black ${done ? 'text-orange-400' : 'text-white'}`}>
-                {have}/{need}
-              </p>
+              <div className="space-y-1">
+                {signings.map((signing) => (
+                  <div
+                    key={signing.players.id}
+                    className="rounded-lg bg-black/20 px-1.5 py-1"
+                  >
+                    <p className="truncate text-[11px] font-semibold leading-tight">
+                      {signing.players.name}
+                    </p>
+                    <p className="text-[9px] text-orange-400">
+                      {signing.rating}
+                    </p>
+                  </div>
+                ))}
+                {have === 0 && (
+                  <p className="py-1 text-center text-[10px] text-white/30">
+                    {have}/{need}
+                  </p>
+                )}
+              </div>
             </div>
           );
         })}
       </div>
-
-      {participant.team_players.length > 0 && (
-        <ul className="mt-4 space-y-2">
-          {participant.team_players.map((signing) => (
-            <li
-              key={signing.players.id}
-              className="flex items-center gap-3 rounded-xl bg-black/25 px-3 py-2"
-            >
-              {signing.players.photo_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={signing.players.photo_url}
-                  alt=""
-                  className="h-9 w-9 rounded-full object-cover"
-                />
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">{signing.players.name}</p>
-                <p className="truncate text-xs text-white/45">
-                  {POSITION_SHORT[signing.players.position_type]}
-                  {signing.season_year ? ` · ${signing.season_year}` : ''}
-                  {signing.era_label ? ` · ${signing.era_label}` : ''}
-                </p>
-              </div>
-              <div className="shrink-0 text-right leading-tight">
-                <span className="block text-sm font-black text-orange-400">
-                  {signing.rating ?? '—'}
-                </span>
-                <span className="block text-[10px] text-white/35">pagó {signing.purchase_price}</span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 }
