@@ -48,14 +48,11 @@ export function PowerPanel({
   const open = POWERS.find((p) => p.id === picked) ?? null;
 
   return (
-    <div className="panel p-4 sm:p-5">
+    <div className="panel p-3">
       <div className="mb-1 flex items-baseline justify-between gap-2">
-        <h3 className="font-bold">Poderes</h3>
-        <span className="text-[11px] text-white/40">salen de tu presupuesto</span>
+        <h3 className="text-sm font-bold">Poderes</h3>
+        <span className="text-[10px] text-white/40">salen de tu presupuesto</span>
       </div>
-      <p className="mb-3 text-xs leading-snug text-white/45">
-        Se activan en la próxima ronda. Uno por rival a la vez.
-      </p>
 
       {/* Cuatro columnas y dos filas: con siete poderes en una sola fila cada
           icono baja de los 44px que hace falta para tocarlo con el dedo. */}

@@ -36,12 +36,12 @@ export function RosterRail({
     // they come later in the DOM with an opaque background, they win. It went
     // unnoticed with one player because the powers panel is a stub until there
     // is somebody to aim at, and the rail had nothing to scroll.
-    <aside className="panel h-fit p-4">
+    <aside className="panel h-fit p-3">
       {showHeading && (
-        <h3 className="mb-3 px-1 font-bold">Tabla ({room.room_participants.length})</h3>
+        <h3 className="mb-2 px-1 text-sm font-bold">Tabla ({room.room_participants.length})</h3>
       )}
 
-      <ul className="space-y-2">
+      <ul className="space-y-1.5">
         {ordered.map((p) => {
           const counts = countByPosition(p);
           const complete = isTeamComplete(p, room.requirements);

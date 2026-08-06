@@ -1015,16 +1015,16 @@ function MyTeam({
   const complete = isTeamComplete(participant, requirements);
 
   return (
-    <div className="panel p-5">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-bold">
+    <div className="panel p-3">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h3 className="text-sm font-bold">
           Tu equipo{' '}
           <span className="ml-1 font-black text-orange-400">{totalPoints(participant)} pts</span>
         </h3>
-        {complete && <span className="chip border-orange-400/30 text-orange-400">Completo ✓</span>}
+        {complete && <span className="chip border-orange-400/30 py-0.5 text-[10px] text-orange-400">Completo ✓</span>}
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-4 gap-1.5">
         {POSITION_ORDER.map((pos) => {
           const have = counts[pos];
           const need = requirements[pos] ?? 0;
@@ -1032,14 +1032,14 @@ function MyTeam({
           return (
             <div
               key={pos}
-              className={`rounded-xl border px-3 py-2.5 text-center transition ${
+              className={`rounded-lg border px-2 py-1.5 text-center transition ${
                 done ? 'border-orange-400/40 bg-orange-500/10' : 'border-white/10 bg-white/5'
               }`}
             >
-              <p className="text-[11px] uppercase tracking-wider text-white/50">
+              <p className="text-[10px] uppercase tracking-wider text-white/50">
                 {POSITION_SHORT[pos]}
               </p>
-              <p className={`text-lg font-black ${done ? 'text-orange-400' : 'text-white'}`}>
+              <p className={`text-base font-black ${done ? 'text-orange-400' : 'text-white'}`}>
                 {have}/{need}
               </p>
             </div>
