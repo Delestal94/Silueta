@@ -1,15 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 /**
- * El reto por el OVR del jugador que acabás de comprar.
+ * El reto por el OVR del jugador que se acaba de vender.
  *
- * Dos columnas: a la izquierda lo que se gana y lo que se pierde con la
- * probabilidad que te tocó, a la derecha la salida. Los dos números salen
- * sorteados por separado en el servidor cuando se cierra la compra, así que
- * puede tocarte una apuesta regalada o una trampa — y refrescar la página no
- * cambia la que te tocó.
+ * Lo mira toda la sala: decide el que se llevó la silueta, y el resto ve girar
+ * la misma ruleta y se entera de cómo le fue. Los dos números salen sorteados
+ * por separado en el servidor cuando se cierra la compra, así que puede tocar
+ * una apuesta regalada o una trampa — y refrescar la página no cambia la que
+ * tocó.
+ *
+ * Un solo componente para el dueño y para los que miran, y no dos: el estado
+ * está en el fichaje, que llega a todos por el mismo canal. Con el resultado
+ * afuera —el padre cambiando un componente por otro cuando ovr_bet deja de
+ * estar en null— la ruleta se desmontaba a mitad de giro, porque la respuesta
+ * del servidor refresca la sala antes de devolver.
  */
 
 /**
@@ -75,33 +81,19 @@ function Tendencia({ sube }: { sube: boolean }) {
   );
 }
 
-export function ApuestaOvr({
-  reto,
-  playerId,
-  rating,
-  onDecidir,
-}: {
-  reto: RetoOvr;
-  playerId: string;
-  /** El rating con el que quedó el fichaje, para mostrar de dónde parte. */
-  rating: number | null;
-  onDecidir: (decision: 'va' | 'paso') => Promise<void>;
-}) {
-  const [ocupado, setOcupado] = useState(false);
-  const [sorteando, setSorteando] = useState(false);
-  /** Cuál de las dos filas está encendida mientras corre la ruleta. */
+/**
+ * La ruleta: se van encendiendo una y otra fila, cada vez más lento.
+ *
+ * Con setInterval el paso sería siempre igual y parecería un parpadeo; con un
+ * setTimeout que se reagenda solo, cada salto tarda un poco más que el anterior
+ * y queda el frenado de una ruleta de verdad. El sorteo ya está hecho en el
+ * servidor, así que esto es puro suspenso — no decide nada.
+ */
+function useRuleta(girando: boolean) {
   const [encendida, setEncendida] = useState<0 | 1>(0);
 
-  /**
-   * La ruleta: se van encendiendo una y otra fila, cada vez más lento.
-   *
-   * Con setInterval el paso sería siempre igual y parecería un parpadeo; con
-   * un setTimeout que se reagenda solo, cada salto tarda un poco más que el
-   * anterior y queda el frenado de una ruleta de verdad. El sorteo ya está
-   * hecho en el servidor, así que esto es puro suspenso — no decide nada.
-   */
   useEffect(() => {
-    if (!sorteando) return;
+    if (!girando) return;
 
     let temporizador: ReturnType<typeof setTimeout>;
     let espera = 70;
@@ -114,49 +106,106 @@ export function ApuestaOvr({
 
     temporizador = setTimeout(saltar, espera);
     return () => clearTimeout(temporizador);
-  }, [sorteando]);
+  }, [girando]);
+
+  return encendida;
+}
+
+export function ApuestaOvr({
+  reto,
+  playerId,
+  rating,
+  quien,
+  mio,
+  bet,
+  delta,
+  onDecidir,
+}: {
+  reto: RetoOvr;
+  playerId: string;
+  /** El rating con el que quedó el fichaje, para mostrar de dónde parte. */
+  rating: number | null;
+  /** El nombre del que se llevó la silueta. */
+  quien: string;
+  /** Si el que mira es el que decide. */
+  mio: boolean;
+  /** null mientras no decidió; después 'va' o 'paso'. */
+  bet: string | null;
+  delta: number | null;
+  onDecidir: (decision: 'va' | 'paso') => Promise<void>;
+}) {
+  const [ocupado, setOcupado] = useState(false);
+  /** Hasta cuándo sigue girando la ruleta, o null si no está girando. */
+  const [girandoHasta, setGirandoHasta] = useState<number | null>(null);
+  const betAnterior = useRef(bet);
+
+  const girando = girandoHasta !== null;
+  const encendida = useRuleta(girando);
+
+  // El que mira arranca la ruleta cuando la apuesta pasa de "sin decidir" a
+  // "se la jugó"; el que decide, ya en el clic, para no quedarse mirando un
+  // panel quieto mientras va y viene el pedido. Quien entra o refresca con la
+  // apuesta ya resuelta no ve nada girar: no hay suspenso que hacer de algo
+  // que pasó hace dos rondas.
+  useEffect(() => {
+    const antes = betAnterior.current;
+    betAnterior.current = bet;
+    if (antes === null && bet === 'va') setGirandoHasta((v) => v ?? Date.now() + 1600);
+  }, [bet]);
+
+  useEffect(() => {
+    if (girandoHasta === null) return;
+    const falta = Math.max(0, girandoHasta - Date.now());
+    const t = setTimeout(() => setGirandoHasta(null), falta);
+    return () => clearTimeout(t);
+  }, [girandoHasta]);
 
   const decidir = async (decision: 'va' | 'paso') => {
     if (ocupado) return;
     setOcupado(true);
+    // La ruleta corre un mínimo aunque el servidor conteste al instante: sin
+    // ese piso el resultado aparecía antes de que se llegara a ver girar, que
+    // es justo la parte que da el nervio.
+    if (decision === 'va') setGirandoHasta(Date.now() + 1800);
     try {
-      if (decision === 'paso') {
-        await onDecidir(decision);
-        return;
-      }
-      // La ruleta corre un mínimo aunque el servidor conteste al instante:
-      // sin este piso el resultado aparecía antes de que se llegara a ver
-      // girar, que es justo la parte que da el nervio.
-      setSorteando(true);
-      await Promise.all([
-        onDecidir(decision),
-        new Promise((listo) => setTimeout(listo, 1800)),
-      ]);
+      await onDecidir(decision);
     } finally {
-      setSorteando(false);
       setOcupado(false);
     }
   };
 
-  // Cada fila se apaga cuando le toca a la otra. Fuera del sorteo las dos
-  // están en su estado normal.
+  const decidido = bet !== null && !girando;
+  const subio = (delta ?? 0) > 0;
+  const bajo = (delta ?? 0) < 0;
+
+  // Durante la ruleta se turnan las dos filas. Cuando ya se sabe, queda
+  // encendida la que salió; con delta en cero —un 99 que no puede subir más,
+  // un 40 que no puede bajar— no se enciende ninguna, porque no pasó nada.
   const luz = (fila: 0 | 1) => {
-    if (!sorteando) return '';
-    return encendida === fila
-      ? 'scale-[1.04] brightness-125'
-      : 'opacity-30 saturate-50';
+    if (girando) {
+      return encendida === fila ? 'scale-[1.04] brightness-125' : 'opacity-30 saturate-50';
+    }
+    if (!decidido || bet !== 'va') return '';
+    const ganadora = fila === 0 ? subio : bajo;
+    return ganadora ? 'scale-[1.04] brightness-125' : 'opacity-30 saturate-50';
   };
 
   return (
     <section className="panel animate-pop space-y-4 p-5">
       <header className="space-y-1">
         <h3 className="text-lg font-bold">
-          ¿Te la jugás por el OVR?
+          {mio ? '¿Te la jugás por el OVR?' : `El reto de ${quien}`}
           {typeof rating === 'number' && (
-            <span className="ml-2 text-sm font-medium text-white/45">ahora vale {rating}</span>
+            <span className="ml-2 text-sm font-medium text-white/45">
+              {decidido ? 'quedó en' : 'ahora vale'} {rating}
+            </span>
           )}
         </h3>
-        <p className="text-sm text-white/50">Una sola vez, y sólo por este jugador.</p>
+        <p className="text-sm text-white/50">
+          {mio
+            ? 'Una sola vez, y sólo por este jugador.'
+            : 'Se lo juega quien se llevó la silueta. Vos mirás.'}
+        </p>
       </header>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -187,63 +236,123 @@ export function ApuestaOvr({
             </div>
           </div>
 
-          <p className="text-base italic leading-relaxed text-white/60">
-            {frase(ARENGAS, playerId)}
-          </p>
+          {mio && !decidido && (
+            <p className="text-base italic leading-relaxed text-white/60">
+              {frase(ARENGAS, playerId)}
+            </p>
+          )}
 
-          <button
-            type="button"
-            className="btn-primary w-full py-3 text-base font-bold"
-            disabled={ocupado}
-            onClick={() => decidir('va')}
-          >
-            {sorteando ? 'Girando…' : 'Me la juego'}
-          </button>
+          {mio && !decidido && (
+            <button
+              type="button"
+              className="btn-primary w-full py-3 text-base font-bold"
+              disabled={ocupado || girando}
+              onClick={() => decidir('va')}
+            >
+              {girando ? 'Girando…' : 'Me la juego'}
+            </button>
+          )}
         </div>
 
-        {/* Derecha: la salida. */}
-        <div className="flex flex-col justify-between gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-5">
-          <p className="text-base italic leading-relaxed text-center text-white/60">
-            {frase(EXCUSAS, playerId)}
-          </p>
-          <button
-            type="button"
-            className="btn-ghost w-full py-3 text-base font-bold"
-            disabled={ocupado}
-            onClick={() => decidir('paso')}
-          >
-            Así está bien
-          </button>
+        {/* Derecha: la salida mientras se puede elegir, y lo que pasó después. */}
+        <div className="flex flex-col justify-center gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-5 text-center">
+          {mio && !decidido ? (
+            <>
+              <p className="text-base italic leading-relaxed text-white/60">
+                {frase(EXCUSAS, playerId)}
+              </p>
+              <button
+                type="button"
+                className="btn-ghost w-full py-3 text-base font-bold"
+                disabled={ocupado || girando}
+                onClick={() => decidir('paso')}
+              >
+                Así está bien
+              </button>
+            </>
+          ) : (
+            <Desenlace
+              mio={mio}
+              quien={quien}
+              bet={bet}
+              delta={delta}
+              rating={rating}
+              girando={girando}
+            />
+          )}
         </div>
       </div>
     </section>
   );
 }
 
-/** Lo que pasó, una vez que ya se decidió. */
-export function ResultadoOvr({ bet, delta, rating }: { bet: string; delta: number | null; rating: number | null }) {
+/** El texto de la derecha para todo lo que no sea "todavía podés elegir". */
+function Desenlace({
+  mio,
+  quien,
+  bet,
+  delta,
+  rating,
+  girando,
+}: {
+  mio: boolean;
+  quien: string;
+  bet: string | null;
+  delta: number | null;
+  rating: number | null;
+  girando: boolean;
+}) {
+  if (girando) {
+    return (
+      <p className="animate-pulse text-lg font-bold text-orange-300">
+        Girando…
+      </p>
+    );
+  }
+
+  if (bet === null) {
+    return (
+      <p className="animate-pulse text-base text-white/55">
+        {quien} está decidiendo si se la juega.
+      </p>
+    );
+  }
+
   if (bet === 'paso') {
     return (
-      <p className="panel px-4 py-3 text-sm text-white/50">
-        No te la jugaste. Queda en {rating ?? '—'}.
+      <p className="text-base text-white/55">
+        {mio ? 'No te la jugaste.' : `${quien} no se la jugó.`}
+        {typeof rating === 'number' && <> Queda en {rating}.</>}
       </p>
     );
   }
 
   const subio = (delta ?? 0) > 0;
+  const bajo = (delta ?? 0) < 0;
+
   return (
-    <p
-      className={`panel animate-pop px-4 py-3 text-sm font-semibold ${
-        subio ? 'text-emerald-300' : 'text-rose-300'
-      }`}
-    >
-      {subio ? '¡Entró!' : 'La erró.'}{' '}
-      <span className="tabular-nums">
+    <div className="animate-pop space-y-1">
+      <p
+        className={`text-xl font-black ${
+          subio ? 'text-emerald-300' : bajo ? 'text-rose-300' : 'text-white/60'
+        }`}
+      >
+        {!subio && !bajo
+          ? 'Quedó igual.'
+          : subio
+            ? mio
+              ? '¡Entró!'
+              : `¡Le entró a ${quien}!`
+            : mio
+              ? 'La erró.'
+              : `${quien} la erró.`}
+      </p>
+      <p className="text-sm font-semibold tabular-nums text-white/70">
         {delta === 0 ? 'sin cambios' : `${subio ? '+' : ''}${delta} OVR`}
-      </span>
-      {typeof rating === 'number' && (
-        <span className="font-medium text-white/45"> · queda en {rating}</span>
-      )}
-    </p>
+        {typeof rating === 'number' && (
+          <span className="font-medium text-white/45"> · queda en {rating}</span>
+        )}
+      </p>
+    </div>
   );
 }

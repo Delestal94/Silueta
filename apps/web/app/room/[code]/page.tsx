@@ -24,7 +24,7 @@ import { FinalStandings } from '@/components/FinalStandings';
 import { RematchPanel, type RematchSettings } from '@/components/RematchPanel';
 import { Ruleta } from '@/components/Ruleta';
 import { ConfirmarRonda } from '@/components/ConfirmarRonda';
-import { ApuestaOvr, ResultadoOvr } from '@/components/ApuestaOvr';
+import { ApuestaOvr } from '@/components/ApuestaOvr';
 import { Toasts, useToasts } from '@/components/Toasts';
 import { PowerPanel } from '@/components/PowerPanel';
 import { RulesModal } from '@/components/RulesModal';
@@ -84,13 +84,18 @@ export default function RoomPage() {
     [room, me]
   );
 
-  // El fichaje de la ronda que se acaba de revelar, si lo gané yo. Es lo que
-  // decide si se ofrece el reto por el OVR y si ya se resolvió.
-  const miFichajeDeEstaRonda = useMemo(() => {
-    if (!round?.revealed || !round.player?.id) return null;
-    if (!me?.id || round.current_bid_by !== me.id) return null;
-    return meParticipant?.team_players.find((s) => s.players.id === round.player.id) ?? null;
-  }, [round, me, meParticipant]);
+  // El reto por el OVR de la ronda que se acaba de revelar: el fichaje del que
+  // se llevó la silueta, sea quien sea. Decide el dueño, pero lo mira toda la
+  // sala — la gracia es ver cómo le fue. Se busca por el fichaje y no por la
+  // ronda: la apuesta vive con el jugador comprado, así que sobrevive a un
+  // refresco y no se puede volver a tirar.
+  const retoDeLaRonda = useMemo(() => {
+    if (!round?.revealed || !round.player?.id || !round.current_bid_by) return null;
+    const duenio = room?.room_participants.find((p) => p.id === round.current_bid_by);
+    const fichaje = duenio?.team_players.find((s) => s.players.id === round.player.id);
+    if (!duenio || !fichaje || typeof fichaje.ovr_prob !== 'number') return null;
+    return { fichaje, quien: duenio.display_name, mio: duenio.id === me?.id };
+  }, [round, room, me]);
 
   const msLeft = round?.status === 'active' ? new Date(round.ends_at).getTime() - now : 0;
   const secondsLeft = Math.max(0, Math.ceil(msLeft / 1000));
@@ -172,17 +177,15 @@ export default function RoomPage() {
     }
   }, [act, round?.id, push]);
 
+  // Sin aviso flotante con el resultado: llegaba con la respuesta del
+  // servidor, o sea a mitad del giro de la ruleta, y contaba el final antes de
+  // tiempo. El panel lo anuncia cuando la ruleta frena, y lo anuncia para
+  // todos.
   const apostarOvr = useCallback(
     async (decision: 'va' | 'paso') => {
-      const data = await act(`/api/rounds/${round?.id}/ovr`, { decision });
-      if (data?.ovr_bet === 'va') {
-        push(
-          data.gano ? `¡Entró! ${data.delta > 0 ? '+' : ''}${data.delta} OVR` : `La erró. ${data.delta} OVR`,
-          data.gano ? 'success' : 'error'
-        );
-      }
+      await act(`/api/rounds/${round?.id}/ovr`, { decision });
     },
-    [act, round?.id, push]
+    [act, round?.id]
   );
 
   const markReady = useCallback(async () => {
@@ -357,30 +360,25 @@ export default function RoomPage() {
           />
         }
       />
-      {/* El reto por el OVR, sólo para el que se lo llevó. Se busca por el
-          fichaje y no por la ronda: la apuesta vive con el jugador comprado,
-          así que sobrevive a un refresco y no se puede volver a tirar. */}
-      {miFichajeDeEstaRonda &&
-        (miFichajeDeEstaRonda.ovr_bet ? (
-          <ResultadoOvr
-            bet={miFichajeDeEstaRonda.ovr_bet}
-            delta={miFichajeDeEstaRonda.ovr_delta}
-            rating={miFichajeDeEstaRonda.rating}
-          />
-        ) : (
-          typeof miFichajeDeEstaRonda.ovr_prob === 'number' && (
-            <ApuestaOvr
-              reto={{
-                prob: miFichajeDeEstaRonda.ovr_prob,
-                gana: miFichajeDeEstaRonda.ovr_gana ?? 0,
-                pierde: miFichajeDeEstaRonda.ovr_pierde ?? 0,
-              }}
-              playerId={round.player.id}
-              rating={miFichajeDeEstaRonda.rating}
-              onDecidir={apostarOvr}
-            />
-          )
-        ))}
+      {/* El reto por el OVR. Lo ve toda la sala, no sólo el que se lo llevó:
+          el panel se encarga solo de mostrar los botones al dueño y el
+          suspenso al resto. */}
+      {retoDeLaRonda && (
+        <ApuestaOvr
+          reto={{
+            prob: retoDeLaRonda.fichaje.ovr_prob as number,
+            gana: retoDeLaRonda.fichaje.ovr_gana ?? 0,
+            pierde: retoDeLaRonda.fichaje.ovr_pierde ?? 0,
+          }}
+          playerId={round.player.id}
+          rating={retoDeLaRonda.fichaje.rating}
+          quien={retoDeLaRonda.quien}
+          mio={retoDeLaRonda.mio}
+          bet={retoDeLaRonda.fichaje.ovr_bet ?? null}
+          delta={retoDeLaRonda.fichaje.ovr_delta}
+          onDecidir={apostarOvr}
+        />
+      )}
       {/* Half the point of the mode: seeing what everybody else was willing to
           pay is the only feedback you get about how far off you were. */}
       {round.sealed && round.envelopes && (
