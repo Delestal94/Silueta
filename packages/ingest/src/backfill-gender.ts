@@ -56,7 +56,11 @@ async function main() {
     .from('players')
     .select('ea_id')
     .not('ea_id', 'is', null)
-    .is('gender', null);
+    .is('gender', null)
+    // PostgREST corta en 1000 sin avisar. Acá alcanza con decirlo en voz alta:
+    // el script recorre 1200 fichas de EA por corrida y ya estaba pensado para
+    // volver a correrse hasta que no quede nadie sin género.
+    .range(0, 999);
 
   const pending = new Set((rows || []).map((r) => r.ea_id as number));
   console.log(`${pending.size} players need a gender\n`);

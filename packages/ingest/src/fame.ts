@@ -167,22 +167,34 @@ async function main() {
   const refresh = process.argv.includes('--refresh');
   const repair = process.argv.includes('--repair');
 
-  let query = supabase
-    .from('players')
-    .select('id, name, fame_score')
-    .not('ea_id', 'is', null)
-    .order('ea_rank');
+  // Paginado a mano: PostgREST corta en 1000 filas sin avisar —la respuesta
+  // llega completa y con éxito, sólo que recortada— y acá eso importa más que
+  // en otros lados, porque de fame_score sale fame_rank y de ahí quién entra
+  // al pool de famosos. Con --refresh sobre un catálogo de 6810, se estaban
+  // recalculando los primeros 1000 y el resto quedaba con el valor viejo.
+  const TAMANO = 1000;
+  const players: Player[] = [];
 
-  if (repair) query = query.or(`fame_score.is.null,fame_score.lt.${IMPLAUSIBLY_LOW}`);
-  else if (!refresh) query = query.is('fame_score', null);
+  for (let desde = 0; ; desde += TAMANO) {
+    let query = supabase
+      .from('players')
+      .select('id, name, fame_score')
+      .not('ea_id', 'is', null)
+      .order('ea_rank')
+      .range(desde, desde + TAMANO - 1);
 
-  const { data, error } = await query;
-  if (error || !data) {
-    console.error('Could not load catalog:', error?.message);
-    process.exit(1);
+    if (repair) query = query.or(`fame_score.is.null,fame_score.lt.${IMPLAUSIBLY_LOW}`);
+    else if (!refresh) query = query.is('fame_score', null);
+
+    const { data, error } = await query;
+    if (error || !data) {
+      console.error('Could not load catalog:', error?.message);
+      process.exit(1);
+    }
+
+    players.push(...(data as Player[]));
+    if (data.length < TAMANO) break;
   }
-
-  const players = data as Player[];
   console.log(`Scoring ${players.length} players\n`);
 
   // Step 1: batch-resolve titles.

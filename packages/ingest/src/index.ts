@@ -199,12 +199,28 @@ async function main() {
 
   const alreadyNotable = new Set<number>();
   if (resume) {
-    const { data } = await supabase
-      .from('players')
-      .select('ea_id')
-      .eq('notable', true)
-      .eq('silhouette_source', 'render');
-    for (const r of data || []) alreadyNotable.add(r.ea_id as number);
+    // Paginado a mano porque PostgREST corta en 1000 filas y no avisa: la
+    // respuesta llega completa y con éxito, sólo que recortada. Con el
+    // catálogo en 6810, --resume creía que había 1000 hechos y volvía a
+    // procesar a los otros 5810 —horas de cuota de TheSportsDB— para
+    // terminar subiendo de nuevo la silueta que ya tenían.
+    const TAMANO = 1000;
+    for (let desde = 0; ; desde += TAMANO) {
+      const { data, error } = await supabase
+        .from('players')
+        .select('ea_id')
+        .eq('notable', true)
+        .eq('silhouette_source', 'render')
+        .range(desde, desde + TAMANO - 1);
+
+      if (error) {
+        console.error(`No se pudo leer lo ya hecho: ${error.message}`);
+        process.exit(1);
+      }
+
+      for (const r of data || []) alreadyNotable.add(r.ea_id as number);
+      if (!data || data.length < TAMANO) break;
+    }
     console.log(`Resuming: ${alreadyNotable.size} already have render silhouettes\n`);
   }
 
