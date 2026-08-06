@@ -473,9 +473,9 @@ export default function RoomPage() {
           onLeave={leaveRoom}
         />
 
-        {/* Tu equipo: arriba y lo más angosto posible */}
+        {/* Tu equipo: arriba y todo el ancho */}
         {room.status !== 'finished' && meParticipant && (
-          <div className="mt-3 mx-auto max-w-xs rounded-2xl border border-white/10 bg-white/[0.035] backdrop-blur-xl p-4">
+          <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.035] backdrop-blur-xl p-4">
             <MyTeam participant={meParticipant} requirements={requirements} />
           </div>
         )}
