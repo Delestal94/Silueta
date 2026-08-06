@@ -193,12 +193,6 @@ export function RevealCard({
               </div>
             ))}
           </dl>
-
-          {p.description && (
-            <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-white/55">
-              {p.description}
-            </p>
-          )}
           </div>
         </div>
       </div>
