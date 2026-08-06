@@ -160,8 +160,10 @@ export function ApuestaOvr({
       </header>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Izquierda: lo que está en juego. */}
-        <div className="flex flex-col justify-between gap-4">
+        {/* Izquierda: lo que está en juego. El pb-5 iguala el p-5 de la caja de
+            enfrente: sin él este botón llega hasta el fondo de la columna y el
+            otro se queda 20px más arriba, apoyado en el borde de su caja. */}
+        <div className="flex flex-col justify-between gap-4 pb-5">
           <div className="space-y-3">
             <div
               className={`flex items-center justify-between gap-3 rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-3 transition-all duration-100 ${luz(0)}`}
