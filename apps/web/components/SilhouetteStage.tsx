@@ -26,7 +26,7 @@ export function SilhouetteStage({
   const circumference = 2 * Math.PI * radius;
 
   return (
-    <section className="panel animate-rise relative flex min-h-0 flex-1 flex-col overflow-hidden">
+    <section className="panel animate-rise relative flex min-h-0 flex-col overflow-hidden max-h-[45vh]">
       {/* Spotlight behind the figure */}
       <div
         aria-hidden
