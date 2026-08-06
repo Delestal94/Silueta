@@ -80,7 +80,7 @@ export function RevealCard({
           next round. Letting the photo and the stats scroll costs a reader
           nothing — losing the button costs them the game. */}
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_200px]">
+        <div className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           {/* Tarjeta y detalles a la izquierda */}
           <div className="grid gap-6 sm:grid-cols-[190px_minmax(0,1fr)]">
         <div className="mx-auto w-full max-w-[190px] space-y-3">
@@ -181,7 +181,7 @@ export function RevealCard({
 
           {/* Silueta a la derecha */}
           {p.colour_url && (
-            <div className="relative aspect-square flex items-center justify-center overflow-hidden">
+            <div className="relative min-h-0 flex-1 flex items-center justify-center overflow-hidden">
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0 flex items-center justify-center"
