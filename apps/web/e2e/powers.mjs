@@ -225,7 +225,8 @@ async function rules() {
     { 'x-client-token': r.clientToken }
   );
   const budgetAfter = (await state(r.code, r.clientToken)).me.remaining_budget;
-  check('descuenta el costo del presupuesto', budgetBefore - budgetAfter === 18, `${budgetBefore} -> ${budgetAfter}`);
+  // El apagón bajó de 18 a 12 cuando se abarataron los poderes salvo la lupa.
+  check('descuenta el costo del presupuesto', budgetBefore - budgetAfter === 12, `${budgetBefore} -> ${budgetAfter}`);
 
   const [stacked] = await post(
     `/api/rooms/${r.code}/powers`,

@@ -49,7 +49,9 @@ const [, settled] = await post(`/api/rounds/${r1.round.id}/finalize`, { force: t
 
 check('con tres interesados igual se adjudica', settled.round?.status === 'sold', settled.round?.status);
 check('se marca como sorteado', settled.raffled === true, JSON.stringify(settled).slice(0, 90));
-check('al precio mínimo', settled.round?.current_bid === 1, `${settled.round?.current_bid}`);
+// El piso del sorteo pasó de 1 a 10 (migración 0041): quedarse quieto seguía
+// saliendo casi gratis.
+check('al precio mínimo', settled.round?.current_bid === 10, `${settled.round?.current_bid}`);
 
 const afterRaffle = await state(room.code, room.clientToken);
 const owners = afterRaffle.room.room_participants.filter((p) => p.team_players.length > 0);

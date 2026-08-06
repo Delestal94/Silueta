@@ -99,9 +99,9 @@ export function Rules({
           <li>En los dos, nunca podés pasarte de tu presupuesto.</li>
           <li>Si ya completaste ese puesto, quedás afuera de esa ronda.</li>
           <li>
-            Si <strong>nadie oferta</strong>, el jugador se sortea entre todos los que todavía
-            necesitan ese puesto, al precio mínimo. Quedarte quieto no te salva: para eso está
-            el pase, y tenés uno solo por puesto.
+            Si <strong>nadie oferta</strong>, el jugador se sortea al precio mínimo entre los que
+            todavía necesitan ese puesto <strong>y no pasaron</strong>. Quedarte quieto no te
+            salva: para eso está el pase, y tenés uno solo por puesto.
           </li>
           <li>
             Si dos ofertan <strong>lo mismo</strong> —pasa cuando a varios los empujan— sale una
@@ -116,8 +116,13 @@ export function Rules({
           así. Gastarlo temprano ya no te deja indefenso el resto de la partida.
         </p>
         <p>
-          Si todos los que necesitaban ese puesto pasan, se sortea entre ellos y a alguien le
-          toca igual.
+          Si <strong>pasan todos</strong>, la silueta se saltea: no se la lleva nadie, no se cobra
+          nada y el puesto sigue abierto para la próxima. El pase te saca del sorteo de verdad,
+          incluso si sos el último que queda.
+        </p>
+        <p>
+          Lo único que no esquiva es el <strong>empujón</strong>: esa oferta ya entró, así que la
+          ronda se resuelve por puja y no llega al sorteo.
         </p>
       </Section>
 

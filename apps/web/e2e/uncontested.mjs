@@ -61,13 +61,15 @@ const [, r2] = await post('/api/rounds', { roomId: room.roomId }, host);
 check('sigue ofreciendo arquero', r2.round?.position_type === 'goalkeeper', r2.round?.position_type);
 
 const [, settled] = await post(`/api/rounds/${r2.round.id}/finalize`, { force: true }, host);
-check('se asigna sin puja', settled.uncontested === true, JSON.stringify(settled).slice(0, 120));
+// Ya no viaja como 'uncontested': todo lo que se adjudica sin puja pasa por el
+// mismo sorteo, con uno o con varios interesados.
+check('se asigna sin puja', settled.raffled === true, JSON.stringify(settled).slice(0, 120));
 check('queda como vendido', settled.round?.status === 'sold', settled.round?.status);
 
 const after = await state(room.code, room.clientToken);
 const solo = after.room.room_participants.find((p) => p.display_name === 'Solo');
 check('el último en necesitarlo se lo queda', solo.team_players.length === 1, `tiene ${solo.team_players.length}`);
-check('a precio mínimo', solo.team_players[0]?.purchase_price === 1, `pagó ${solo.team_players[0]?.purchase_price}`);
+check('a precio mínimo', solo.team_players[0]?.purchase_price === 10, `pagó ${solo.team_players[0]?.purchase_price}`);
 check('y suma sus puntos', (solo.team_players[0]?.rating ?? 0) > 0);
 
 // With two still needing the position, an empty round stays unsold.

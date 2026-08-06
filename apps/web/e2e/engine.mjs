@@ -50,9 +50,13 @@ async function auctionRules() {
   });
   const [, p3] = await post(`/api/rooms/${room.code}/join`, { code: room.code, displayName: NOMBRE_C });
 
+  // En minúscula a propósito: el rechazo no distingue mayúsculas. Acá decía
+  // 'cobra' de cuando los nombres de prueba eran "La Cobra"; desde que se les
+  // puso un prefijo reconocible, ese nombre ya no coincidía con nadie de la
+  // sala y la comprobación pasaba a probar que un nombre libre se acepta.
   const [dup] = await post(`/api/rooms/${room.code}/join`, {
     code: room.code,
-    displayName: 'cobra',
+    displayName: NOMBRE_B.toLowerCase(),
   });
   check('duplicate display name rejected', dup === 409, `got ${dup}`);
 
@@ -106,7 +110,11 @@ async function auctionRules() {
 }
 
 async function passAndFlip() {
-  console.log('\npass and coin flip');
+  // El último pase ya no adjudica. Antes, cuando pasaba el que faltaba, se
+  // elegía un ganador al azar ahí mismo y se le cobraba: el pase servía sólo si
+  // el otro no lo usaba. Ahora pasar es pasar, y si pasan todos la silueta se
+  // saltea sin dueño.
+  console.log('\npass: nobody is forced to take him');
   const [, room] = await post('/api/rooms', {
     displayName: 'A',
     startingBudget: 100,
@@ -119,35 +127,37 @@ async function passAndFlip() {
   const round = r.round.id;
 
   const [s1, d1] = await post(`/api/rounds/${round}/pass`, null, { 'x-client-token': room.clientToken });
-  check('a lone pass only opts out', s1 === 200 && d1.passed === true && !d1.coin_flip);
+  check('a lone pass only opts out', s1 === 200 && d1.passed === true && !d1.todos_pasaron);
 
   const [s2] = await post(`/api/rounds/${round}/pass`, null, { 'x-client-token': room.clientToken });
   check('cannot pass twice in one round', s2 === 400, `got ${s2}`);
 
   const [s3, d3] = await post(`/api/rounds/${round}/pass`, null, { 'x-client-token': b.clientToken });
-  check('the last pass triggers the flip', s3 === 200 && d3.coin_flip === true);
-  check('the flip picks a winner', !!d3.coin_flip_winner);
+  check('the last pass closes the round', s3 === 200 && d3.todos_pasaron === true, JSON.stringify(d3));
+  check('and picks nobody', !d3.coin_flip_winner, JSON.stringify(d3.coin_flip_winner));
 
-  await post(`/api/rounds/${round}/finalize`, { force: true }, host);
+  const [, settled] = await post(`/api/rounds/${round}/finalize`, { force: true }, host);
+  check('the round ends with no owner', settled.round?.status === 'unsold', settled.round?.status);
+
   const state = await get(`/api/rooms/${room.code}/state`);
   const owners = state.room.room_participants.filter((p) => p.team_players.length === 1);
-  check('exactly one participant gets the player', owners.length === 1, `got ${owners.length}`);
-  check('assigned at the flip price', owners[0]?.remaining_budget === 99);
+  check('nobody gets the player', owners.length === 0, `got ${owners.length}`);
+  check(
+    'and nobody is charged',
+    state.room.room_participants.every((p) => p.remaining_budget === 100),
+    state.room.room_participants.map((p) => `${p.display_name}=${p.remaining_budget}`).join(' ')
+  );
 
-  // The flip winner now has the position filled, and that check fires before
-  // the pass-quota one, so ask the loser. A pass is spent per position, so the
-  // loser still owes a goalkeeper and has already used that position's pass.
-  const loser = state.room.room_participants.find((p) => p.team_players.length === 0);
-  const loserToken = loser.display_name === 'A' ? room.clientToken : b.clientToken;
-
+  // A pass is spent per position, so both still owe a goalkeeper and both have
+  // already used that position's pass.
   const [, r2] = await post('/api/rounds', { roomId: room.roomId }, host);
-  const [s4] = await post(`/api/rounds/${r2.round.id}/pass`, null, { 'x-client-token': loserToken });
+  const [s4] = await post(`/api/rounds/${r2.round.id}/pass`, null, { 'x-client-token': room.clientToken });
   check('the pass for that position is already spent', s4 >= 400, `got ${s4}`);
 
   // …but a different position starts with a fresh one.
   const fresh = await get(`/api/rooms/${room.code}/state`);
-  const loserRow = fresh.room.room_participants.find((p) => p.display_name === loser.display_name);
-  const spent = (loserRow.position_passes || []).map((p) => p.position_type);
+  const row = fresh.room.room_participants.find((p) => p.display_name === 'A');
+  const spent = (row.position_passes || []).map((p) => p.position_type);
   check('only that position is marked as passed', spent.length === 1 && spent[0] === 'goalkeeper',
     JSON.stringify(spent));
 }

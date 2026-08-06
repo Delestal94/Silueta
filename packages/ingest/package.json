@@ -20,7 +20,9 @@
     "icons": "tsx src/make-icons.ts",
     "cursors": "tsx src/make-cursors.ts",
     "scores": "tsx --env-file-if-exists=.env src/export-scores.ts",
-    "purge-tests": "tsx --env-file-if-exists=.env src/purge-test-games.ts"
+    "purge-tests": "tsx --env-file-if-exists=.env src/purge-test-games.ts",
+    "test:match": "tsx --env-file-if-exists=.env src/test-match.ts",
+    "verify": "tsx --env-file-if-exists=.env src/verify-catalog.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",

@@ -13,6 +13,14 @@
  */
 import { createClient } from '@supabase/supabase-js';
 import sharp from 'sharp';
+import {
+  elegirCandidato,
+  mapPosition,
+  parseBirthdate,
+  type EaPlayer,
+  type PositionType,
+  type SportsDbPlayer,
+} from './match.js';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -34,95 +42,14 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-type PositionType = 'goalkeeper' | 'defender' | 'midfielder' | 'forward';
-
-interface EaPlayer {
-  id: number;
-  rank: number;
-  overallRating: number;
-  firstName: string;
-  lastName: string;
-  commonName: string | null;
-  birthdate: string | null;
-  height: number | null;
-  weight: number | null;
-  skillMoves: number | null;
-  weakFootAbility: number | null;
-  preferredFoot: number | null;
-  leagueName: string | null;
-  avatarUrl: string | null;
-  shieldUrl: string | null;
-  gender?: { label: string } | null;
-  team?: { label: string } | null;
-  nationality?: { label: string } | null;
-  position?: {
-    label: string;
-    shortLabel: string;
-    positionType?: { name: string };
-  } | null;
-  stats?: Record<string, { value: number }>;
-}
-
-interface SportsDbPlayer {
-  idPlayer: string;
-  strPlayer: string;
-  strSport: string | null;
-  strDescriptionEN: string | null;
-  strNumber: string | null;
-  strRender: string | null;
-  strCutout: string | null;
-}
+// Los tipos, el mapeo de posiciones y la verificación de identidad viven en
+// match.ts: este archivo arranca la importación al cargarse, así que nada que
+// se quiera probar por separado puede quedar acá.
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-const POSITION_BY_EA_TYPE: Record<string, PositionType> = {
-  goalkeeper: 'goalkeeper',
-  defender: 'defender',
-  defense: 'defender',
-  midfielder: 'midfielder',
-  midfield: 'midfielder',
-  attack: 'forward',
-  attacker: 'forward',
-  forward: 'forward',
-};
-
-function mapPosition(p: EaPlayer): PositionType | null {
-  const short = p.position?.shortLabel?.toUpperCase();
-
-  // EA files goalkeepers under positionType "Defense", so the specific
-  // position has to win over the broad category or every keeper becomes a
-  // defender.
-  if (short === 'GK') return 'goalkeeper';
-  if (short && ['CB', 'LB', 'RB', 'LWB', 'RWB'].includes(short)) return 'defender';
-  if (short && ['CDM', 'CM', 'CAM', 'LM', 'RM'].includes(short)) return 'midfielder';
-  if (short && ['ST', 'CF', 'LW', 'RW'].includes(short)) return 'forward';
-
-  const typeName = p.position?.positionType?.name?.toLowerCase();
-  if (typeName && POSITION_BY_EA_TYPE[typeName]) return POSITION_BY_EA_TYPE[typeName];
-  return null;
-}
-
 function displayName(p: EaPlayer): string {
   return (p.commonName || `${p.firstName ?? ''} ${p.lastName ?? ''}`).trim();
-}
-
-function normalise(name: string): string {
-  return name
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/['’`.]/g, '')
-    .replace(/\s+/g, ' ')
-    .toLowerCase()
-    .trim();
-}
-
-function parseBirthdate(raw: string | null): string | null {
-  // EA sends "12/20/1998 12:00:00 AM".
-  if (!raw) return null;
-  const m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (!m) return null;
-  const [, month, day, year] = m;
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 }
 
 /**
@@ -228,7 +155,7 @@ async function fetchEaPage(offset: number, limit: number): Promise<EaPlayer[]> {
 }
 
 /** TheSportsDB is consulted purely to obtain an action-pose render. */
-async function findRender(name: string): Promise<SportsDbPlayer | null> {
+async function findRender(ea: EaPlayer, name: string): Promise<SportsDbPlayer | null> {
   const search = await fetchJson<{ player: SportsDbPlayer[] | null }>(
     `${SPORTSDB_API}/searchplayers.php?p=${encodeURIComponent(name)}`
   );
@@ -236,11 +163,10 @@ async function findRender(name: string): Promise<SportsDbPlayer | null> {
   const candidates = (search?.player || []).filter((p) => p.strSport === 'Soccer');
   if (!candidates.length) return null;
 
-  const target = normalise(name);
-  const match =
-    candidates.find((p) => normalise(p.strPlayer) === target) ||
-    candidates.find((p) => normalise(p.strPlayer).endsWith(target.split(' ').slice(-1)[0])) ||
-    candidates[0];
+  // Sólo se acepta un candidato que además de llamarse igual sea la misma
+  // persona; si ninguno verifica, el jugador se queda sin silueta y no entra.
+  const match = elegirCandidato(candidates, ea, name);
+  if (!match) return null;
 
   // searchplayers.php omits strRender; the full record has it.
   await sleep(700);
@@ -360,7 +286,7 @@ async function main() {
 
     // The silhouette needs an action pose, which only TheSportsDB provides.
     await sleep(900);
-    const sdb = await findRender(name);
+    const sdb = await findRender(ea, name);
 
     if (sdb?.strRender) {
       const image = await downloadImage(sdb.strRender);

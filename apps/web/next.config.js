@@ -36,7 +36,10 @@ const csp = [
   `script-src 'self' 'unsafe-inline' ${VERCEL_INSIGHTS}${dev ? " 'unsafe-eval'" : ''}`,
   // React writes inline style attributes, so this one is not optional.
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: ${SUPABASE} https://ratings-images-prod.pulse.ea.com https://r2.thesportsdb.com https://lh3.googleusercontent.com`,
+  // drop-assets sirve los escudos de club, las banderas y los iconos de
+  // PlayStyle; es otro host que el de las cartas, así que necesita su propia
+  // línea o la planilla de /demo sale con los huecos vacíos.
+  `img-src 'self' data: blob: ${SUPABASE} https://ratings-images-prod.pulse.ea.com https://drop-assets.ea.com https://r2.thesportsdb.com https://lh3.googleusercontent.com`,
   `connect-src 'self' ${SUPABASE} wss://*.supabase.co ${VERCEL_INSIGHTS}`,
   "font-src 'self' data:",
   // Sign-in navigates to Google, so it has to be an allowed form target.
