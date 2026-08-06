@@ -181,12 +181,16 @@ export function RevealCard({
 
           {/* Silueta a la derecha */}
           {p.colour_url && (
-            <div className="relative flex items-end justify-center overflow-hidden">
+            <div className="relative aspect-square flex items-end justify-center overflow-hidden">
               <div
                 aria-hidden
-                className="pointer-events-none absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
-                style={{ background: 'radial-gradient(circle, rgba(245,130,31,0.22), transparent 65%)' }}
-              />
+                className="pointer-events-none absolute inset-0 flex items-center justify-center"
+              >
+                <div
+                  className="h-[280px] w-[280px] rounded-full blur-3xl"
+                  style={{ background: 'radial-gradient(circle, rgba(245,130,31,0.22), transparent 65%)' }}
+                />
+              </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={p.colour_url}
