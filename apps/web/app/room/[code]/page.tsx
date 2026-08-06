@@ -472,13 +472,18 @@ export default function RoomPage() {
           onOpenRules={() => setShowRules(true)}
           onLeave={leaveRoom}
         />
+      </div>
 
-        {/* Tu equipo: arriba y todo el ancho */}
-        {room.status !== 'finished' && meParticipant && (
-          <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.035] backdrop-blur-xl p-4">
+      {/* Tu equipo: arriba y todo el ancho real (fuera del max-w-7xl) */}
+      {room.status !== 'finished' && meParticipant && (
+        <div className="mt-3 px-3 sm:px-6 lg:px-8">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.035] backdrop-blur-xl p-4">
             <MyTeam participant={meParticipant} requirements={requirements} />
           </div>
-        )}
+        </div>
+      )}
+
+      <div className="mx-auto max-w-7xl">
 
         {room.status === 'finished' ? (
           <>
