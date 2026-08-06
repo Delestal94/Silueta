@@ -153,11 +153,11 @@ export function RevealCard({
           )}
 
           {attributes.length > 0 && (
-            <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
+            <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-6">
               {attributes.map(([label, value]) => (
                 <div
                   key={label}
-                  className="rounded-xl border border-white/10 bg-black/25 px-2 py-2 text-center"
+                  className="rounded-xl border border-white/10 bg-black/25 px-3 py-3 text-center"
                 >
                   <p className="text-[10px] uppercase tracking-wider text-white/40">{label}</p>
                   <p className="text-lg font-black">{value}</p>
@@ -181,7 +181,7 @@ export function RevealCard({
 
           {/* Silueta a la derecha */}
           {p.colour_url && (
-            <div className="relative min-h-0 flex-1 flex items-center justify-center overflow-hidden">
+            <div className="relative min-h-[280px] flex items-center justify-center overflow-hidden">
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0 flex items-center justify-center"
