@@ -184,7 +184,7 @@ export function RevealCard({
             <div className="relative flex items-end justify-center overflow-hidden">
               <div
                 aria-hidden
-                className="pointer-events-none absolute left-1/2 top-1/2 h-[300px] w-full max-w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
+                className="pointer-events-none absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
                 style={{ background: 'radial-gradient(circle, rgba(245,130,31,0.22), transparent 65%)' }}
               />
               {/* eslint-disable-next-line @next/next/no-img-element */}
