@@ -7,6 +7,13 @@
  * gira. Un nombre tapado con CSS se lee igual desde el inspector.
  */
 import { chromium } from 'playwright';
+import { nombreDePrueba } from './helpers.mjs';
+
+// Nombres reconocibles como de prueba, para poder sacarlos del ranking
+// después sin confundirlos con los de una persona.
+const NOMBRE_ANFITRION = nombreDePrueba('T');
+const NOMBRE_INVITADO = nombreDePrueba('P');
+const NOMBRE_INVITADO2 = nombreDePrueba('R');
 
 const BASE = process.argv[2] || 'http://localhost:3000';
 const browser = await chromium.launch();
@@ -23,14 +30,14 @@ const mkPage = async () =>
 const host = await mkPage();
 await host.goto(BASE);
 await host.getByRole('button', { name: 'Crear sala' }).click();
-await host.getByPlaceholder('Ej: Davo').fill('Davo');
+await host.getByPlaceholder('Ej: Davo').fill(NOMBRE_ANFITRION);
 await host.locator('input[type=number]').nth(1).fill('8');
 await host.getByRole('button', { name: 'Crear sala' }).click();
 await host.waitForURL(/\/room\//, { timeout: 20000 });
 const code = host.url().split('/room/')[1];
 
 const invitados = [];
-for (const nombre of ['Cobra', 'Teo']) {
+for (const nombre of [NOMBRE_INVITADO, NOMBRE_INVITADO2]) {
   const p = await mkPage();
   await p.goto(BASE);
   await p.getByRole('button', { name: 'Unirme con un código' }).click();
@@ -40,7 +47,7 @@ for (const nombre of ['Cobra', 'Teo']) {
   await p.waitForURL(/\/room\//, { timeout: 20000 });
   invitados.push({ nombre, page: p });
 }
-await host.waitForFunction(() => document.body.innerText.includes('Teo'), null, { timeout: 20000 });
+await host.waitForFunction((n) => document.body.innerText.includes(n), NOMBRE_INVITADO2, { timeout: 20000 });
 
 const estado = async (page) => {
   const token = await page.evaluate(
@@ -78,7 +85,7 @@ const enRonda = await estado(host);
 check(
   'a los empujados no se les cobra al ofertar',
   enRonda.room.room_participants
-    .filter((p) => p.display_name !== 'Davo')
+    .filter((p) => p.display_name !== NOMBRE_ANFITRION)
     .every((p) => p.remaining_budget === 200),
   enRonda.room.room_participants.map((p) => `${p.display_name}=${p.remaining_budget}`).join(' ')
 );
@@ -89,14 +96,14 @@ await host.waitForSelector('text=Empataron la oferta', { timeout: 40000 });
 const textoGirando = await host.locator('div:has-text("Empataron la oferta")').last().innerText();
 check(
   'los nombres no se pueden leer mientras gira',
-  !textoGirando.includes('Cobra') && !textoGirando.includes('Teo'),
+  !textoGirando.includes(NOMBRE_INVITADO) && !textoGirando.includes(NOMBRE_INVITADO2),
   JSON.stringify(textoGirando.replace(/\n/g, ' ').slice(0, 60))
 );
 
 // Al frenar, destapa al ganador.
 await host.waitForTimeout(4000);
 const textoFinal = await host.locator('div:has-text("Empataron la oferta")').last().innerText();
-const destapado = ['Cobra', 'Teo'].filter((n) => textoFinal.includes(n));
+const destapado = [NOMBRE_INVITADO, NOMBRE_INVITADO2].filter((n) => textoFinal.includes(n));
 check('al frenar destapa a uno solo', destapado.length === 1, destapado.join(', ') || 'ninguno');
 
 const fin = await estado(host);
@@ -109,7 +116,7 @@ check(
 );
 
 const perdedor = fin.room.room_participants.find(
-  (p) => p.display_name !== 'Davo' && p.id !== fin.currentRound.current_bid_by
+  (p) => p.display_name !== NOMBRE_ANFITRION && p.id !== fin.currentRound.current_bid_by
 );
 check(
   'al que perdió el sorteo no le costó nada',

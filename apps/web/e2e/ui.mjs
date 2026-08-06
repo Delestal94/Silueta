@@ -1,5 +1,11 @@
 import { chromium } from 'playwright';
-import { avanzar, esperarRevelacion } from './helpers.mjs';
+import { avanzar, esperarRevelacion, nombreDePrueba } from './helpers.mjs';
+
+// Nombres reconocibles como de prueba, para poder sacarlos del ranking
+// después sin confundirlos con los de una persona.
+const NOMBRE_ANFITRION = nombreDePrueba('T');
+const NOMBRE_INVITADO = nombreDePrueba('P');
+const NOMBRE_INVITADO2 = nombreDePrueba('R');
 const BASE = process.argv[2] || 'http://localhost:3000';
 const SHOT = 'C:/Users/migue/AppData/Local/Temp/claude/d--Programas-Utilities-Proyectos-Siluetas/ed3f0880-0d1f-472e-b522-7dccb38476fc/scratchpad';
 
@@ -18,7 +24,7 @@ const mkPage = async (label) => {
 const host = await mkPage('host');
 await host.goto(BASE);
 await host.getByRole('button', { name: 'Crear sala' }).click();
-await host.getByPlaceholder('Ej: Davo').fill('Davo');
+await host.getByPlaceholder('Ej: Davo').fill(NOMBRE_ANFITRION);
 await host.locator('input[type=number]').first().fill('150');
 await host.locator('input[type=number]').nth(1).fill('15');
 await host.getByRole('button', { name: 'Crear sala' }).click();
@@ -32,13 +38,15 @@ const guest = await mkPage('guest');
 await guest.goto(BASE);
 await guest.getByRole('button', { name: 'Unirme con un código' }).click();
 await guest.getByPlaceholder('ABC123').fill(code);
-await guest.getByPlaceholder('Ej: La Cobra').fill('Cobra');
+await guest.getByPlaceholder('Ej: La Cobra').fill(NOMBRE_INVITADO);
 // exact: the header's "Entrar con Google" also starts with "Entrar".
 await guest.getByRole('button', { name: 'Entrar', exact: true }).click();
 await guest.waitForURL(/\/room\//, { timeout: 15000 });
 
 // --- Host sees guest appear (realtime)
-await host.waitForSelector('text=Cobra', { timeout: 15000 });
+await host.waitForFunction((n) => document.body.innerText.includes(n), NOMBRE_INVITADO, {
+  timeout: 15000,
+});
 console.log('PASS guest appeared on host screen via realtime');
 
 // --- Start round: it now takes everyone agreeing, not one person's button.

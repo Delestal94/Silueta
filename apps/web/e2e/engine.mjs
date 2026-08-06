@@ -1,3 +1,10 @@
+import { nombreDePrueba } from './helpers.mjs';
+
+// Nombres reconocibles como de prueba: estas partidas terminan en el
+// ranking público igual que las de una persona.
+const NOMBRE_A = nombreDePrueba('T');
+const NOMBRE_B = nombreDePrueba('P');
+const NOMBRE_C = nombreDePrueba('R');
 // Game-engine tests against a running dev server.
 //   node apps/web/e2e/engine.mjs [baseUrl]
 const BASE = process.argv[2] || process.env.BASE_URL || 'http://localhost:3000';
@@ -32,16 +39,16 @@ const check = (name, cond, detail = '') => {
 async function auctionRules() {
   console.log('\nauction rules');
   const [, room] = await post('/api/rooms', {
-    displayName: 'Davo',
+    displayName: NOMBRE_A,
     startingBudget: 100,
     roundSeconds: 8,
   });
   const host = { 'x-host-token': room.hostToken };
   const [, p2] = await post(`/api/rooms/${room.code}/join`, {
     code: room.code,
-    displayName: 'Cobra',
+    displayName: NOMBRE_B,
   });
-  const [, p3] = await post(`/api/rooms/${room.code}/join`, { code: room.code, displayName: 'Teo' });
+  const [, p3] = await post(`/api/rooms/${room.code}/join`, { code: room.code, displayName: NOMBRE_C });
 
   const [dup] = await post(`/api/rooms/${room.code}/join`, {
     code: room.code,
@@ -85,7 +92,7 @@ async function auctionRules() {
   check('finalize is idempotent', fin2.already_final === true);
 
   const after = await get(`/api/rooms/${room.code}/state`);
-  const cobra = after.room.room_participants.find((p) => p.display_name === 'Cobra');
+  const cobra = after.room.room_participants.find((p) => p.display_name === NOMBRE_B);
   check('winner charged exactly once', cobra.remaining_budget === 75, `budget ${cobra.remaining_budget}`);
   check('winner holds exactly one player', cobra.team_players.length === 1);
   check('identity revealed after the sale', !!after.currentRound?.player?.name);
@@ -148,12 +155,12 @@ async function passAndFlip() {
 async function fullGame() {
   console.log('\nfull game to completion');
   const [, room] = await post('/api/rooms', {
-    displayName: 'Davo',
+    displayName: NOMBRE_A,
     startingBudget: 300,
     roundSeconds: 60,
   });
   const host = { 'x-host-token': room.hostToken };
-  const [, b] = await post(`/api/rooms/${room.code}/join`, { code: room.code, displayName: 'Cobra' });
+  const [, b] = await post(`/api/rooms/${room.code}/join`, { code: room.code, displayName: NOMBRE_B });
   const tokens = [room.clientToken, b.clientToken];
 
   const sequence = [];

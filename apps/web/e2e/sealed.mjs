@@ -6,7 +6,13 @@
  * field, not anywhere in the payload. Everything else is ordinary game logic.
  */
 import { chromium } from 'playwright';
-import { avanzar, esperarRevelacion } from './helpers.mjs';
+import { avanzar, esperarRevelacion, nombreDePrueba } from './helpers.mjs';
+
+// Nombres reconocibles como de prueba, para poder sacarlos del ranking
+// después sin confundirlos con los de una persona.
+const NOMBRE_ANFITRION = nombreDePrueba('T');
+const NOMBRE_INVITADO = nombreDePrueba('P');
+const NOMBRE_INVITADO2 = nombreDePrueba('R');
 
 const BASE = process.argv[2] || 'http://localhost:3000';
 const browser = await chromium.launch();
@@ -30,7 +36,7 @@ const mkPage = async (label) => {
 const host = await mkPage('host');
 await host.goto(BASE);
 await host.getByRole('button', { name: 'Crear sala' }).click();
-await host.getByPlaceholder('Ej: Davo').fill('Davo');
+await host.getByPlaceholder('Ej: Davo').fill(NOMBRE_ANFITRION);
 // A big budget so the two envelopes can be numbers that appear nowhere else in
 // the payload — ratings stop at 99 and seasons are four digits, so 137 and 619
 // cannot be confused with anything the state legitimately carries. 990 and not
@@ -48,10 +54,10 @@ const guest = await mkPage('guest');
 await guest.goto(BASE);
 await guest.getByRole('button', { name: 'Unirme con un código' }).click();
 await guest.getByPlaceholder('ABC123').fill(code);
-await guest.getByPlaceholder('Ej: La Cobra').fill('Cobra');
+await guest.getByPlaceholder('Ej: La Cobra').fill(NOMBRE_INVITADO);
 await guest.getByRole('button', { name: 'Entrar', exact: true }).click();
 await guest.waitForURL(/\/room\//, { timeout: 20000 });
-await host.waitForFunction(() => document.body.innerText.includes('Cobra'), null, {
+await host.waitForFunction((n) => document.body.innerText.includes(n), NOMBRE_INVITADO, {
   timeout: 20000,
 });
 

@@ -19,6 +19,12 @@
  * from re-pointing every relative URL on the page.
  */
 const SUPABASE = 'https://*.supabase.co';
+
+// Analytics y Speed Insights. En Vercel el script se sirve desde el propio
+// dominio bajo /_vercel/, pero fuera de ahí —y en desarrollo— se baja de este
+// host: dar por sentado que siempre era 'self' dejaba los dos bloqueados y sólo
+// se veía en la consola.
+const VERCEL_INSIGHTS = 'https://va.vercel-scripts.com';
 const dev = process.env.NODE_ENV === 'development';
 
 const csp = [
@@ -27,11 +33,11 @@ const csp = [
   // módulos con eval, y sin esto la página se dibuja pero ningún botón
   // responde — falla en silencio salvo por un error en la consola. La
   // compilación de producción no lo necesita, y ahí no se concede.
-  `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ''}`,
+  `script-src 'self' 'unsafe-inline' ${VERCEL_INSIGHTS}${dev ? " 'unsafe-eval'" : ''}`,
   // React writes inline style attributes, so this one is not optional.
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${SUPABASE} https://ratings-images-prod.pulse.ea.com https://r2.thesportsdb.com https://lh3.googleusercontent.com`,
-  `connect-src 'self' ${SUPABASE} wss://*.supabase.co`,
+  `connect-src 'self' ${SUPABASE} wss://*.supabase.co ${VERCEL_INSIGHTS}`,
   "font-src 'self' data:",
   // Sign-in navigates to Google, so it has to be an allowed form target.
   "form-action 'self' https://accounts.google.com",

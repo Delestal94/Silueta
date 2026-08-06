@@ -41,3 +41,17 @@ export async function avanzar(pages) {
 
   return alguno;
 }
+
+/**
+ * Un nombre que se reconoce como de prueba.
+ *
+ * Los tests juegan partidas de verdad contra la base de verdad, así que sus
+ * resultados terminan en el ranking público. Con este prefijo se los puede
+ * separar después sin adivinar — antes usaban "Davo" y "Cobra", que son
+ * nombres que una persona real también elige, y no había forma de distinguir
+ * una partida de prueba de una jugada.
+ *
+ * Se limpian con: npm run purge-tests --workspace=packages/ingest -- --si
+ */
+export const nombreDePrueba = (prefijo = 'T') =>
+  prefijo + Date.now().toString().slice(-5);

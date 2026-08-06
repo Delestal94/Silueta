@@ -3,7 +3,13 @@
  * quién entra al sorteo, cuánto paga, y qué épocas salen.
  */
 import { chromium } from 'playwright';
-import { avanzar, esperarRevelacion } from './helpers.mjs';
+import { avanzar, esperarRevelacion, nombreDePrueba } from './helpers.mjs';
+
+// Nombres reconocibles como de prueba, para poder sacarlos del ranking
+// después sin confundirlos con los de una persona.
+const NOMBRE_ANFITRION = nombreDePrueba('T');
+const NOMBRE_INVITADO = nombreDePrueba('P');
+const NOMBRE_INVITADO2 = nombreDePrueba('R');
 
 const BASE = process.argv[2] || 'http://localhost:3000';
 const browser = await chromium.launch();
@@ -22,7 +28,7 @@ const mkPage = async () => {
 const host = await mkPage();
 await host.goto(BASE);
 await host.getByRole('button', { name: 'Crear sala' }).click();
-await host.getByPlaceholder('Ej: Davo').fill('Davo');
+await host.getByPlaceholder('Ej: Davo').fill(NOMBRE_ANFITRION);
 await host.getByRole('button', { name: 'Crear sala' }).click();
 await host.waitForURL(/\/room\//, { timeout: 20000 });
 const code = host.url().split('/room/')[1];
@@ -31,10 +37,10 @@ const guest = await mkPage();
 await guest.goto(BASE);
 await guest.getByRole('button', { name: 'Unirme con un código' }).click();
 await guest.getByPlaceholder('ABC123').fill(code);
-await guest.getByPlaceholder('Ej: La Cobra').fill('Cobra');
+await guest.getByPlaceholder('Ej: La Cobra').fill(NOMBRE_INVITADO);
 await guest.getByRole('button', { name: 'Entrar', exact: true }).click();
 await guest.waitForURL(/\/room\//, { timeout: 20000 });
-await host.waitForFunction(() => document.body.innerText.includes('Cobra'), null, { timeout: 20000 });
+await host.waitForFunction((n) => document.body.innerText.includes(n), NOMBRE_INVITADO, { timeout: 20000 });
 
 const stateOf = async (page) => {
   const token = await page.evaluate(

@@ -6,6 +6,13 @@
  * haya reiniciado por eso.
  */
 import { chromium } from 'playwright';
+import { nombreDePrueba } from './helpers.mjs';
+
+// Nombres reconocibles como de prueba, para poder sacarlos del ranking
+// después sin confundirlos con los de una persona.
+const NOMBRE_ANFITRION = nombreDePrueba('T');
+const NOMBRE_INVITADO = nombreDePrueba('P');
+const NOMBRE_INVITADO2 = nombreDePrueba('R');
 
 const BASE = process.argv[2] || 'http://localhost:3000';
 const browser = await chromium.launch();
@@ -22,7 +29,7 @@ const mkPage = async () =>
 const host = await mkPage();
 await host.goto(BASE);
 await host.getByRole('button', { name: 'Crear sala' }).click();
-await host.getByPlaceholder('Ej: Davo').fill('Davo');
+await host.getByPlaceholder('Ej: Davo').fill(NOMBRE_ANFITRION);
 // Rondas largas: hace falta tiempo para tirar el poder y mirar el estado.
 await host.locator('input[type=number]').nth(1).fill('30');
 await host.getByRole('button', { name: 'Crear sala' }).click();
@@ -33,10 +40,10 @@ const guest = await mkPage();
 await guest.goto(BASE);
 await guest.getByRole('button', { name: 'Unirme con un código' }).click();
 await guest.getByPlaceholder('ABC123').fill(code);
-await guest.getByPlaceholder('Ej: La Cobra').fill('Cobra');
+await guest.getByPlaceholder('Ej: La Cobra').fill(NOMBRE_INVITADO);
 await guest.getByRole('button', { name: 'Entrar', exact: true }).click();
 await guest.waitForURL(/\/room\//, { timeout: 20000 });
-await host.waitForFunction(() => document.body.innerText.includes('Cobra'), null, { timeout: 20000 });
+await host.waitForFunction((n) => document.body.innerText.includes(n), NOMBRE_INVITADO, { timeout: 20000 });
 
 const estado = async (page) => {
   const token = await page.evaluate(
@@ -65,7 +72,7 @@ await icono.click();
 // del celular—, cada copia con su propio estado.
 await host
   .locator('div:has(> p:text-is("¿A quién le tirás Empujón?")):visible')
-  .getByRole('button', { name: 'Cobra', exact: true })
+  .getByRole('button', { name: NOMBRE_INVITADO, exact: true })
   .click();
 await host.waitForTimeout(1500);
 
@@ -84,7 +91,7 @@ await host.waitForTimeout(1200);
 
 const enRonda = await estado(host);
 const r = enRonda.currentRound;
-const cobra = enRonda.room.room_participants.find((p) => p.display_name === 'Cobra');
+const cobra = enRonda.room.room_participants.find((p) => p.display_name === NOMBRE_INVITADO);
 
 check('la víctima ya ofertó sin haber tocado nada', r.current_bid === 25, `puja=${r.current_bid}`);
 check('y la oferta figura a su nombre', r.current_bid_by === cobra.id);
